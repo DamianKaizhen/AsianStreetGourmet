@@ -1,0 +1,17 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local agent / tool artifacts (not for the public repo)
+CLAUDE.md
+hexstrike.log
+*.log
+
+# Vercel
+.vercel

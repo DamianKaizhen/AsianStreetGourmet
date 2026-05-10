@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f5f1ea" />
+  <title>Asian Street Gourmet · 亞洲街頭美食 — Cantonese Home Kitchen on Avenue O</title>
+  <meta name="description" content="Cantonese home cooking, served on Avenue O. Steamed rice plates, home-style dishes, soups & snacks at 84 Avenue O, Brooklyn." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=Inter+Tight:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Noto+Serif+TC:wght@400;500;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind Play CDN (v3) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Set initial theme + language before first paint to avoid flash
+    (function () {
+      try {
+        var stored = localStorage.getItem('asg-theme');
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var dark = stored ? stored === 'dark' : prefersDark;
+        if (dark) document.documentElement.classList.add('dark');
+      } catch (e) {}
+      try {
+        var storedLang = localStorage.getItem('asg-lang');
+        var browserLang = (navigator.language || 'en').toLowerCase();
+        var initialLang = storedLang || (browserLang.indexOf('zh') === 0 ? 'zh' : 'en');
+        document.documentElement.lang = initialLang === 'zh' ? 'zh-Hant' : 'en';
+      } catch (e) {}
+    })();
+
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Fraunces', 'ui-serif', 'Georgia', 'serif'],
+            body: ['"Inter Tight"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['"DM Mono"', 'ui-monospace', 'monospace'],
+            zh: ['"Noto Serif TC"', 'ui-serif', 'serif'],
+          },
+          colors: {
+            background: 'var(--background)',
+            foreground: 'var(--foreground)',
+            card: 'var(--card)',
+            'card-fg': 'var(--card-foreground)',
+            primary: 'var(--primary)',
+            'primary-fg': 'var(--primary-foreground)',
+            secondary: 'var(--secondary)',
+            'secondary-fg': 'var(--secondary-foreground)',
+            muted: 'var(--muted)',
+            'muted-fg': 'var(--muted-foreground)',
+            accent: 'var(--accent)',
+            'accent-fg': 'var(--accent-foreground)',
+            ink: 'var(--destructive)',
+            border: 'var(--border)',
+            ring: 'var(--ring)',
+          },
+          borderColor: {
+            DEFAULT: 'var(--border)',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root {
+      --background: oklch(0.9821 0 0);
+      --foreground: oklch(0.2435 0 0);
+      --card: oklch(0.9911 0 0);
+      --card-foreground: oklch(0.2435 0 0);
+      --primary: oklch(0.4341 0.0392 41.9938);
+      --primary-foreground: oklch(1 0 0);
+      --secondary: oklch(0.92 0.0651 74.3695);
+      --secondary-foreground: oklch(0.3499 0.0685 40.8288);
+      --muted: oklch(0.9521 0 0);
+      --muted-foreground: oklch(0.5032 0 0);
+      --accent: oklch(0.931 0 0);
+      --accent-foreground: oklch(0.2435 0 0);
+      --destructive: oklch(0.6271 0.1936 33.339);
+      --border: oklch(0.8822 0 0);
+      --ring: oklch(0.4341 0.0392 41.9938);
+      --paper-shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.08), 0 6px 24px -4px hsl(0 0% 0% / 0.06);
+    }
+
+    .dark {
+      --background: oklch(0.1776 0 0);
+      --foreground: oklch(0.9491 0 0);
+      --card: oklch(0.2134 0 0);
+      --card-foreground: oklch(0.9491 0 0);
+      --primary: oklch(0.9247 0.0524 66.1732);
+      --primary-foreground: oklch(0.2029 0.024 200.1962);
+      --secondary: oklch(0.3163 0.019 63.6992);
+      --secondary-foreground: oklch(0.9247 0.0524 66.1732);
+      --muted: oklch(0.252 0 0);
+      --muted-foreground: oklch(0.7699 0 0);
+      --accent: oklch(0.285 0 0);
+      --accent-foreground: oklch(0.9491 0 0);
+      --destructive: oklch(0.6271 0.1936 33.339);
+      --border: oklch(0.2351 0.0115 91.7467);
+      --ring: oklch(0.9247 0.0524 66.1732);
+      --paper-shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.4), 0 8px 32px -4px hsl(0 0% 0% / 0.5);
+    }
+
+    html, body { background: var(--background); color: var(--foreground); }
+    body { font-family: 'Inter Tight', 'Noto Sans TC', ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+    /* When in Chinese mode, hide redundant elements (English dupes of Chinese headers, small bilingual zh subtitles, etc.) */
+    html[lang="zh-Hant"] [data-hide-zh] { display: none; }
+    /* Slightly tighter line-height for CJK body text */
+    html[lang="zh-Hant"] body { line-height: 1.7; }
+    /* Display headings: keep Fraunces for Latin glyphs, fall back to Noto Serif TC for CJK */
+    .display { font-family: 'Fraunces', 'Noto Serif TC', serif; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.02em; }
+    /* In zh mode, slightly relax the negative letter-spacing on display headings (CJK doesn't need tight tracking) */
+    html[lang="zh-Hant"] .display { letter-spacing: -0.01em; }
+    html[lang="zh-Hant"] .display-tight { letter-spacing: 0; }
+
+    /* Language toggle pill */
+    .lang-pill { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0 0.6rem; height: 2.5rem; border: 1px solid var(--border); border-radius: 2px; transition: border-color .25s ease; }
+    .lang-pill:hover { border-color: var(--destructive); }
+    .lang-pill .l-en { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; transition: color .25s ease, opacity .25s ease; }
+    .lang-pill .l-sep { color: var(--border); }
+    .lang-pill .l-zh { font-family: 'Noto Serif TC', serif; font-size: 0.95rem; line-height: 1; transition: color .25s ease, opacity .25s ease; }
+    html[lang="en"] .lang-pill .l-en { color: var(--destructive); font-weight: 500; }
+    html[lang="en"] .lang-pill .l-zh { opacity: 0.4; }
+    html[lang="zh-Hant"] .lang-pill .l-zh { color: var(--destructive); font-weight: 700; }
+    html[lang="zh-Hant"] .lang-pill .l-en { opacity: 0.4; }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      opacity: 0.5;
+      mix-blend-mode: multiply;
+      z-index: 1;
+    }
+    .dark body::before { mix-blend-mode: screen; opacity: 0.35; }
+
+    main, header, footer { position: relative; z-index: 2; }
+
+    .char-bg {
+      font-family: 'Noto Serif TC', serif;
+      font-weight: 900;
+      line-height: 0.8;
+      letter-spacing: -0.05em;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .leader { flex: 1; border-bottom: 1.5px dotted var(--border); margin: 0 0.75rem 0.45rem; min-width: 1.5rem; }
+
+    .display-tight { letter-spacing: -0.035em; }
+    .price { font-family: 'Fraunces', serif; font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 0; font-weight: 500; }
+    .mono-code { font-family: 'DM Mono', monospace; letter-spacing: 0.05em; }
+    .zh { font-family: 'Noto Serif TC', serif; }
+
+    [data-reveal] { opacity: 0; transform: translateY(24px); transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1); }
+    [data-reveal].is-visible { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      [data-reveal] { opacity: 1; transform: none; transition: none; }
+      html { scroll-behavior: auto; }
+    }
+
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--ring);
+      outline-offset: 3px;
+      border-radius: 2px;
+    }
+
+    .stamp {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      border: 1.5px solid var(--destructive);
+      color: var(--destructive);
+      padding: 0.35rem 0.7rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      border-radius: 2px;
+    }
+    .stamp::before { content: ''; width: 6px; height: 6px; background: var(--destructive); border-radius: 50%; }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .marquee-track {
+      display: flex; white-space: nowrap;
+      animation: marquee 60s linear infinite;
+    }
+    @media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+
+    .img-ph { background: linear-gradient(135deg, var(--muted), var(--card)); }
+
+    .menu-tabs { backdrop-filter: blur(10px) saturate(1.2); }
+
+    .nav-base { transition: background-color .35s ease, box-shadow .35s ease, border-color .35s ease; }
+    .nav-scrolled {
+      background: color-mix(in oklab, var(--background) 92%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-link { position: relative; }
+    .nav-link::after {
+      content: '';
+      position: absolute; left: 0; right: 0; bottom: -6px;
+      height: 1px; background: var(--destructive);
+      transform: scaleX(0); transform-origin: right;
+      transition: transform .4s cubic-bezier(.2,.7,.2,1);
+    }
+    .nav-link:hover::after, .nav-link:focus-visible::after { transform: scaleX(1); transform-origin: left; }
+
+    .btn { display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.85rem 1.4rem; font-family: 'DM Mono', monospace; font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; border-radius: 2px; transition: transform .25s ease, background .25s ease, color .25s ease, border-color .25s ease; }
+    .btn-primary { background: var(--destructive); color: #fff; border: 1.5px solid var(--destructive); }
+    .btn-primary:hover { transform: translateY(-2px); background: transparent; color: var(--destructive); }
+    .dark .btn-primary:hover { color: var(--destructive); }
+    .btn-ghost { background: transparent; color: var(--foreground); border: 1.5px solid var(--foreground); }
+    .btn-ghost:hover { transform: translateY(-2px); background: var(--foreground); color: var(--background); }
+
+    body.menu-open { overflow: hidden; }
+
+    .rule-mark { display: inline-flex; align-items: center; gap: 0.75rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted-foreground); }
+    .rule-mark::before { content: ''; width: 28px; height: 1px; background: var(--destructive); }
+
+    ::selection { background: var(--destructive); color: #fff; }
+
+    .menu-row:hover .leader { border-bottom-style: dashed; border-bottom-color: var(--destructive); }
+    .menu-row:hover .row-zh { color: var(--destructive); }
+
+    .gal-item { overflow: hidden; }
+    .gal-item img { transition: transform 1.2s cubic-bezier(.2,.7,.2,1), filter .6s ease; }
+    .gal-item:hover img { transform: scale(1.06); filter: saturate(1.1); }
+    .gal-cap { transition: opacity .4s ease, transform .4s ease; }
+    .gal-item:not(:hover) .gal-cap { opacity: 0; transform: translateY(8px); }
+  </style>
+</head>
+
+<body class="font-body antialiased">
+
+  <a href="#main" data-i18n="skip" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-[color:var(--background)] focus:text-[color:var(--foreground)] focus:px-3 focus:py-2 focus:border focus:border-[color:var(--destructive)]">Skip to content</a>
+
+  <!-- ============== Top marquee strip ============== -->
+  <div aria-hidden="true" class="hidden md:block border-b border-[color:var(--border)] py-2 overflow-hidden text-[0.7rem] tracking-[0.2em] uppercase mono-code text-[color:var(--muted-foreground)]" style="position:relative; z-index:3;">
+    <div class="marquee-track gap-12">
+      <span>家庭廚房 · Home Kitchen</span><span>·</span>
+      <span>Open Tue–Sun · 11am – 9pm</span><span>·</span>
+      <span>Call to Order · 917-723-6262</span><span>·</span>
+      <span>84 Avenue O · Brooklyn 11204</span><span>·</span>
+      <span>蒸餸飯 $7</span><span>·</span>
+      <span>家庭菜 $7</span><span>·</span>
+      <span>靚湯 $3</span><span>·</span>
+      <span>小食 $3</span><span>·</span>
+      <span>家庭廚房 · Home Kitchen</span><span>·</span>
+      <span>Open Tue–Sun · 11am – 9pm</span><span>·</span>
+      <span>Call to Order · 917-723-6262</span><span>·</span>
+      <span>84 Avenue O · Brooklyn 11204</span><span>·</span>
+      <span>蒸餸飯 $7</span><span>·</span>
+      <span>家庭菜 $7</span><span>·</span>
+      <span>靚湯 $3</span><span>·</span>
+      <span>小食 $3</span><span>·</span>
+    </div>
+  </div>
+
+  <!-- ============== HEADER / NAV ============== -->
+  <header id="site-nav" class="nav-base sticky top-0 z-40">
+    <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 h-[68px] flex items-center justify-between">
+      <a href="#top" class="flex items-baseline gap-3 group" aria-label="Asian Street Gourmet — home">
+        <span class="zh font-bold text-[1.1rem] text-[color:var(--destructive)] leading-none">亞洲街頭美食</span>
+        <span class="hidden sm:inline-block w-px h-4 bg-[color:var(--border)]"></span>
+        <span class="hidden sm:inline-block display-tight text-[0.95rem] font-semibold tracking-tight text-[color:var(--foreground)]">Asian Street Gourmet</span>
+      </a>
+
+      <nav aria-label="Primary" class="hidden lg:flex items-center gap-9 text-[0.78rem] mono-code uppercase tracking-[0.18em]">
+        <a class="nav-link" href="#story" data-i18n="nav.story">Story</a>
+        <a class="nav-link" href="#menu" data-i18n="nav.menu">Menu</a>
+        <a class="nav-link" href="#gallery" data-i18n="nav.gallery">Gallery</a>
+        <a class="nav-link" href="#visit" data-i18n="nav.visit">Visit</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <button id="lang-toggle" type="button" aria-label="Switch language to Chinese" class="lang-pill" data-lang-toggle>
+          <span class="l-en">EN</span>
+          <span class="l-sep" aria-hidden="true">·</span>
+          <span class="l-zh">中</span>
+        </button>
+        <a href="tel:+19177236262" class="hidden md:inline-flex btn btn-primary" aria-label="Call to order: 917-723-6262">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span data-i18n="nav.calltoorder">Call to Order</span>
+        </a>
+        <button id="theme-toggle" type="button" aria-label="Toggle theme" class="w-10 h-10 inline-flex items-center justify-center border border-[color:var(--border)] rounded-sm hover:border-[color:var(--destructive)] transition-colors">
+          <svg class="hidden dark:block" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="block dark:hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button id="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" class="lg:hidden w-10 h-10 inline-flex items-center justify-center border border-[color:var(--border)] rounded-sm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobile-menu" class="lg:hidden fixed inset-0 z-50 bg-[color:var(--background)] hidden flex-col">
+      <div class="px-5 sm:px-8 h-[68px] flex items-center justify-between border-b border-[color:var(--border)]">
+        <span class="zh font-bold text-[1.1rem] text-[color:var(--destructive)]">亞洲街頭美食</span>
+        <button id="menu-close" type="button" aria-label="Close menu" class="w-10 h-10 inline-flex items-center justify-center border border-[color:var(--border)] rounded-sm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <nav aria-label="Primary mobile" class="flex-1 flex flex-col px-6 sm:px-8 pt-12 gap-2 overflow-auto">
+        <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#story" data-mobile-link><span class="mono-code text-xs text-[color:var(--muted-foreground)]">01</span><span data-i18n="nav.story">Story</span></a>
+        <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#menu" data-mobile-link><span class="mono-code text-xs text-[color:var(--muted-foreground)]">02</span><span data-i18n="nav.menu">Menu</span></a>
+        <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#gallery" data-mobile-link><span class="mono-code text-xs text-[color:var(--muted-foreground)]">03</span><span data-i18n="nav.gallery">Gallery</span></a>
+        <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#visit" data-mobile-link><span class="mono-code text-xs text-[color:var(--muted-foreground)]">04</span><span data-i18n="nav.visit">Visit</span></a>
+        <div class="flex items-center gap-3 mt-8">
+          <a href="tel:+19177236262" class="btn btn-primary self-start" data-i18n="hero.cta2">Call 917-723-6262</a>
+          <button type="button" aria-label="Switch language" class="lang-pill" data-lang-toggle>
+            <span class="l-en">EN</span>
+            <span class="l-sep" aria-hidden="true">·</span>
+            <span class="l-zh">中</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ============== HERO ============== -->
+    <section id="top" class="relative overflow-hidden min-h-[calc(100vh-68px)] flex items-center" aria-labelledby="hero-title">
+      <span aria-hidden="true" class="char-bg absolute -right-[8vw] -bottom-[14vw] text-[color:var(--primary)] opacity-[0.07] dark:opacity-[0.10]" style="font-size: clamp(28rem, 70vw, 80rem);">食</span>
+      <span aria-hidden="true" class="char-bg absolute -left-[6vw] top-[5vw] text-[color:var(--destructive)] opacity-[0.04]" style="font-size: clamp(14rem, 30vw, 30rem);">家</span>
+
+      <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 grid lg:grid-cols-12 gap-10 items-center w-full pt-12 pb-20 relative">
+        <div class="lg:col-span-7 xl:col-span-7 relative z-10" data-reveal>
+          <div class="stamp mb-8">Est. Brooklyn · Cantonese · 廣東</div>
+
+          <p data-hide-zh class="zh text-[color:var(--destructive)] text-xl sm:text-2xl mb-4 tracking-wide">亞洲街頭美食 · 家庭廚房</p>
+
+          <h1 id="hero-title" data-i18n="hero.title" class="display display-tight font-light text-[color:var(--foreground)] leading-[0.92]" style="font-size: clamp(3.2rem, 9vw, 9.5rem);">
+            Cantonese<br/>
+            <span class="italic" style="font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;">home cooking,</span><br/>
+            <span class="text-[color:var(--destructive)]">served</span> on Avenue&nbsp;O.
+          </h1>
+
+          <p data-i18n="hero.desc" class="mt-8 max-w-xl text-base sm:text-lg text-[color:var(--muted-foreground)] leading-relaxed">
+            A neighborhood family kitchen in Brooklyn, plating $7 steamed rice plates, simmered soups, and the home-style dishes you grew up eating — or wish you had.
+          </p>
+
+          <div class="mt-10 flex flex-wrap gap-3">
+            <a href="#menu" class="btn btn-ghost" data-i18n="hero.cta1">See the Menu →</a>
+            <a href="tel:+19177236262" class="btn btn-primary" data-i18n="hero.cta2">Call 917-723-6262</a>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 xl:col-span-5 relative z-10" data-reveal>
+          <figure class="relative">
+            <div class="relative aspect-[4/5] w-full overflow-hidden img-ph">
+              <img
+                data-placeholder="true"
+                src="https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?auto=format&fit=crop&w=1200&q=80"
+                alt="Placeholder: bowl of Cantonese steamed rice plate with pork ribs and preserved mustard, top-down on dark wooden table"
+                class="w-full h-full object-cover"
+                loading="eager"
+                onerror="this.style.display='none'"
+              />
+            </div>
+            <figcaption class="absolute -left-3 sm:-left-6 bottom-6 bg-[color:var(--background)] border border-[color:var(--border)] py-3 px-4 max-w-[260px] shadow-[var(--paper-shadow)]">
+              <p data-i18n="hero.todaylabel" class="mono-code text-[0.65rem] uppercase tracking-[0.22em] text-[color:var(--muted-foreground)]">Today's plate</p>
+              <p data-i18n="hero.todayitem" class="display text-xl mt-1 leading-tight">Preserved Mustard <span class="italic">&</span> Pork Ribs</p>
+              <p class="zh text-sm text-[color:var(--destructive)] mt-1">榨菜排骨蒸飯 · S1 · $7</p>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div aria-hidden="true" class="absolute left-1/2 -translate-x-1/2 bottom-6 mono-code text-[0.65rem] tracking-[0.3em] uppercase text-[color:var(--muted-foreground)] flex flex-col items-center gap-2">
+        <span>Scroll</span>
+        <span class="w-px h-10 bg-[color:var(--border)]"></span>
+      </div>
+    </section>
+
+    <!-- ============== STORY ============== -->
+    <section id="story" class="relative py-24 sm:py-32 lg:py-40 overflow-hidden border-t border-[color:var(--border)]" aria-labelledby="story-title">
+      <span aria-hidden="true" class="char-bg absolute -left-[4vw] -bottom-[6vw] text-[color:var(--primary)] opacity-[0.06]" style="font-size: clamp(20rem, 50vw, 50rem);">街</span>
+
+      <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 grid lg:grid-cols-12 gap-12 lg:gap-16 relative z-10">
+        <div class="lg:col-span-5" data-reveal>
+          <span class="rule-mark mb-6" data-i18n="story.eyebrow">01 · Our Story</span>
+          <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-3 mt-4">家庭廚房</p>
+          <h2 id="story-title" data-i18n="story.title" class="display display-tight font-light leading-[0.95]" style="font-size: clamp(2.5rem, 5vw, 4.4rem);">
+            Home Kitchen.<br/>
+            <span class="italic" style="font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;">Avenue&nbsp;O.</span><br/>
+            Brooklyn.
+          </h2>
+          <div class="mt-10 zh text-[color:var(--primary)] opacity-30 leading-none" style="font-size: clamp(8rem, 14vw, 14rem); font-weight: 900;">家</div>
+        </div>
+
+        <div class="lg:col-span-6 lg:col-start-7 lg:pt-8" data-reveal>
+          <div class="space-y-6 text-base sm:text-lg leading-[1.75] text-[color:var(--foreground)]/90 max-w-prose">
+            <p data-i18n="story.lead" class="display text-2xl sm:text-3xl leading-[1.35] text-[color:var(--foreground)]">
+              We don't claim to be fancy. We claim to be <span class="italic text-[color:var(--destructive)]">honest</span>.
+            </p>
+            <p data-i18n="story.p1">
+              Asian Street Gourmet is a small Cantonese family kitchen on a quiet block of Avenue&nbsp;O. The recipes belong to our mother and her mother — steamed rice plates simmered over the same blue flame she used in Guangdong, soups that take all afternoon, fish-ball noodles ladled into paper bowls.
+            </p>
+            <p data-i18n="story.p2">
+              Order by code on the phone, the way it's always been done — <span class="mono-code text-[color:var(--destructive)]">"one S1, one C2, two D6"</span> — and we'll have it ready when you arrive. Every plate is $7. Every soup is $3. Every plate is made the way home is.
+            </p>
+            <hr class="border-0 border-t border-dashed border-[color:var(--destructive)] w-12 my-8" />
+            <p data-i18n="story.signoff" class="mono-code text-xs uppercase tracking-[0.22em] text-[color:var(--muted-foreground)]">— The family at 84 Avenue O</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== MENU ============== -->
+    <section id="menu" class="relative pt-20 sm:pt-28 pb-24 sm:pb-32 border-t border-[color:var(--border)]" aria-labelledby="menu-title">
+      <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10" data-reveal>
+          <div>
+            <span class="rule-mark mb-4" data-i18n="menu.eyebrow">02 · The Menu</span>
+            <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-2 mt-4">餐牌</p>
+            <h2 id="menu-title" data-i18n="menu.title" class="display display-tight font-light leading-[0.95]" style="font-size: clamp(2.4rem, 5vw, 4.4rem);">
+              Order by <span class="italic" style="font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;">code</span>.
+            </h2>
+            <p data-i18n="menu.intro" class="mt-4 max-w-md text-[color:var(--muted-foreground)]">Phone, takeout, or in-store. Tell us a code (S1, A4, C3) and a quantity.</p>
+          </div>
+          <div class="flex flex-wrap gap-2 mono-code text-[0.7rem] uppercase tracking-[0.18em]">
+            <a href="#cat-rice" class="cat-jump px-3 py-2 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors">蒸餸飯 Rice</a>
+            <a href="#cat-home" class="cat-jump px-3 py-2 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors">家庭菜 Home-Style</a>
+            <a href="#cat-soup" class="cat-jump px-3 py-2 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors">靚湯 Soups</a>
+            <a href="#cat-snack" class="cat-jump px-3 py-2 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors">小食 Snacks</a>
+          </div>
+        </div>
+
+        <!-- ====== CATEGORY: 蒸餸飯 Steamed Rice Plates ====== -->
+        <article id="cat-rice" class="grid lg:grid-cols-12 gap-10 lg:gap-16 py-12 sm:py-16 border-t border-[color:var(--border)] scroll-mt-24" data-reveal>
+          <header class="lg:col-span-4">
+            <div class="flex items-baseline gap-3 mb-4">
+              <span class="mono-code text-[color:var(--destructive)] text-sm">S · $7</span>
+              <span class="h-px flex-1 bg-[color:var(--border)]"></span>
+            </div>
+            <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">蒸餸飯</h3>
+            <p data-hide-zh class="display text-3xl sm:text-4xl font-light leading-tight">Steamed Rice Plates</p>
+            <p data-i18n="cat.rice.desc" class="mt-4 text-[color:var(--muted-foreground)] max-w-sm">Slow-steamed rice with a topping. Comfort by the bowl.</p>
+            <div class="mt-8 aspect-[5/4] w-full overflow-hidden img-ph relative">
+              <img data-placeholder="true" src="https://images.unsplash.com/photo-1626804475297-41608ea09aeb?auto=format&fit=crop&w=900&q=80" alt="Placeholder: Cantonese clay-pot rice with toppings" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'" />
+            </div>
+          </header>
+          <ul class="lg:col-span-8 space-y-1">
+            <li class="menu-row flex items-baseline gap-1 py-4 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors">榨菜排骨蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Preserved Mustard & Pork Ribs over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-4 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors">冬菇滑雞蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Black Mushroom & Silky Chicken over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-4 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors">梅菜肉餅蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Preserved Mustard Greens & Pork Patty over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-4 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors">蘿蔔牛腩蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Daikon & Beef Brisket over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-4"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors">支竹羊腩蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Bean Curd Stick & Lamb Brisket over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
+          </ul>
+        </article>
+
+        <!-- ====== CATEGORY: 家庭菜 Home-Style Dishes ====== -->
+        <article id="cat-home" class="grid lg:grid-cols-12 gap-10 lg:gap-16 py-12 sm:py-16 border-t border-[color:var(--border)] scroll-mt-24" data-reveal>
+          <header class="lg:col-span-4">
+            <div class="flex items-baseline gap-3 mb-4">
+              <span class="mono-code text-[color:var(--destructive)] text-sm">A·B · $7</span>
+              <span class="h-px flex-1 bg-[color:var(--border)]"></span>
+            </div>
+            <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">家庭菜</h3>
+            <p data-hide-zh class="display text-3xl sm:text-4xl font-light leading-tight">Home-Style Dishes</p>
+            <p data-i18n="cat.home.desc" class="mt-4 text-[color:var(--muted-foreground)] max-w-sm">Stir-fried, steamed, braised. Twelve dishes. Each $7.</p>
+            <div class="mt-8 aspect-[5/4] w-full overflow-hidden img-ph relative">
+              <img data-placeholder="true" src="https://images.unsplash.com/photo-1582450871972-ab5ca641643d?auto=format&fit=crop&w=900&q=80" alt="Placeholder: Cantonese stir-fry with greens, top-down" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'" />
+            </div>
+          </header>
+          <div class="lg:col-span-8 grid sm:grid-cols-2 gap-x-10">
+            <ul class="space-y-1 sm:border-r sm:border-dotted sm:border-[color:var(--border)] sm:pr-10">
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">榨菜排骨</span><span class="block text-sm text-[color:var(--muted-foreground)]">Preserved Mustard Pork Ribs</span></div><span class="price text-xl shrink-0">$7</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">冬菇蒸雞</span><span class="block text-sm text-[color:var(--muted-foreground)]">Steamed Chicken w/ Mushrooms</span></div><span class="price text-xl shrink-0">$7</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">梅菜肉餅</span><span class="block text-sm text-[color:var(--muted-foreground)]">Preserved Mustard Pork Patty</span></div><span class="price text-xl shrink-0">$7</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">蘿蔔牛腩</span><span class="block text-sm text-[color:var(--muted-foreground)]">Daikon Beef Brisket</span></div><span class="price text-xl shrink-0">$7</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">支竹羊腩</span><span class="block text-sm text-[color:var(--muted-foreground)]">Bean Curd Stick Lamb Brisket</span></div><span class="price text-xl shrink-0">$7</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A6</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">香芋燒鴨</span><span class="block text-sm text-[color:var(--muted-foreground)]">Taro & Roast Duck</span></div><span class="price text-xl shrink-0">$7</span></li>
+            </ul>
+            <ul class="space-y-1 sm:pl-2">
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">蝦仁滑蛋</span><span class="block text-sm text-[color:var(--muted-foreground)]">Shrimp w/ Silky Egg</span></div><span class="price text-xl shrink-0">$7</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">豉汁倉魚</span><span class="block text-sm text-[color:var(--muted-foreground)]">Pomfret in Black Bean Sauce</span></div><span class="price text-xl shrink-0">$7</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">豉椒鮮魷</span><span class="block text-sm text-[color:var(--muted-foreground)]">Squid w/ Black Bean & Pepper</span></div><span class="price text-xl shrink-0">$7</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">蒸黃花魚</span><span class="block text-sm text-[color:var(--muted-foreground)]">Steamed Yellow Croaker</span></div><span class="price text-xl shrink-0">$7</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">辣椒魚滑</span><span class="block text-sm text-[color:var(--muted-foreground)]">Spicy Fish Paste</span></div><span class="price text-xl shrink-0">$7</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B6</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">豬皮魚旦</span><span class="block text-sm text-[color:var(--muted-foreground)]">Pork Skin & Fish Balls</span></div><span class="price text-xl shrink-0">$7</span></li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- ====== CATEGORY: 靚湯 Soups ====== -->
+        <article id="cat-soup" class="grid lg:grid-cols-12 gap-10 lg:gap-16 py-12 sm:py-16 border-t border-[color:var(--border)] scroll-mt-24" data-reveal>
+          <header class="lg:col-span-4">
+            <div class="flex items-baseline gap-3 mb-4">
+              <span class="mono-code text-[color:var(--destructive)] text-sm">C · $3</span>
+              <span class="h-px flex-1 bg-[color:var(--border)]"></span>
+            </div>
+            <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">靚湯</h3>
+            <p data-hide-zh class="display text-3xl sm:text-4xl font-light leading-tight">Slow-Simmered Soups</p>
+            <p data-i18n="cat.soup.desc" class="mt-4 text-[color:var(--muted-foreground)] max-w-sm">Cantonese 老火湯 — bones, herbs, vegetables, simmered for hours.</p>
+            <div class="mt-8 aspect-[5/4] w-full overflow-hidden img-ph relative">
+              <img data-placeholder="true" src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80" alt="Placeholder: Cantonese clear soup in a bowl, herbs and lotus root visible" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'" />
+            </div>
+          </header>
+          <ul class="lg:col-span-8 grid sm:grid-cols-2 gap-x-10">
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">蓮藕湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Lotus Root Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">西洋菜湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Watercress Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">霸王花湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Night-Blooming Cereus Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">菜乾湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Dried Vegetable Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)] sm:border-b-0"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">番茄湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Tomato Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C6</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">節瓜湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Hairy Gourd Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+          </ul>
+        </article>
+
+        <!-- ====== CATEGORY: 小食 Snacks ====== -->
+        <article id="cat-snack" class="grid lg:grid-cols-12 gap-10 lg:gap-16 py-12 sm:py-16 border-t border-[color:var(--border)] scroll-mt-24" data-reveal>
+          <header class="lg:col-span-4">
+            <div class="flex items-baseline gap-3 mb-4">
+              <span class="mono-code text-[color:var(--destructive)] text-sm">D · $3</span>
+              <span class="h-px flex-1 bg-[color:var(--border)]"></span>
+            </div>
+            <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">小食</h3>
+            <p data-hide-zh class="display text-3xl sm:text-4xl font-light leading-tight">Snacks & Sides</p>
+            <p data-i18n="cat.snack.desc" class="mt-4 text-[color:var(--muted-foreground)] max-w-sm">Fish balls, dumplings, fried mantou. The little plates that make a meal.</p>
+            <div class="mt-8 aspect-[5/4] w-full overflow-hidden img-ph relative">
+              <img data-placeholder="true" src="https://images.unsplash.com/photo-1496116218417-1a781b1c416c?auto=format&fit=crop&w=900&q=80" alt="Placeholder: dumplings or fried mantou with dipping sauce" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'" />
+            </div>
+          </header>
+          <ul class="lg:col-span-8 grid sm:grid-cols-2 gap-x-10">
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">炸春卷</span><span class="block text-sm text-[color:var(--muted-foreground)]">Fried Spring Rolls</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">炸饅頭</span><span class="block text-sm text-[color:var(--muted-foreground)]">Fried Mantou (Sweet Buns)</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">魚旦燒賣</span><span class="block text-sm text-[color:var(--muted-foreground)]">Fish Balls & Siu Mai</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">湯粉</span><span class="block text-sm text-[color:var(--muted-foreground)]">Rice Noodle Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)] sm:border-b-0"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">湯麵</span><span class="block text-sm text-[color:var(--muted-foreground)]">Egg Noodle Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D6</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">水餃</span><span class="block text-sm text-[color:var(--muted-foreground)]">Boiled Dumplings</span></div><span class="price text-xl shrink-0">$3</span></li>
+          </ul>
+        </article>
+
+        <p class="mt-12 text-sm text-[color:var(--muted-foreground)] mono-code uppercase tracking-[0.18em] text-center">Menu subject to seasonal availability · 菜單以實際供應為準</p>
+      </div>
+    </section>
+
+    <!-- ============== GALLERY ============== -->
+    <section id="gallery" class="relative pt-20 sm:pt-28 pb-24 sm:pb-32 border-t border-[color:var(--border)]" aria-labelledby="gallery-title">
+      <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+        <div class="mb-12 max-w-2xl" data-reveal>
+          <span class="rule-mark mb-4" data-i18n="gallery.eyebrow">03 · Gallery</span>
+          <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-2 mt-4">廚房一角</p>
+          <h2 id="gallery-title" data-i18n="gallery.title" class="display display-tight font-light leading-[0.95]" style="font-size: clamp(2.4rem, 5vw, 4.4rem);">A look <span class="italic" style="font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;">inside</span>.</h2>
+        </div>
+
+        <div class="grid grid-cols-12 gap-3 sm:gap-5">
+          <figure class="gal-item col-span-12 sm:col-span-7 aspect-[4/3] img-ph relative" data-reveal>
+            <img data-placeholder="true" src="https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=1400&q=80" alt="Placeholder: wok station mid-stir-fry with flame" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'" />
+            <figcaption data-i18n="gal.cap1" class="gal-cap absolute bottom-4 left-4 mono-code text-[0.7rem] uppercase tracking-[0.2em] text-white bg-black/60 px-3 py-1.5">The wok at noon</figcaption>
+          </figure>
+          <figure class="gal-item col-span-6 sm:col-span-5 aspect-[4/3] img-ph relative" data-reveal>
+            <img data-placeholder="true" src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&w=1000&q=80" alt="Placeholder: bowl of Cantonese soup with herbs" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'" />
+            <figcaption data-i18n="gal.cap2" class="gal-cap absolute bottom-4 left-4 mono-code text-[0.7rem] uppercase tracking-[0.2em] text-white bg-black/60 px-3 py-1.5">老火湯 · simmered all afternoon</figcaption>
+          </figure>
+          <figure class="gal-item col-span-6 sm:col-span-4 aspect-square img-ph relative" data-reveal>
+            <img data-placeholder="true" src="https://images.unsplash.com/photo-1496412705862-e0088f16f791?auto=format&fit=crop&w=900&q=80" alt="Placeholder: dumplings with dipping sauce" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'" />
+            <figcaption data-i18n="gal.cap3" class="gal-cap absolute bottom-4 left-4 mono-code text-[0.7rem] uppercase tracking-[0.2em] text-white bg-black/60 px-3 py-1.5">D6 · Boiled dumplings</figcaption>
+          </figure>
+          <figure class="gal-item col-span-12 sm:col-span-4 aspect-square img-ph relative" data-reveal>
+            <img data-placeholder="true" src="https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=900&q=80" alt="Placeholder: Cantonese fish dish on a plate" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'" />
+            <figcaption data-i18n="gal.cap4" class="gal-cap absolute bottom-4 left-4 mono-code text-[0.7rem] uppercase tracking-[0.2em] text-white bg-black/60 px-3 py-1.5">B4 · Steamed yellow croaker</figcaption>
+          </figure>
+          <figure class="gal-item col-span-6 sm:col-span-4 aspect-square img-ph relative" data-reveal>
+            <img data-placeholder="true" src="https://images.unsplash.com/photo-1567337710282-00832b415979?auto=format&fit=crop&w=900&q=80" alt="Placeholder: takeout container with Cantonese rice plate" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'" />
+            <figcaption data-i18n="gal.cap5" class="gal-cap absolute bottom-4 left-4 mono-code text-[0.7rem] uppercase tracking-[0.2em] text-white bg-black/60 px-3 py-1.5">Takeout, ready</figcaption>
+          </figure>
+          <figure class="gal-item col-span-6 sm:col-span-4 aspect-square img-ph relative bg-[color:var(--destructive)] flex items-center justify-center" data-reveal>
+            <div class="text-center text-white p-6">
+              <p class="zh font-bold text-3xl sm:text-4xl leading-tight">家庭廚房</p>
+              <p class="mono-code text-xs uppercase tracking-[0.2em] mt-2 opacity-80">Home Kitchen</p>
+              <p class="mono-code text-[0.65rem] uppercase tracking-[0.18em] mt-6 opacity-70">84 Avenue O · Brooklyn</p>
+            </div>
+          </figure>
+          <figure class="gal-item col-span-12 sm:col-span-4 aspect-square img-ph relative" data-reveal>
+            <img data-placeholder="true" src="https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?auto=format&fit=crop&w=900&q=80" alt="Placeholder: hands cooking in a Cantonese kitchen" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'" />
+            <figcaption data-i18n="gal.cap6" class="gal-cap absolute bottom-4 left-4 mono-code text-[0.7rem] uppercase tracking-[0.2em] text-white bg-black/60 px-3 py-1.5">By hand, by family</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== VISIT ============== -->
+    <section id="visit" class="relative pt-20 sm:pt-28 pb-24 sm:pb-32 border-t border-[color:var(--border)]" aria-labelledby="visit-title">
+      <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+        <div class="mb-12 max-w-2xl" data-reveal>
+          <span class="rule-mark mb-4" data-i18n="visit.eyebrow">04 · Visit</span>
+          <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-2 mt-4">嚟搵我哋</p>
+          <h2 id="visit-title" data-i18n="visit.title" class="display display-tight font-light leading-[0.95]" style="font-size: clamp(2.4rem, 5vw, 4.4rem);">Come <span class="italic" style="font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;">find us</span>.</h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6" data-reveal>
+          <article class="border border-[color:var(--border)] p-7 bg-[color:var(--card)]">
+            <p class="rule-mark mb-6">Address · 地址</p>
+            <p class="display text-3xl leading-tight">84 Avenue&nbsp;O</p>
+            <p class="display text-3xl leading-tight">Brooklyn,</p>
+            <p class="display text-3xl leading-tight">NY 11204</p>
+            <a href="https://www.google.com/maps?q=84+Avenue+O+Brooklyn+NY+11204" target="_blank" rel="noopener" class="mt-6 inline-flex items-center gap-2 mono-code text-xs uppercase tracking-[0.2em] text-[color:var(--destructive)] hover:underline">
+              <span data-i18n="visit.openmaps">Open in Maps</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+            </a>
+            <div class="mt-7 aspect-[5/3] border border-dashed border-[color:var(--border)] relative overflow-hidden" aria-hidden="true">
+              <svg class="absolute inset-0 w-full h-full opacity-40" viewBox="0 0 200 120" preserveAspectRatio="none">
+                <defs>
+                  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.4"/>
+                  </pattern>
+                </defs>
+                <rect width="200" height="120" fill="url(#grid)" />
+                <path d="M0 70 Q 60 60 110 75 T 200 80" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2 3"/>
+                <path d="M40 0 L60 120" fill="none" stroke="currentColor" stroke-width="0.6"/>
+                <path d="M120 0 L140 120" fill="none" stroke="currentColor" stroke-width="0.6"/>
+              </svg>
+              <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                <span class="w-3 h-3 rounded-full bg-[color:var(--destructive)] ring-4 ring-[color:var(--destructive)]/20"></span>
+                <span class="mono-code text-[0.6rem] mt-2 uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">Avenue O · Bensonhurst</span>
+              </div>
+            </div>
+            <!-- PLACEHOLDER: replace faux map with real Google Maps iframe when ready -->
+          </article>
+
+          <article class="border border-[color:var(--border)] p-7 bg-[color:var(--card)]">
+            <p class="rule-mark mb-6">Hours · 營業時間</p>
+            <!-- PLACEHOLDER: confirm actual hours with client -->
+            <ul class="divide-y divide-dotted divide-[color:var(--border)]">
+              <li class="flex justify-between py-3" data-day="1"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.mon">Mon</span><span class="text-[color:var(--muted-foreground)] text-sm" data-i18n="hours.closed">Closed</span></li>
+              <li class="flex justify-between py-3" data-day="2"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.tue">Tue</span><span class="text-sm">11:00 — 21:00</span></li>
+              <li class="flex justify-between py-3" data-day="3"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.wed">Wed</span><span class="text-sm">11:00 — 21:00</span></li>
+              <li class="flex justify-between py-3" data-day="4"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.thu">Thu</span><span class="text-sm">11:00 — 21:00</span></li>
+              <li class="flex justify-between py-3" data-day="5"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.fri">Fri</span><span class="text-sm">11:00 — 22:00</span></li>
+              <li class="flex justify-between py-3" data-day="6"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.sat">Sat</span><span class="text-sm">11:00 — 22:00</span></li>
+              <li class="flex justify-between py-3" data-day="0"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.sun">Sun</span><span class="text-sm">11:00 — 21:00</span></li>
+            </ul>
+            <p data-i18n="hours.lastorder" class="mt-5 text-xs mono-code uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">Last orders 30 min before close</p>
+          </article>
+
+          <article class="border border-[color:var(--border)] p-7 bg-[color:var(--card)]">
+            <p class="rule-mark mb-6">Order · 訂餐</p>
+            <a href="tel:+19177236262" class="block group">
+              <p data-i18n="order.calllabel" class="mono-code text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)]">Call</p>
+              <p class="display text-3xl sm:text-4xl mt-1 group-hover:text-[color:var(--destructive)] transition-colors">917 · 723 · 6262</p>
+            </a>
+            <hr class="border-0 border-t border-dashed border-[color:var(--border)] my-6" />
+            <p data-i18n="order.howlabel" class="mono-code text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)] mb-2">How it works</p>
+            <p data-i18n="order.howbody" class="text-sm leading-relaxed">Read off menu codes — for example: <span class="mono-code text-[color:var(--destructive)]">"one S1, one C2, two D6"</span> — and we'll have it bagged for pickup.</p>
+            <hr class="border-0 border-t border-dashed border-[color:var(--border)] my-6" />
+            <p data-i18n="order.sociallabel" class="mono-code text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)] mb-2">Find us online</p>
+            <ul class="flex flex-wrap gap-2 mt-2">
+              <!-- PLACEHOLDER: real social URLs -->
+              <li><a href="#" class="px-3 py-1.5 border border-[color:var(--border)] mono-code text-xs uppercase tracking-[0.18em] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors inline-block" rel="noopener">Instagram</a></li>
+              <li><a href="#" class="px-3 py-1.5 border border-[color:var(--border)] mono-code text-xs uppercase tracking-[0.18em] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors inline-block" rel="noopener">Facebook</a></li>
+              <li><a href="#" class="px-3 py-1.5 border border-[color:var(--border)] mono-code text-xs uppercase tracking-[0.18em] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors inline-block" rel="noopener">Yelp</a></li>
+              <li><a href="#" class="px-3 py-1.5 border border-[color:var(--border)] mono-code text-xs uppercase tracking-[0.18em] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors inline-block" rel="noopener">Google</a></li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== ORDER CTA STRIP ============== -->
+    <section aria-labelledby="cta-title" class="relative bg-[color:var(--destructive)] text-white py-20 sm:py-28 overflow-hidden">
+      <span aria-hidden="true" class="char-bg absolute -right-[4vw] -top-[6vw] text-white/[0.08]" style="font-size: clamp(20rem, 50vw, 50rem);">餓</span>
+      <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 relative z-10 grid lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-7" data-reveal>
+          <p data-i18n="cta.eyebrow" class="mono-code text-xs uppercase tracking-[0.22em] mb-5 text-white/80">餓咗未？ · Hungry yet?</p>
+          <h2 id="cta-title" data-i18n="cta.title" class="display display-tight font-light leading-[0.95]" style="font-size: clamp(3rem, 8vw, 7rem);">
+            Pick up the <span class="italic" style="font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;">phone</span>.
+          </h2>
+        </div>
+        <div class="lg:col-span-5 lg:text-right" data-reveal>
+          <a href="tel:+19177236262" class="inline-block group">
+            <p data-i18n="cta.tapcall" class="mono-code text-xs uppercase tracking-[0.22em] text-white/80 mb-3">Tap to call</p>
+            <p class="display font-light leading-none group-hover:tracking-tight transition-all" style="font-size: clamp(2.6rem, 7vw, 5.5rem);">917·723·6262</p>
+            <p data-i18n="cta.subline" class="mono-code text-xs uppercase tracking-[0.22em] text-white/80 mt-4">Daily · 11am – 9pm · 84 Avenue O</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============== FOOTER ============== -->
+  <footer class="border-t border-[color:var(--border)] pt-16 sm:pt-20 pb-10 relative">
+    <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+      <div class="grid md:grid-cols-12 gap-10 mb-14">
+        <div class="md:col-span-5">
+          <p class="zh text-[color:var(--destructive)] text-2xl font-bold mb-2">亞洲街頭美食</p>
+          <p class="display text-3xl font-light">Asian Street Gourmet</p>
+          <p class="mono-code text-xs uppercase tracking-[0.2em] mt-2 text-[color:var(--muted-foreground)]">家庭廚房 · Home Kitchen</p>
+          <p data-i18n="footer.tagline" class="mt-6 text-sm text-[color:var(--muted-foreground)] max-w-sm leading-relaxed">A Cantonese family kitchen on Avenue O. Steamed rice plates, home-style dishes, soups, snacks. Made the way home is.</p>
+        </div>
+        <nav aria-label="Footer" class="md:col-span-3">
+          <p class="rule-mark mb-5" data-i18n="footer.visit">Visit</p>
+          <ul class="space-y-3 text-sm">
+            <li><a href="#story" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.story">Our Story</a></li>
+            <li><a href="#menu" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.menu">The Menu</a></li>
+            <li><a href="#gallery" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.gallery">Gallery</a></li>
+            <li><a href="#visit" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.hours">Hours & Address</a></li>
+          </ul>
+        </nav>
+        <div class="md:col-span-4">
+          <p class="rule-mark mb-5" data-i18n="footer.contact">Contact</p>
+          <ul class="space-y-3 text-sm">
+            <li><a href="tel:+19177236262" class="display text-2xl hover:text-[color:var(--destructive)] transition-colors">917 · 723 · 6262</a></li>
+            <li class="text-[color:var(--muted-foreground)]">84 Avenue O, Brooklyn 11204</li>
+            <li class="flex flex-wrap gap-2 pt-3">
+              <!-- PLACEHOLDER: real social URLs -->
+              <a href="#" aria-label="Instagram" class="w-9 h-9 inline-flex items-center justify-center border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+              <a href="#" aria-label="Facebook" class="w-9 h-9 inline-flex items-center justify-center border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+              <a href="#" aria-label="Yelp" class="w-9 h-9 inline-flex items-center justify-center border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors mono-code text-[0.6rem] tracking-[0.05em]">Y</a>
+              <a href="https://www.google.com/maps?q=84+Avenue+O+Brooklyn+NY+11204" target="_blank" rel="noopener" aria-label="Google Maps" class="w-9 h-9 inline-flex items-center justify-center border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-8 border-t border-[color:var(--border)] flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mono-code text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">
+        <p>© <span id="footer-year">2026</span> Asian Street Gourmet · 亞洲街頭美食</p>
+        <p>Made with care on Avenue O · 用心炮製</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============== SCRIPTS ============== -->
+  <script>
+    // ---------- Translations ----------
+    // Strings are static, hand-authored, defined inline below — not user input.
+    // For markup-bearing translations, we parse via Range#createContextualFragment
+    // and swap parsed DOM nodes (no innerHTML assignment).
+    var LANG_STRINGS = {
+      en: {
+        'skip': 'Skip to content',
+        'nav.story': 'Story',
+        'nav.menu': 'Menu',
+        'nav.gallery': 'Gallery',
+        'nav.visit': 'Visit',
+        'nav.calltoorder': 'Call to Order',
+        'hero.title': 'Cantonese<br/>\n            <span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">home cooking,</span><br/>\n            <span class="text-[color:var(--destructive)]">served</span> on Avenue&nbsp;O.',
+        'hero.desc': 'A neighborhood family kitchen in Brooklyn, plating $7 steamed rice plates, simmered soups, and the home-style dishes you grew up eating — or wish you had.',
+        'hero.cta1': 'See the Menu →',
+        'hero.cta2': 'Call 917-723-6262',
+        'hero.todaylabel': "Today's plate",
+        'hero.todayitem': 'Preserved Mustard <span class="italic">&</span> Pork Ribs',
+        'story.eyebrow': '01 · Our Story',
+        'story.title': 'Home Kitchen.<br/>\n            <span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">Avenue&nbsp;O.</span><br/>\n            Brooklyn.',
+        'story.lead': 'We don’t claim to be fancy. We claim to be <span class="italic text-[color:var(--destructive)]">honest</span>.',
+        'story.p1': 'Asian Street Gourmet is a small Cantonese family kitchen on a quiet block of Avenue&nbsp;O. The recipes belong to our mother and her mother — steamed rice plates simmered over the same blue flame she used in Guangdong, soups that take all afternoon, fish-ball noodles ladled into paper bowls.',
+        'story.p2': 'Order by code on the phone, the way it’s always been done — <span class="mono-code text-[color:var(--destructive)]">"one S1, one C2, two D6"</span> — and we’ll have it ready when you arrive. Every plate is $7. Every soup is $3. Every plate is made the way home is.',
+        'story.signoff': '— The family at 84 Avenue O',
+        'menu.eyebrow': '02 · The Menu',
+        'menu.title': 'Order by <span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">code</span>.',
+        'menu.intro': 'Phone, takeout, or in-store. Tell us a code (S1, A4, C3) and a quantity.',
+        'cat.rice.desc': 'Slow-steamed rice with a topping. Comfort by the bowl.',
+        'cat.home.desc': 'Stir-fried, steamed, braised. Twelve dishes. Each $7.',
+        'cat.soup.desc': 'Cantonese 老火湯 — bones, herbs, vegetables, simmered for hours.',
+        'cat.snack.desc': 'Fish balls, dumplings, fried mantou. The little plates that make a meal.',
+        'gallery.eyebrow': '03 · Gallery',
+        'gallery.title': 'A look <span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">inside</span>.',
+        'gal.cap1': 'The wok at noon',
+        'gal.cap2': '老火湯 · simmered all afternoon',
+        'gal.cap3': 'D6 · Boiled dumplings',
+        'gal.cap4': 'B4 · Steamed yellow croaker',
+        'gal.cap5': 'Takeout, ready',
+        'gal.cap6': 'By hand, by family',
+        'visit.eyebrow': '04 · Visit',
+        'visit.title': 'Come <span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">find us</span>.',
+        'visit.openmaps': 'Open in Maps',
+        'day.mon': 'Mon', 'day.tue': 'Tue', 'day.wed': 'Wed', 'day.thu': 'Thu', 'day.fri': 'Fri', 'day.sat': 'Sat', 'day.sun': 'Sun',
+        'hours.closed': 'Closed',
+        'hours.lastorder': 'Last orders 30 min before close',
+        'order.calllabel': 'Call',
+        'order.howlabel': 'How it works',
+        'order.howbody': 'Read off menu codes — for example: <span class="mono-code text-[color:var(--destructive)]">"one S1, one C2, two D6"</span> — and we’ll have it bagged for pickup.',
+        'order.sociallabel': 'Find us online',
+        'cta.eyebrow': '餓咗未？ · Hungry yet?',
+        'cta.title': 'Pick up the <span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">phone</span>.',
+        'cta.tapcall': 'Tap to call',
+        'cta.subline': 'Daily · 11am – 9pm · 84 Avenue O',
+        'footer.tagline': 'A Cantonese family kitchen on Avenue O. Steamed rice plates, home-style dishes, soups, snacks. Made the way home is.',
+        'footer.visit': 'Visit',
+        'footer.story': 'Our Story',
+        'footer.menu': 'The Menu',
+        'footer.gallery': 'Gallery',
+        'footer.hours': 'Hours & Address',
+        'footer.contact': 'Contact'
+      },
+      zh: {
+        'skip': '跳至內容',
+        'nav.story': '故事',
+        'nav.menu': '餐牌',
+        'nav.gallery': '相片',
+        'nav.visit': '嚟搵我哋',
+        'nav.calltoorder': '立即訂餐',
+        'hero.title': '廣東<br/>\n            <span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">家常飯餸，</span><br/>\n            開喺<span class="text-[color:var(--destructive)]">Avenue&nbsp;O</span>。',
+        'hero.desc': '布魯克林街角嘅一間家庭廚房，奉上每碟$7嘅蒸餸飯、慢火靚湯，同你細個食慣嘅家常菜——或者係你心心念念嘅家鄉味。',
+        'hero.cta1': '睇餐牌 →',
+        'hero.cta2': '致電 917-723-6262',
+        'hero.todaylabel': '今日推介',
+        'hero.todayitem': '榨菜 <span class="italic">·</span> 排骨',
+        'story.eyebrow': '01 · 我哋嘅故事',
+        'story.title': '家庭廚房。<br/>\n            <span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">Avenue&nbsp;O。</span><br/>\n            布魯克林。',
+        'story.lead': '唔追求華麗，只求<span class="italic text-[color:var(--destructive)]">老實</span>。',
+        'story.p1': '亞洲街頭美食係 Avenue&nbsp;O 街角一間細小嘅廣東家庭廚房。我哋啲食譜傳自媽媽、再之前係外婆——同佢喺廣東煮飯時嘅藍色火焰一樣慢火蒸出嘅蒸餸飯，慢火煲足成個下晝嘅老火湯，舀入紙碗裡嘅魚旦麵。',
+        'story.p2': '電話點餐就用編號，一直以嚟都係咁——<span class="mono-code text-[color:var(--destructive)]">「一個S1、一個C2、兩個D6」</span>——你嚟到我哋就準備好。每碟$7，每碗湯$3。每一碟，都係家嘅味道。',
+        'story.signoff': '— 84 Avenue O 嘅一家人',
+        'menu.eyebrow': '02 · 餐牌',
+        'menu.title': '報<span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">編號</span>就得。',
+        'menu.intro': '電話訂、外賣或者堂食。報出編號（S1、A4、C3）同份數就得。',
+        'cat.rice.desc': '慢火蒸出嘅米飯，配上餸料，一碗暖心。',
+        'cat.home.desc': '炒、蒸、燜。十二款菜式，每款 $7。',
+        'cat.soup.desc': '廣東老火湯——骨、藥材、菜蔬，慢煲數個鐘。',
+        'cat.snack.desc': '魚旦、餃子、炸饅頭。一啲小食，配齊一餐。',
+        'gallery.eyebrow': '03 · 相片',
+        'gallery.title': '走入<span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">廚房</span>。',
+        'gal.cap1': '正午嘅鑊',
+        'gal.cap2': '老火湯 · 煲足一個下晝',
+        'gal.cap3': 'D6 · 水餃',
+        'gal.cap4': 'B4 · 蒸黃花魚',
+        'gal.cap5': '外賣，準備好',
+        'gal.cap6': '親手煮，一家做',
+        'visit.eyebrow': '04 · 嚟搵我哋',
+        'visit.title': '<span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">嚟搵</span>我哋啦。',
+        'visit.openmaps': '在地圖中打開',
+        'day.mon': '一', 'day.tue': '二', 'day.wed': '三', 'day.thu': '四', 'day.fri': '五', 'day.sat': '六', 'day.sun': '日',
+        'hours.closed': '休息',
+        'hours.lastorder': '結束前 30 分鐘截單',
+        'order.calllabel': '致電',
+        'order.howlabel': '點樣訂',
+        'order.howbody': '報出菜單編號——例如<span class="mono-code text-[color:var(--destructive)]">「一個S1、一個C2、兩個D6」</span>——我哋會幫你裝好等你嚟攞。',
+        'order.sociallabel': '網上搵我哋',
+        'cta.eyebrow': '餓咗未？ · Hungry yet?',
+        'cta.title': '拎起<span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">電話</span>啦。',
+        'cta.tapcall': '點擊撥號',
+        'cta.subline': '每日 · 上午11時 – 晚上9時 · 84 Avenue O',
+        'footer.tagline': 'Avenue O 嘅一間廣東家庭廚房。蒸餸飯、家庭菜、靚湯、小食。每一碟都係家嘅味道。',
+        'footer.visit': '嚟搵我哋',
+        'footer.story': '我哋嘅故事',
+        'footer.menu': '餐牌',
+        'footer.gallery': '相片',
+        'footer.hours': '營業時間 同 地址',
+        'footer.contact': '聯絡'
+      }
+    };
+
+    (function () {
+      var doc = document, root = doc.documentElement, body = doc.body;
+
+      // ---------- Language ----------
+      // Replace element children using Range#createContextualFragment, which
+      // parses HTML safely (no script execution) without using direct HTML-string
+      // assignment to element properties.
+      function setRichContent (el, htmlStr) {
+        while (el.firstChild) el.removeChild(el.firstChild);
+        var range = doc.createRange();
+        range.selectNodeContents(el);
+        var frag = range.createContextualFragment(htmlStr);
+        el.appendChild(frag);
+      }
+
+      function applyLang (lang) {
+        var dict = LANG_STRINGS[lang] || LANG_STRINGS.en;
+        root.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        Array.prototype.forEach.call(doc.querySelectorAll('[data-i18n]'), function (el) {
+          var key = el.getAttribute('data-i18n');
+          var val = dict[key];
+          if (val === undefined) return;
+          if (val.indexOf('<') === -1) {
+            el.textContent = val;
+          } else {
+            setRichContent(el, val);
+          }
+        });
+        Array.prototype.forEach.call(doc.querySelectorAll('[data-lang-toggle]'), function (btn) {
+          btn.setAttribute('aria-label', lang === 'zh' ? 'Switch language to English' : 'Switch language to Chinese · 切換到中文');
+        });
+        try { localStorage.setItem('asg-lang', lang); } catch (e) {}
+      }
+
+      var stored = (function () { try { return localStorage.getItem('asg-lang'); } catch (e) { return null; } })();
+      var browserLang = (navigator.language || 'en').toLowerCase();
+      var initialLang = stored || (browserLang.indexOf('zh') === 0 ? 'zh' : 'en');
+      applyLang(initialLang);
+
+      Array.prototype.forEach.call(doc.querySelectorAll('[data-lang-toggle]'), function (btn) {
+        btn.addEventListener('click', function () {
+          var current = root.lang === 'zh-Hant' ? 'zh' : 'en';
+          applyLang(current === 'zh' ? 'en' : 'zh');
+        });
+      });
+
+      // ---------- Theme ----------
+      var themeBtn = doc.getElementById('theme-toggle');
+      themeBtn.addEventListener('click', function () {
+        var nowDark = !root.classList.contains('dark');
+        root.classList.toggle('dark', nowDark);
+        try { localStorage.setItem('asg-theme', nowDark ? 'dark' : 'light'); } catch (e) {}
+      });
+
+      var menu = doc.getElementById('mobile-menu');
+      var openBtn = doc.getElementById('menu-toggle');
+      var closeBtn = doc.getElementById('menu-close');
+      function openMenu () {
+        menu.classList.remove('hidden');
+        menu.classList.add('flex');
+        body.classList.add('menu-open');
+        openBtn.setAttribute('aria-expanded', 'true');
+      }
+      function closeMenu () {
+        menu.classList.add('hidden');
+        menu.classList.remove('flex');
+        body.classList.remove('menu-open');
+        openBtn.setAttribute('aria-expanded', 'false');
+      }
+      openBtn.addEventListener('click', openMenu);
+      closeBtn.addEventListener('click', closeMenu);
+      doc.querySelectorAll('[data-mobile-link]').forEach(function (a) {
+        a.addEventListener('click', closeMenu);
+      });
+      doc.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !menu.classList.contains('hidden')) closeMenu();
+      });
+
+      var nav = doc.getElementById('site-nav');
+      function onScroll () {
+        if (window.scrollY > 12) nav.classList.add('nav-scrolled');
+        else nav.classList.remove('nav-scrolled');
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!prefersReduced && 'IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        doc.querySelectorAll('[data-reveal]').forEach(function (el) { io.observe(el); });
+      } else {
+        doc.querySelectorAll('[data-reveal]').forEach(function (el) { el.classList.add('is-visible'); });
+      }
+
+      var today = new Date().getDay();
+      var todayRow = doc.querySelector('[data-day="' + today + '"]');
+      if (todayRow) {
+        todayRow.style.color = 'var(--destructive)';
+        todayRow.firstElementChild.insertAdjacentHTML('afterbegin', '<span aria-hidden="true" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--destructive);margin-right:8px;vertical-align:middle"></span>');
+      }
+
+      doc.getElementById('footer-year').textContent = new Date().getFullYear();
+    })();
+  </script>
+</body>
+</html>

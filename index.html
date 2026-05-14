@@ -276,7 +276,7 @@
       <nav aria-label="Primary" class="hidden lg:flex items-center gap-9 text-[0.78rem] mono-code uppercase tracking-[0.18em]">
         <a class="nav-link" href="#story" data-i18n="nav.story">Story</a>
         <a class="nav-link" href="#menu" data-i18n="nav.menu">Menu</a>
-        <a class="nav-link" href="#gallery" data-i18n="nav.gallery" hidden>Gallery</a>
+        <a class="nav-link !hidden" href="#gallery" data-i18n="nav.gallery" hidden aria-hidden="true">Gallery</a>
         <a class="nav-link" href="#visit" data-i18n="nav.visit">Visit</a>
       </nav>
 
@@ -310,7 +310,7 @@
       <nav aria-label="Primary mobile" class="flex-1 flex flex-col px-6 sm:px-8 pt-12 gap-2 overflow-auto">
         <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#story" data-mobile-link><span class="mono-code text-xs text-[color:var(--muted-foreground)]">01</span><span data-i18n="nav.story">Story</span></a>
         <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#menu" data-mobile-link><span class="mono-code text-xs text-[color:var(--muted-foreground)]">02</span><span data-i18n="nav.menu">Menu</span></a>
-        <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#gallery" data-mobile-link hidden><span class="mono-code text-xs text-[color:var(--muted-foreground)]">03</span><span data-i18n="nav.gallery">Gallery</span></a>
+        <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4 !hidden" href="#gallery" data-mobile-link hidden aria-hidden="true"><span class="mono-code text-xs text-[color:var(--muted-foreground)]">03</span><span data-i18n="nav.gallery">Gallery</span></a>
         <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#visit" data-mobile-link><span class="mono-code text-xs text-[color:var(--muted-foreground)]">03</span><span data-i18n="nav.visit">Visit</span></a>
         <div class="flex items-center gap-3 mt-8">
           <a href="tel:+19177236262" class="btn btn-primary self-start" data-i18n="hero.cta2">Call 917-723-6262</a>
@@ -699,7 +699,7 @@
           <ul class="space-y-3 text-sm">
             <li><a href="#story" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.story">Our Story</a></li>
             <li><a href="#menu" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.menu">The Menu</a></li>
-            <li hidden><a href="#gallery" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.gallery">Gallery</a></li>
+            <li class="!hidden" hidden aria-hidden="true"><a href="#gallery" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.gallery">Gallery</a></li>
             <li><a href="#visit" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.hours">Hours & Address</a></li>
           </ul>
         </nav>

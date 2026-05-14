@@ -277,7 +277,7 @@
       <nav aria-label="Primary" class="hidden lg:flex items-center gap-9 text-[0.78rem] mono-code uppercase tracking-[0.18em]">
         <a class="nav-link" href="#story" data-i18n="nav.story">Story</a>
         <a class="nav-link" href="#menu" data-i18n="nav.menu">Menu</a>
-        <a class="nav-link" href="#gallery" data-i18n="nav.gallery">Gallery</a>
+        <a class="nav-link" href="#gallery" data-i18n="nav.gallery" hidden>Gallery</a>
         <a class="nav-link" href="#visit" data-i18n="nav.visit">Visit</a>
       </nav>
 
@@ -311,8 +311,8 @@
       <nav aria-label="Primary mobile" class="flex-1 flex flex-col px-6 sm:px-8 pt-12 gap-2 overflow-auto">
         <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#story" data-mobile-link><span class="mono-code text-xs text-[color:var(--muted-foreground)]">01</span><span data-i18n="nav.story">Story</span></a>
         <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#menu" data-mobile-link><span class="mono-code text-xs text-[color:var(--muted-foreground)]">02</span><span data-i18n="nav.menu">Menu</span></a>
-        <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#gallery" data-mobile-link><span class="mono-code text-xs text-[color:var(--muted-foreground)]">03</span><span data-i18n="nav.gallery">Gallery</span></a>
-        <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#visit" data-mobile-link><span class="mono-code text-xs text-[color:var(--muted-foreground)]">04</span><span data-i18n="nav.visit">Visit</span></a>
+        <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#gallery" data-mobile-link hidden><span class="mono-code text-xs text-[color:var(--muted-foreground)]">03</span><span data-i18n="nav.gallery">Gallery</span></a>
+        <a class="display text-5xl font-light py-3 border-b border-[color:var(--border)] flex items-baseline gap-4" href="#visit" data-mobile-link><span class="mono-code text-xs text-[color:var(--muted-foreground)]">03</span><span data-i18n="nav.visit">Visit</span></a>
         <div class="flex items-center gap-3 mt-8">
           <a href="tel:+19177236262" class="btn btn-primary self-start" data-i18n="hero.cta2">Call 917-723-6262</a>
           <button type="button" aria-label="Switch language" class="lang-pill" data-lang-toggle>
@@ -545,7 +545,7 @@
     </section>
 
     <!-- ============== GALLERY ============== -->
-    <section id="gallery" class="relative pt-20 sm:pt-28 pb-24 sm:pb-32 border-t border-[color:var(--border)]" aria-labelledby="gallery-title">
+    <section id="gallery" hidden class="relative pt-20 sm:pt-28 pb-24 sm:pb-32 border-t border-[color:var(--border)]" aria-labelledby="gallery-title">
       <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
         <div class="mb-12 max-w-2xl" data-reveal>
           <span class="rule-mark mb-4" data-i18n="gallery.eyebrow">03 · Gallery</span>
@@ -593,7 +593,7 @@
     <section id="visit" class="relative pt-20 sm:pt-28 pb-24 sm:pb-32 border-t border-[color:var(--border)]" aria-labelledby="visit-title">
       <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
         <div class="mb-12 max-w-2xl" data-reveal>
-          <span class="rule-mark mb-4" data-i18n="visit.eyebrow">04 · Visit</span>
+          <span class="rule-mark mb-4" data-i18n="visit.eyebrow">03 · Visit</span>
           <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-2 mt-4">嚟搵我哋</p>
           <h2 id="visit-title" data-i18n="visit.title" class="display display-tight font-light leading-[0.95]" style="font-size: clamp(2.4rem, 5vw, 4.4rem);">Come <span class="italic" style="font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;">find us</span>.</h2>
         </div>
@@ -703,7 +703,7 @@
           <ul class="space-y-3 text-sm">
             <li><a href="#story" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.story">Our Story</a></li>
             <li><a href="#menu" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.menu">The Menu</a></li>
-            <li><a href="#gallery" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.gallery">Gallery</a></li>
+            <li hidden><a href="#gallery" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.gallery">Gallery</a></li>
             <li><a href="#visit" class="hover:text-[color:var(--destructive)] transition-colors" data-i18n="footer.hours">Hours & Address</a></li>
           </ul>
         </nav>
@@ -771,7 +771,7 @@
         'gal.cap4': 'B4 · Steamed yellow croaker',
         'gal.cap5': 'Takeout, ready',
         'gal.cap6': 'By hand, by family',
-        'visit.eyebrow': '04 · Visit',
+        'visit.eyebrow': '03 · Visit',
         'visit.title': 'Come <span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">find us</span>.',
         'visit.openmaps': 'Open in Maps',
         'day.mon': 'Mon', 'day.tue': 'Tue', 'day.wed': 'Wed', 'day.thu': 'Thu', 'day.fri': 'Fri', 'day.sat': 'Sat', 'day.sun': 'Sun',
@@ -827,7 +827,7 @@
         'gal.cap4': 'B4 · 蒸黃花魚',
         'gal.cap5': '外賣，準備好',
         'gal.cap6': '親手煮，一家做',
-        'visit.eyebrow': '04 · 嚟搵我哋',
+        'visit.eyebrow': '03 · 嚟搵我哋',
         'visit.title': '<span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">嚟搵</span>我哋啦。',
         'visit.openmaps': '在地圖中打開',
         'day.mon': '一', 'day.tue': '二', 'day.wed': '三', 'day.thu': '四', 'day.fri': '五', 'day.sat': '六', 'day.sun': '日',

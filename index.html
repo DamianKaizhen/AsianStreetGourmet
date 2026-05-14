@@ -527,7 +527,7 @@
             <p data-hide-zh class="display text-3xl sm:text-4xl font-light leading-tight">Snacks & Sides</p>
             <p data-i18n="cat.snack.desc" class="mt-4 text-[color:var(--muted-foreground)] max-w-sm">Fish balls, dumplings, fried mantou. The little plates that make a meal.</p>
             <div class="mt-8 aspect-[5/4] w-full overflow-hidden img-ph relative">
-              <img data-placeholder="true" src="https://images.unsplash.com/photo-1496116218417-1a781b1c416c?auto=format&fit=crop&w=900&q=80" alt="Placeholder: dumplings or fried mantou with dipping sauce" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'" />
+              <img src="images/snacks.jpg" alt="Four golden-fried Cantonese spring rolls (D1 炸春卷) on a teal ceramic plate with chili dipping sauce on the side" class="w-full h-full object-cover" width="1264" height="843" loading="lazy" />
             </div>
           </header>
           <ul class="lg:col-span-8 grid sm:grid-cols-2 gap-x-10">
@@ -608,24 +608,16 @@
               <span data-i18n="visit.openmaps">Open in Maps</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
             </a>
-            <div class="mt-7 aspect-[5/3] border border-dashed border-[color:var(--border)] relative overflow-hidden" aria-hidden="true">
-              <svg class="absolute inset-0 w-full h-full opacity-40" viewBox="0 0 200 120" preserveAspectRatio="none">
-                <defs>
-                  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.4"/>
-                  </pattern>
-                </defs>
-                <rect width="200" height="120" fill="url(#grid)" />
-                <path d="M0 70 Q 60 60 110 75 T 200 80" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2 3"/>
-                <path d="M40 0 L60 120" fill="none" stroke="currentColor" stroke-width="0.6"/>
-                <path d="M120 0 L140 120" fill="none" stroke="currentColor" stroke-width="0.6"/>
-              </svg>
-              <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                <span class="w-3 h-3 rounded-full bg-[color:var(--destructive)] ring-4 ring-[color:var(--destructive)]/20"></span>
-                <span class="mono-code text-[0.6rem] mt-2 uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">Avenue O · Bensonhurst</span>
-              </div>
+            <div class="mt-7 aspect-[5/3] border border-[color:var(--border)] relative overflow-hidden">
+              <iframe
+                src="https://maps.google.com/maps?q=84%20Avenue%20O%2C%20Brooklyn%2C%20NY%2011204&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                title="Map showing Asian Street Gourmet at 84 Avenue O, Brooklyn, NY 11204"
+                class="absolute inset-0 w-full h-full"
+                style="border:0;"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen></iframe>
             </div>
-            <!-- PLACEHOLDER: replace faux map with real Google Maps iframe when ready -->
           </article>
 
           <article class="border border-[color:var(--border)] p-7 bg-[color:var(--card)]">

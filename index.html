@@ -867,11 +867,10 @@
           var key = el.getAttribute('data-i18n');
           var val = dict[key];
           if (val === undefined) return;
-          if (val.indexOf('<') === -1) {
-            el.textContent = val;
-          } else {
-            setRichContent(el, val);
-          }
+          // Always route through the HTML parser so entities like &nbsp;
+          // decode correctly. Plain text without tags or entities also
+          // parses fine — just becomes a single text node.
+          setRichContent(el, val);
         });
         Array.prototype.forEach.call(doc.querySelectorAll('[data-lang-toggle]'), function (btn) {
           btn.setAttribute('aria-label', lang === 'zh' ? 'Switch language to English' : 'Switch language to Chinese · 切換到中文');

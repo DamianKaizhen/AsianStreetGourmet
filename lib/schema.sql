@@ -104,13 +104,12 @@ ON CONFLICT (slug) DO NOTHING;
 -- 3. MENU ITEMS (seed)
 -- ============================================================
 
--- 蒸餸飯 Steamed Rice Plates ($7) — S1–S5
+-- 蒸餸飯 Steamed Rice Plates ($7) — S1–S4
 INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_order) VALUES
   ('S1', 'Preserved Mustard & Pork Ribs over Rice',           '榨菜排骨蒸飯', 'rice', 700, 1),
   ('S2', 'Black Mushroom & Silky Chicken over Rice',          '冬菇滑雞蒸飯', 'rice', 700, 2),
   ('S3', 'Preserved Mustard Greens & Pork Patty over Rice',   '梅菜肉餅蒸飯', 'rice', 700, 3),
-  ('S4', 'Daikon & Beef Brisket over Rice',                   '蘿蔔牛腩蒸飯', 'rice', 700, 4),
-  ('S5', 'Bean Curd Stick & Lamb Brisket over Rice',          '支竹羊腩蒸飯', 'rice', 700, 5)
+  ('S4', 'Daikon & Beef Brisket over Rice',                   '蘿蔔牛腩蒸飯', 'rice', 700, 4)
 ON CONFLICT (code) DO NOTHING;
 
 -- 家庭菜 Home-Style Dishes ($7) — A1–A6
@@ -167,7 +166,6 @@ FROM (VALUES
   ('S2','chicken'),      ('S2','black-mushroom'),
   ('S3','pork-ground'),  ('S3','preserved-mustard-greens'),
   ('S4','beef-brisket'), ('S4','daikon'),
-  ('S5','lamb-brisket'), ('S5','bean-curd-stick'),
   -- Home-style A (家庭菜)
   ('A1','pork-ribs'),    ('A1','preserved-mustard'),
   ('A2','chicken'),      ('A2','black-mushroom'),
@@ -215,7 +213,7 @@ ON CONFLICT (category) DO NOTHING;
 -- ============================================================
 -- DONE. Verify with:
 --   SELECT COUNT(*) FROM ingredients;         -- 35
---   SELECT COUNT(*) FROM menu_items;          -- 29
---   SELECT COUNT(*) FROM menu_item_ingredients; -- 55
+--   SELECT COUNT(*) FROM menu_items;          -- 28
+--   SELECT COUNT(*) FROM menu_item_ingredients; -- 53
 --   SELECT COUNT(*) FROM rotation_settings;   -- 4
 -- ============================================================

@@ -1,0 +1,34 @@
+# robots.txt — Asian Street Gourmet
+# Allow everyone except the admin portal and backend API.
+# AI search/answer engines are explicitly welcomed: they recommend the
+# restaurant to diners asking for Cantonese food in Brooklyn.
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin
+Disallow: /api/
+
+# Explicitly welcome AI search & answer-engine crawlers
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://asian-street-gourmet.vercel.app/sitemap.xml

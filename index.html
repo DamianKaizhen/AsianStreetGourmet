@@ -7,6 +7,25 @@
   <title>Asian Street Gourmet · 亞洲街頭美食 — Cantonese Home Kitchen on Avenue O</title>
   <meta name="description" content="Cantonese home cooking, served on Avenue O. Steamed rice plates, home-style dishes, soups & snacks at 84 Avenue O, Brooklyn." />
 
+  <link rel="canonical" href="https://asian-street-gourmet.vercel.app/" />
+
+  <!-- Open Graph (Facebook, iMessage, Slack, WhatsApp link previews) -->
+  <meta property="og:type" content="restaurant" />
+  <meta property="og:site_name" content="Asian Street Gourmet" />
+  <meta property="og:title" content="Asian Street Gourmet · 亞洲街頭美食 — Cantonese Home Kitchen on Avenue O" />
+  <meta property="og:description" content="Cantonese home cooking on Avenue O, Brooklyn. $7 steamed rice plates, home-style dishes, slow-simmered soups, and snacks. Call to order." />
+  <meta property="og:url" content="https://asian-street-gourmet.vercel.app/" />
+  <meta property="og:image" content="https://asian-street-gourmet.vercel.app/images/frontdoor.jpg" />
+  <meta property="og:image:alt" content="Storefront of Asian Street Gourmet at 84 Avenue O, Brooklyn" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="zh_HK" />
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Asian Street Gourmet — Cantonese Home Kitchen on Avenue O" />
+  <meta name="twitter:description" content="Cantonese home cooking on Avenue O, Brooklyn. Steamed rice plates from $7. Call to order." />
+  <meta name="twitter:image" content="https://asian-street-gourmet.vercel.app/images/frontdoor.jpg" />
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -264,6 +283,171 @@
     .gal-cap { transition: opacity .4s ease, transform .4s ease; }
     .gal-item:not(:hover) .gal-cap { opacity: 0; transform: translateY(8px); }
   </style>
+
+  <!-- Structured data: Restaurant + Menu + FAQPage in one @graph.
+       Manual-sync rule: when adding/removing a menu item or changing a
+       price, update BOTH the visible HTML rows AND the relevant entries
+       in this Menu @graph in the same commit. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Restaurant",
+        "@id": "https://asian-street-gourmet.vercel.app/#restaurant",
+        "name": "Asian Street Gourmet",
+        "alternateName": "亞洲街頭美食",
+        "description": "A Cantonese family kitchen on Avenue O in Brooklyn, serving steamed rice plates, home-style dishes, slow-simmered soups, and snacks. Order by menu code for takeout, pickup, or dine-in.",
+        "url": "https://asian-street-gourmet.vercel.app/",
+        "telephone": "+19177236262",
+        "image": [
+          "https://asian-street-gourmet.vercel.app/images/frontdoor.jpg",
+          "https://asian-street-gourmet.vercel.app/images/homestyle.jpg",
+          "https://asian-street-gourmet.vercel.app/images/soup.jpg"
+        ],
+        "servesCuisine": ["Cantonese", "Chinese"],
+        "priceRange": "$",
+        "currenciesAccepted": "USD",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "84 Avenue O",
+          "addressLocality": "Brooklyn",
+          "addressRegion": "NY",
+          "postalCode": "11204",
+          "addressCountry": "US"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 40.6102694,
+          "longitude": -73.9818564
+        },
+        "hasMap": "https://www.google.com/maps?q=84+Avenue+O+Brooklyn+NY+11204",
+        "areaServed": [
+          { "@type": "Place", "name": "Mapleton, Brooklyn" },
+          { "@type": "Place", "name": "Borough Park, Brooklyn" },
+          { "@type": "Place", "name": "Bensonhurst, Brooklyn" },
+          { "@type": "Place", "name": "Midwood, Brooklyn" }
+        ],
+        "openingHoursSpecification": [
+          { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Tuesday", "Wednesday", "Thursday", "Sunday"], "opens": "11:00", "closes": "21:00" },
+          { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Friday", "Saturday"], "opens": "11:00", "closes": "22:00" }
+        ],
+        "acceptsReservations": "False",
+        "hasMenu": { "@id": "https://asian-street-gourmet.vercel.app/#menu" },
+        "potentialAction": {
+          "@type": "OrderAction",
+          "target": "tel:+19177236262",
+          "deliveryMethod": "http://purl.org/goodrelations/v1#DeliveryModePickUp"
+        }
+      },
+      {
+        "@type": "Menu",
+        "@id": "https://asian-street-gourmet.vercel.app/#menu",
+        "name": "Asian Street Gourmet Menu",
+        "inLanguage": ["en", "zh-Hant"],
+        "hasMenuSection": [
+          {
+            "@type": "MenuSection",
+            "name": "蒸餸飯 Steamed Rice Plates",
+            "description": "Slow-steamed rice with a topping. Each $7.",
+            "hasMenuItem": [
+              { "@type": "MenuItem", "name": "S1 榨菜排骨蒸飯 — Preserved Mustard & Pork Ribs over Rice", "offers": { "@type": "Offer", "price": "7.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "S2 冬菇滑雞蒸飯 — Black Mushroom & Silky Chicken over Rice", "offers": { "@type": "Offer", "price": "7.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "S3 梅菜肉餅蒸飯 — Preserved Mustard Greens & Pork Patty over Rice", "offers": { "@type": "Offer", "price": "7.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "S4 蘿蔔牛腩蒸飯 — Daikon & Beef Brisket over Rice", "offers": { "@type": "Offer", "price": "7.00", "priceCurrency": "USD" } }
+            ]
+          },
+          {
+            "@type": "MenuSection",
+            "name": "家庭菜 Home-Style Dishes",
+            "description": "Stir-fried, steamed, braised. Each $8.",
+            "hasMenuItem": [
+              { "@type": "MenuItem", "name": "A1 榨菜排骨 — Preserved Mustard Pork Ribs", "offers": { "@type": "Offer", "price": "8.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "A2 冬菇蒸雞 — Steamed Chicken with Mushrooms", "offers": { "@type": "Offer", "price": "8.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "A3 梅菜肉餅 — Preserved Mustard Pork Patty", "offers": { "@type": "Offer", "price": "8.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "A4 蘿蔔牛腩 — Daikon Beef Brisket", "offers": { "@type": "Offer", "price": "8.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "A5 支竹羊腩 — Bean Curd Stick Lamb Brisket", "offers": { "@type": "Offer", "price": "8.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "A6 香芋燒鴨 — Taro & Roast Duck", "offers": { "@type": "Offer", "price": "8.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "B1 蝦仁滑蛋 — Shrimp with Silky Egg", "offers": { "@type": "Offer", "price": "8.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "B2 豉汁倉魚 — Pomfret in Black Bean Sauce", "offers": { "@type": "Offer", "price": "8.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "B3 豉椒鮮魷 — Squid with Black Bean & Pepper", "offers": { "@type": "Offer", "price": "8.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "B4 蒸黃花魚 — Steamed Yellow Croaker", "offers": { "@type": "Offer", "price": "8.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "B5 辣椒魚滑 — Spicy Fish Paste", "offers": { "@type": "Offer", "price": "8.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "B6 豬皮魚旦 — Pork Skin & Fish Balls", "offers": { "@type": "Offer", "price": "8.00", "priceCurrency": "USD" } }
+            ]
+          },
+          {
+            "@type": "MenuSection",
+            "name": "靚湯 Slow-Simmered Soups",
+            "description": "Cantonese 老火湯, simmered for hours. Each $3.",
+            "hasMenuItem": [
+              { "@type": "MenuItem", "name": "C1 蓮藕湯 — Lotus Root Soup", "suitableForDiet": "https://schema.org/VegetarianDiet", "offers": { "@type": "Offer", "price": "3.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "C2 西洋菜湯 — Watercress Soup", "offers": { "@type": "Offer", "price": "3.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "C3 霸王花湯 — Night-Blooming Cereus Soup", "offers": { "@type": "Offer", "price": "3.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "C4 菜乾湯 — Dried Vegetable Soup", "offers": { "@type": "Offer", "price": "3.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "C5 番茄湯 — Tomato Soup", "offers": { "@type": "Offer", "price": "3.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "C6 節瓜湯 — Hairy Gourd Soup", "offers": { "@type": "Offer", "price": "3.00", "priceCurrency": "USD" } }
+            ]
+          },
+          {
+            "@type": "MenuSection",
+            "name": "小食 Snacks & Sides",
+            "description": "The little plates that make a meal. Each $3.",
+            "hasMenuItem": [
+              { "@type": "MenuItem", "name": "D1 炸春卷 — Fried Spring Rolls", "offers": { "@type": "Offer", "price": "3.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "D2 炸饅頭 — Fried Mantou (Sweet Buns)", "suitableForDiet": "https://schema.org/VegetarianDiet", "offers": { "@type": "Offer", "price": "3.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "D3 魚旦燒賣 — Fish Balls & Siu Mai", "offers": { "@type": "Offer", "price": "3.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "D4 湯粉 — Rice Noodle Soup", "offers": { "@type": "Offer", "price": "3.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "D5 湯麵 — Egg Noodle Soup", "offers": { "@type": "Offer", "price": "3.00", "priceCurrency": "USD" } },
+              { "@type": "MenuItem", "name": "D6 水餃 — Boiled Dumplings", "offers": { "@type": "Offer", "price": "3.00", "priceCurrency": "USD" } }
+            ]
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://asian-street-gourmet.vercel.app/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Where is Asian Street Gourmet located?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Asian Street Gourmet is at 84 Avenue O, Brooklyn, NY 11204, in the Mapleton/Borough Park area of Brooklyn." }
+          },
+          {
+            "@type": "Question",
+            "name": "What are your hours?",
+            "acceptedAnswer": { "@type": "Answer", "text": "We are open Tuesday through Thursday and Sunday from 11am to 9pm, and Friday and Saturday from 11am to 10pm. We are closed Mondays. Last orders are 30 minutes before close." }
+          },
+          {
+            "@type": "Question",
+            "name": "Do you offer takeout and pickup?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. We are a phone-order, takeout, and dine-in kitchen. Call 917-723-6262 and order by menu code — for example, 'one S1, one C2, two D6' — and we'll have it ready for pickup." }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I order?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Call 917-723-6262 and read off the menu codes and quantities. Each item has a code such as S1, A4, or C3. We'll have your order bagged and ready when you arrive." }
+          },
+          {
+            "@type": "Question",
+            "name": "Do you have vegetarian options?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Vegetarian choices include the Lotus Root Soup (C1), several vegetable soups, and Fried Mantou sweet buns (D2)." }
+          },
+          {
+            "@type": "Question",
+            "name": "How much does a meal cost?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Steamed rice plates are $7, home-style dishes are $8, and soups and snacks are $3 each. It's an affordable, home-style Cantonese kitchen." }
+          },
+          {
+            "@type": "Question",
+            "name": "Do you take reservations?",
+            "acceptedAnswer": { "@type": "Answer", "text": "We do not take reservations. Orders are placed by phone for pickup, or you can dine in when you arrive." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body class="font-body antialiased">
@@ -296,7 +480,7 @@
   <header id="site-nav" class="nav-base sticky top-0 z-40">
     <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 h-[68px] flex items-center justify-between">
       <a href="#top" class="flex items-baseline gap-3 group" aria-label="Asian Street Gourmet — home">
-        <span class="zh font-bold text-[1.1rem] text-[color:var(--destructive)] leading-none">亞洲街頭美食</span>
+        <span class="zh font-bold text-[1.1rem] text-[color:var(--destructive)] leading-none" lang="zh-Hant">亞洲街頭美食</span>
         <span class="hidden sm:inline-block w-px h-4 bg-[color:var(--border)]"></span>
         <span class="hidden sm:inline-block display-tight text-[0.95rem] font-semibold tracking-tight text-[color:var(--foreground)]">Asian Street Gourmet</span>
       </a>
@@ -330,7 +514,7 @@
 
     <div id="mobile-menu" class="lg:hidden fixed inset-0 z-50 bg-[color:var(--background)] hidden flex-col">
       <div class="px-5 sm:px-8 h-[68px] flex items-center justify-between border-b border-[color:var(--border)]">
-        <span class="zh font-bold text-[1.1rem] text-[color:var(--destructive)]">亞洲街頭美食</span>
+        <span class="zh font-bold text-[1.1rem] text-[color:var(--destructive)]" lang="zh-Hant">亞洲街頭美食</span>
         <button id="menu-close" type="button" aria-label="Close menu" class="w-10 h-10 inline-flex items-center justify-center border border-[color:var(--border)] rounded-sm">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
@@ -363,7 +547,7 @@
         <div class="lg:col-span-7 xl:col-span-7 relative z-10" data-reveal>
           <div class="stamp mb-8">Brooklyn · Cantonese · 廣東</div>
 
-          <p data-hide-zh class="zh text-[color:var(--destructive)] text-xl sm:text-2xl mb-4 tracking-wide">亞洲街頭美食 · 家庭廚房</p>
+          <p data-hide-zh class="zh text-[color:var(--destructive)] text-xl sm:text-2xl mb-4 tracking-wide" lang="zh-Hant">亞洲街頭美食 · 家庭廚房</p>
 
           <h1 id="hero-title" data-i18n="hero.title" class="display display-tight font-light text-[color:var(--foreground)] leading-[0.92]" style="font-size: clamp(3.2rem, 9vw, 9.5rem);">
             Cantonese<br/>
@@ -400,7 +584,7 @@
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
                 </p>
                 <p class="display text-xl mt-1 leading-tight">84 Avenue&nbsp;O</p>
-                <p class="zh text-sm text-[color:var(--destructive)] mt-1">亞洲街頭美食 · Brooklyn</p>
+                <p class="zh text-sm text-[color:var(--destructive)] mt-1" lang="zh-Hant">亞洲街頭美食 · Brooklyn</p>
               </a>
             </figcaption>
           </figure>
@@ -420,7 +604,7 @@
       <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 grid lg:grid-cols-12 gap-12 lg:gap-16 relative z-10">
         <div class="lg:col-span-5" data-reveal>
           <span class="rule-mark mb-6" data-i18n="story.eyebrow">01 · Our Story</span>
-          <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-3 mt-4">家庭廚房</p>
+          <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-3 mt-4" lang="zh-Hant">家庭廚房</p>
           <h2 id="story-title" data-i18n="story.title" class="display display-tight font-light leading-[0.95]" style="font-size: clamp(2.5rem, 5vw, 4.4rem);">
             Home Kitchen.<br/>
             <span class="italic" style="font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;">Avenue&nbsp;O.</span><br/>
@@ -453,7 +637,7 @@
         <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10" data-reveal>
           <div>
             <span class="rule-mark mb-4" data-i18n="menu.eyebrow">02 · The Menu</span>
-            <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-2 mt-4">餐牌</p>
+            <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-2 mt-4" lang="zh-Hant">餐牌</p>
             <h2 id="menu-title" data-i18n="menu.title" class="display display-tight font-light leading-[0.95]" style="font-size: clamp(2.4rem, 5vw, 4.4rem);">
               Order by <span class="italic" style="font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;">code</span>.
             </h2>
@@ -474,7 +658,7 @@
               <span class="mono-code text-[color:var(--destructive)] text-sm">S · $7</span>
               <span class="h-px flex-1 bg-[color:var(--border)]"></span>
             </div>
-            <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">蒸餸飯</h3>
+            <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" lang="zh-Hant" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">蒸餸飯</h3>
             <p data-hide-zh class="display text-3xl sm:text-4xl font-light leading-tight">Steamed Rice Plates</p>
             <p data-i18n="cat.rice.desc" class="mt-4 text-[color:var(--muted-foreground)] max-w-sm">Slow-steamed rice with a topping. Comfort by the bowl.</p>
             <div class="mt-8 aspect-[5/4] w-full overflow-hidden img-ph relative">
@@ -482,10 +666,10 @@
             </div>
           </header>
           <ul class="lg:col-span-8 space-y-1">
-            <li class="menu-row flex items-baseline gap-1 py-4 border-b border-dotted border-[color:var(--border)]" data-menu-code="S1"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors">榨菜排骨蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Preserved Mustard & Pork Ribs over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-4 border-b border-dotted border-[color:var(--border)]" data-menu-code="S2"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors">冬菇滑雞蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Black Mushroom & Silky Chicken over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-4 border-b border-dotted border-[color:var(--border)]" data-menu-code="S3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors">梅菜肉餅蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Preserved Mustard Greens & Pork Patty over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-4" data-menu-code="S4"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors">蘿蔔牛腩蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Daikon & Beef Brisket over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-4 border-b border-dotted border-[color:var(--border)]" data-menu-code="S1"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors" lang="zh-Hant">榨菜排骨蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Preserved Mustard & Pork Ribs over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-4 border-b border-dotted border-[color:var(--border)]" data-menu-code="S2"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors" lang="zh-Hant">冬菇滑雞蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Black Mushroom & Silky Chicken over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-4 border-b border-dotted border-[color:var(--border)]" data-menu-code="S3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors" lang="zh-Hant">梅菜肉餅蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Preserved Mustard Greens & Pork Patty over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-4" data-menu-code="S4"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-10 shrink-0">S4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-lg sm:text-xl font-medium transition-colors" lang="zh-Hant">蘿蔔牛腩蒸飯</span><span class="block sm:inline sm:ml-3 text-[color:var(--muted-foreground)]">Daikon & Beef Brisket over Rice</span></div><span class="leader hidden sm:block"></span><span class="price text-2xl sm:text-3xl shrink-0">$7</span></li>
           </ul>
         </article>
 
@@ -496,7 +680,7 @@
               <span class="mono-code text-[color:var(--destructive)] text-sm">A·B · $8</span>
               <span class="h-px flex-1 bg-[color:var(--border)]"></span>
             </div>
-            <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">家庭菜</h3>
+            <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" lang="zh-Hant" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">家庭菜</h3>
             <p data-hide-zh class="display text-3xl sm:text-4xl font-light leading-tight">Home-Style Dishes</p>
             <p data-i18n="cat.home.desc" class="mt-4 text-[color:var(--muted-foreground)] max-w-sm">Stir-fried, steamed, braised. Twelve dishes. Each $8.</p>
             <div class="mt-8 aspect-[5/4] w-full overflow-hidden img-ph relative">
@@ -505,20 +689,20 @@
           </header>
           <div class="lg:col-span-8 grid sm:grid-cols-2 gap-x-10">
             <ul class="space-y-1 sm:border-r sm:border-dotted sm:border-[color:var(--border)] sm:pr-10">
-              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="A1"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">榨菜排骨</span><span class="block text-sm text-[color:var(--muted-foreground)]">Preserved Mustard Pork Ribs</span></div><span class="price text-xl shrink-0">$8</span></li>
-              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="A2"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">冬菇蒸雞</span><span class="block text-sm text-[color:var(--muted-foreground)]">Steamed Chicken w/ Mushrooms</span></div><span class="price text-xl shrink-0">$8</span></li>
-              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="A3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">梅菜肉餅</span><span class="block text-sm text-[color:var(--muted-foreground)]">Preserved Mustard Pork Patty</span></div><span class="price text-xl shrink-0">$8</span></li>
-              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="A4"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">蘿蔔牛腩</span><span class="block text-sm text-[color:var(--muted-foreground)]">Daikon Beef Brisket</span></div><span class="price text-xl shrink-0">$8</span></li>
-              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="A5"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">支竹羊腩</span><span class="block text-sm text-[color:var(--muted-foreground)]">Bean Curd Stick Lamb Brisket</span></div><span class="price text-xl shrink-0">$8</span></li>
-              <li class="menu-row flex items-baseline gap-1 py-3" data-menu-code="A6"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A6</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">香芋燒鴨</span><span class="block text-sm text-[color:var(--muted-foreground)]">Taro & Roast Duck</span></div><span class="price text-xl shrink-0">$8</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="A1"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">榨菜排骨</span><span class="block text-sm text-[color:var(--muted-foreground)]">Preserved Mustard Pork Ribs</span></div><span class="price text-xl shrink-0">$8</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="A2"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">冬菇蒸雞</span><span class="block text-sm text-[color:var(--muted-foreground)]">Steamed Chicken w/ Mushrooms</span></div><span class="price text-xl shrink-0">$8</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="A3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">梅菜肉餅</span><span class="block text-sm text-[color:var(--muted-foreground)]">Preserved Mustard Pork Patty</span></div><span class="price text-xl shrink-0">$8</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="A4"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">蘿蔔牛腩</span><span class="block text-sm text-[color:var(--muted-foreground)]">Daikon Beef Brisket</span></div><span class="price text-xl shrink-0">$8</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="A5"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">支竹羊腩</span><span class="block text-sm text-[color:var(--muted-foreground)]">Bean Curd Stick Lamb Brisket</span></div><span class="price text-xl shrink-0">$8</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3" data-menu-code="A6"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">A6</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">香芋燒鴨</span><span class="block text-sm text-[color:var(--muted-foreground)]">Taro & Roast Duck</span></div><span class="price text-xl shrink-0">$8</span></li>
             </ul>
             <ul class="space-y-1 sm:pl-2">
-              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="B1"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">蝦仁滑蛋</span><span class="block text-sm text-[color:var(--muted-foreground)]">Shrimp w/ Silky Egg</span></div><span class="price text-xl shrink-0">$8</span></li>
-              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="B2"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">豉汁倉魚</span><span class="block text-sm text-[color:var(--muted-foreground)]">Pomfret in Black Bean Sauce</span></div><span class="price text-xl shrink-0">$8</span></li>
-              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="B3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">豉椒鮮魷</span><span class="block text-sm text-[color:var(--muted-foreground)]">Squid w/ Black Bean & Pepper</span></div><span class="price text-xl shrink-0">$8</span></li>
-              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="B4"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">蒸黃花魚</span><span class="block text-sm text-[color:var(--muted-foreground)]">Steamed Yellow Croaker</span></div><span class="price text-xl shrink-0">$8</span></li>
-              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="B5"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">辣椒魚滑</span><span class="block text-sm text-[color:var(--muted-foreground)]">Spicy Fish Paste</span></div><span class="price text-xl shrink-0">$8</span></li>
-              <li class="menu-row flex items-baseline gap-1 py-3" data-menu-code="B6"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B6</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">豬皮魚旦</span><span class="block text-sm text-[color:var(--muted-foreground)]">Pork Skin & Fish Balls</span></div><span class="price text-xl shrink-0">$8</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="B1"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">蝦仁滑蛋</span><span class="block text-sm text-[color:var(--muted-foreground)]">Shrimp w/ Silky Egg</span></div><span class="price text-xl shrink-0">$8</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="B2"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">豉汁倉魚</span><span class="block text-sm text-[color:var(--muted-foreground)]">Pomfret in Black Bean Sauce</span></div><span class="price text-xl shrink-0">$8</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="B3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">豉椒鮮魷</span><span class="block text-sm text-[color:var(--muted-foreground)]">Squid w/ Black Bean & Pepper</span></div><span class="price text-xl shrink-0">$8</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="B4"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">蒸黃花魚</span><span class="block text-sm text-[color:var(--muted-foreground)]">Steamed Yellow Croaker</span></div><span class="price text-xl shrink-0">$8</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="B5"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">辣椒魚滑</span><span class="block text-sm text-[color:var(--muted-foreground)]">Spicy Fish Paste</span></div><span class="price text-xl shrink-0">$8</span></li>
+              <li class="menu-row flex items-baseline gap-1 py-3" data-menu-code="B6"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">B6</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">豬皮魚旦</span><span class="block text-sm text-[color:var(--muted-foreground)]">Pork Skin & Fish Balls</span></div><span class="price text-xl shrink-0">$8</span></li>
             </ul>
           </div>
         </article>
@@ -530,7 +714,7 @@
               <span class="mono-code text-[color:var(--destructive)] text-sm">C · $3</span>
               <span class="h-px flex-1 bg-[color:var(--border)]"></span>
             </div>
-            <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">靚湯</h3>
+            <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" lang="zh-Hant" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">靚湯</h3>
             <p data-hide-zh class="display text-3xl sm:text-4xl font-light leading-tight">Slow-Simmered Soups</p>
             <p data-i18n="cat.soup.desc" class="mt-4 text-[color:var(--muted-foreground)] max-w-sm">Cantonese 老火湯 — bones, herbs, vegetables, simmered for hours.</p>
             <div class="mt-8 aspect-[5/4] w-full overflow-hidden img-ph relative">
@@ -538,12 +722,12 @@
             </div>
           </header>
           <ul class="lg:col-span-8 grid sm:grid-cols-2 gap-x-10">
-            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="C1"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">蓮藕湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Lotus Root Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="C2"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">西洋菜湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Watercress Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="C3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">霸王花湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Night-Blooming Cereus Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="C4"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">菜乾湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Dried Vegetable Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)] sm:border-b-0" data-menu-code="C5"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">番茄湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Tomato Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-3" data-menu-code="C6"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C6</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">節瓜湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Hairy Gourd Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="C1"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">蓮藕湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Lotus Root Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="C2"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">西洋菜湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Watercress Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="C3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">霸王花湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Night-Blooming Cereus Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="C4"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">菜乾湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Dried Vegetable Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)] sm:border-b-0" data-menu-code="C5"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">番茄湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Tomato Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3" data-menu-code="C6"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">C6</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">節瓜湯</span><span class="block text-sm text-[color:var(--muted-foreground)]">Hairy Gourd Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
           </ul>
         </article>
 
@@ -554,7 +738,7 @@
               <span class="mono-code text-[color:var(--destructive)] text-sm">D · $3</span>
               <span class="h-px flex-1 bg-[color:var(--border)]"></span>
             </div>
-            <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">小食</h3>
+            <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" lang="zh-Hant" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">小食</h3>
             <p data-hide-zh class="display text-3xl sm:text-4xl font-light leading-tight">Snacks & Sides</p>
             <p data-i18n="cat.snack.desc" class="mt-4 text-[color:var(--muted-foreground)] max-w-sm">Fish balls, dumplings, fried mantou. The little plates that make a meal.</p>
             <div class="mt-8 aspect-[5/4] w-full overflow-hidden img-ph relative">
@@ -562,12 +746,12 @@
             </div>
           </header>
           <ul class="lg:col-span-8 grid sm:grid-cols-2 gap-x-10">
-            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="D1"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">炸春卷</span><span class="block text-sm text-[color:var(--muted-foreground)]">Fried Spring Rolls</span></div><span class="price text-xl shrink-0">$3</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="D2"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">炸饅頭</span><span class="block text-sm text-[color:var(--muted-foreground)]">Fried Mantou (Sweet Buns)</span></div><span class="price text-xl shrink-0">$3</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="D3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">魚旦燒賣</span><span class="block text-sm text-[color:var(--muted-foreground)]">Fish Balls & Siu Mai</span></div><span class="price text-xl shrink-0">$3</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="D4"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">湯粉</span><span class="block text-sm text-[color:var(--muted-foreground)]">Rice Noodle Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)] sm:border-b-0" data-menu-code="D5"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">湯麵</span><span class="block text-sm text-[color:var(--muted-foreground)]">Egg Noodle Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
-            <li class="menu-row flex items-baseline gap-1 py-3" data-menu-code="D6"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D6</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors">水餃</span><span class="block text-sm text-[color:var(--muted-foreground)]">Boiled Dumplings</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="D1"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D1</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">炸春卷</span><span class="block text-sm text-[color:var(--muted-foreground)]">Fried Spring Rolls</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="D2"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D2</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">炸饅頭</span><span class="block text-sm text-[color:var(--muted-foreground)]">Fried Mantou (Sweet Buns)</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="D3"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D3</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">魚旦燒賣</span><span class="block text-sm text-[color:var(--muted-foreground)]">Fish Balls & Siu Mai</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)]" data-menu-code="D4"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D4</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">湯粉</span><span class="block text-sm text-[color:var(--muted-foreground)]">Rice Noodle Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3 border-b border-dotted border-[color:var(--border)] sm:border-b-0" data-menu-code="D5"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D5</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">湯麵</span><span class="block text-sm text-[color:var(--muted-foreground)]">Egg Noodle Soup</span></div><span class="price text-xl shrink-0">$3</span></li>
+            <li class="menu-row flex items-baseline gap-1 py-3" data-menu-code="D6"><span class="mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0">D6</span><div class="flex-1 min-w-0"><span class="zh row-zh text-base font-medium transition-colors" lang="zh-Hant">水餃</span><span class="block text-sm text-[color:var(--muted-foreground)]">Boiled Dumplings</span></div><span class="price text-xl shrink-0">$3</span></li>
           </ul>
         </article>
 
@@ -580,7 +764,7 @@
       <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
         <div class="mb-12 max-w-2xl" data-reveal>
           <span class="rule-mark mb-4" data-i18n="gallery.eyebrow">03 · Gallery</span>
-          <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-2 mt-4">廚房一角</p>
+          <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-2 mt-4" lang="zh-Hant">廚房一角</p>
           <h2 id="gallery-title" data-i18n="gallery.title" class="display display-tight font-light leading-[0.95]" style="font-size: clamp(2.4rem, 5vw, 4.4rem);">A look <span class="italic" style="font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;">inside</span>.</h2>
         </div>
 
@@ -607,7 +791,7 @@
           </figure>
           <figure class="gal-item col-span-6 sm:col-span-4 aspect-square img-ph relative bg-[color:var(--destructive)] flex items-center justify-center" data-reveal>
             <div class="text-center text-white p-6">
-              <p class="zh font-bold text-3xl sm:text-4xl leading-tight">家庭廚房</p>
+              <p class="zh font-bold text-3xl sm:text-4xl leading-tight" lang="zh-Hant">家庭廚房</p>
               <p class="mono-code text-xs uppercase tracking-[0.2em] mt-2 opacity-80">Home Kitchen</p>
               <p class="mono-code text-[0.65rem] uppercase tracking-[0.18em] mt-6 opacity-70">84 Avenue O · Brooklyn</p>
             </div>
@@ -625,7 +809,7 @@
       <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
         <div class="mb-12 max-w-2xl" data-reveal>
           <span class="rule-mark mb-4" data-i18n="visit.eyebrow">03 · Visit</span>
-          <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-2 mt-4">嚟搵我哋</p>
+          <p data-hide-zh class="zh text-[color:var(--destructive)] text-lg mb-2 mt-4" lang="zh-Hant">嚟搵我哋</p>
           <h2 id="visit-title" data-i18n="visit.title" class="display display-tight font-light leading-[0.95]" style="font-size: clamp(2.4rem, 5vw, 4.4rem);">Come <span class="italic" style="font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;">find us</span>.</h2>
         </div>
 
@@ -675,16 +859,57 @@
             <hr class="border-0 border-t border-dashed border-[color:var(--border)] my-6" />
             <p data-i18n="order.howlabel" class="mono-code text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)] mb-2">How it works</p>
             <p data-i18n="order.howbody" class="text-sm leading-relaxed">Read off menu codes — for example: <span class="mono-code text-[color:var(--destructive)]">"one S1, one C2, two D6"</span> — and we'll have it bagged for pickup.</p>
-            <hr class="border-0 border-t border-dashed border-[color:var(--border)] my-6" />
-            <p data-i18n="order.sociallabel" class="mono-code text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)] mb-2">Find us online</p>
-            <ul class="flex flex-wrap gap-2 mt-2">
-              <!-- PLACEHOLDER: real social URLs -->
-              <li><a href="#" class="px-3 py-1.5 border border-[color:var(--border)] mono-code text-xs uppercase tracking-[0.18em] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors inline-block" rel="noopener">Instagram</a></li>
-              <li><a href="#" class="px-3 py-1.5 border border-[color:var(--border)] mono-code text-xs uppercase tracking-[0.18em] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors inline-block" rel="noopener">Facebook</a></li>
-              <li><a href="#" class="px-3 py-1.5 border border-[color:var(--border)] mono-code text-xs uppercase tracking-[0.18em] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors inline-block" rel="noopener">Yelp</a></li>
-              <li><a href="#" class="px-3 py-1.5 border border-[color:var(--border)] mono-code text-xs uppercase tracking-[0.18em] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors inline-block" rel="noopener">Google</a></li>
-            </ul>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== FAQ ============== -->
+    <section id="faq" class="relative pt-20 sm:pt-28 pb-24 sm:pb-32 border-t border-[color:var(--border)]" aria-labelledby="faq-title">
+      <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+        <div class="mb-12 max-w-2xl" data-reveal>
+          <span class="rule-mark mb-4">04 · Often asked</span>
+          <p class="zh text-[color:var(--destructive)] text-lg mb-2 mt-4" lang="zh-Hant">常見問題</p>
+          <h2 id="faq-title" class="display display-tight font-light leading-[0.95]" style="font-size: clamp(2.4rem, 5vw, 4.4rem);">Questions, <span class="italic" style="font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;">answered</span>.</h2>
+        </div>
+
+        <div class="grid lg:grid-cols-12 gap-10" data-reveal>
+          <div class="lg:col-span-10 lg:col-start-2 space-y-7 sm:space-y-9 max-w-[64ch]">
+            <div>
+              <p class="mono-code text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--destructive)] mb-2">Q · Where are you?</p>
+              <p class="display text-xl sm:text-2xl font-light leading-snug">Asian Street Gourmet is at 84 Avenue&nbsp;O, Brooklyn, NY 11204 — in the Mapleton / Borough Park area.</p>
+            </div>
+
+            <div>
+              <p class="mono-code text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--destructive)] mb-2">Q · What are your hours?</p>
+              <p class="display text-xl sm:text-2xl font-light leading-snug">Tuesday through Thursday and Sunday, 11am – 9pm. Friday and Saturday, 11am – 10pm. Closed Mondays. Last orders 30 minutes before close.</p>
+            </div>
+
+            <div>
+              <p class="mono-code text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--destructive)] mb-2">Q · Do you offer takeout and pickup?</p>
+              <p class="display text-xl sm:text-2xl font-light leading-snug">Yes. We're a phone-order, takeout, and dine-in kitchen. Call <a href="tel:+19177236262" class="underline decoration-1 underline-offset-4 hover:text-[color:var(--destructive)]">917-723-6262</a> and order by menu code — for example, <span class="mono-code text-base text-[color:var(--destructive)]">"one S1, one C2, two D6"</span> — and we'll have it ready for pickup.</p>
+            </div>
+
+            <div>
+              <p class="mono-code text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--destructive)] mb-2">Q · How do I order?</p>
+              <p class="display text-xl sm:text-2xl font-light leading-snug">Call <a href="tel:+19177236262" class="underline decoration-1 underline-offset-4 hover:text-[color:var(--destructive)]">917-723-6262</a> and read off the menu codes and quantities. Each item has a code like <span class="mono-code text-base text-[color:var(--destructive)]">S1</span>, <span class="mono-code text-base text-[color:var(--destructive)]">A4</span>, or <span class="mono-code text-base text-[color:var(--destructive)]">C3</span>. We'll have your order bagged and ready when you arrive.</p>
+            </div>
+
+            <div>
+              <p class="mono-code text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--destructive)] mb-2">Q · Do you have vegetarian options?</p>
+              <p class="display text-xl sm:text-2xl font-light leading-snug">Yes. Vegetarian choices include the Lotus Root Soup (C1), several vegetable soups, and Fried Mantou sweet buns (D2).</p>
+            </div>
+
+            <div>
+              <p class="mono-code text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--destructive)] mb-2">Q · How much does a meal cost?</p>
+              <p class="display text-xl sm:text-2xl font-light leading-snug">Steamed rice plates are $7, home-style dishes $8, soups and snacks $3 each. An affordable, home-style Cantonese kitchen.</p>
+            </div>
+
+            <div>
+              <p class="mono-code text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--destructive)] mb-2">Q · Do you take reservations?</p>
+              <p class="display text-xl sm:text-2xl font-light leading-snug">We do not take reservations. Orders are placed by phone for pickup, or you can dine in when you arrive.</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -716,7 +941,7 @@
     <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
       <div class="grid md:grid-cols-12 gap-10 mb-14">
         <div class="md:col-span-5">
-          <p class="zh text-[color:var(--destructive)] text-2xl font-bold mb-2">亞洲街頭美食</p>
+          <p class="zh text-[color:var(--destructive)] text-2xl font-bold mb-2" lang="zh-Hant">亞洲街頭美食</p>
           <p class="display text-3xl font-light">Asian Street Gourmet</p>
           <p class="mono-code text-xs uppercase tracking-[0.2em] mt-2 text-[color:var(--muted-foreground)]">家庭廚房 · Home Kitchen</p>
           <p data-i18n="footer.tagline" class="mt-6 text-sm text-[color:var(--muted-foreground)] max-w-sm leading-relaxed">A Cantonese family kitchen on Avenue O. Steamed rice plates, home-style dishes, soups, snacks. Made the way home is.</p>
@@ -736,11 +961,7 @@
             <li><a href="tel:+19177236262" class="display text-2xl hover:text-[color:var(--destructive)] transition-colors">917 · 723 · 6262</a></li>
             <li class="text-[color:var(--muted-foreground)]">84 Avenue O, Brooklyn 11204</li>
             <li class="flex flex-wrap gap-2 pt-3">
-              <!-- PLACEHOLDER: real social URLs -->
-              <a href="#" aria-label="Instagram" class="w-9 h-9 inline-flex items-center justify-center border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
-              <a href="#" aria-label="Facebook" class="w-9 h-9 inline-flex items-center justify-center border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
-              <a href="#" aria-label="Yelp" class="w-9 h-9 inline-flex items-center justify-center border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors mono-code text-[0.6rem] tracking-[0.05em]">Y</a>
-              <a href="https://www.google.com/maps?q=84+Avenue+O+Brooklyn+NY+11204" target="_blank" rel="noopener" aria-label="Google Maps" class="w-9 h-9 inline-flex items-center justify-center border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></a>
+              <a href="https://www.google.com/maps?q=84+Avenue+O+Brooklyn+NY+11204" target="_blank" rel="noopener" aria-label="View on Google Maps" class="w-9 h-9 inline-flex items-center justify-center border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></a>
             </li>
           </ul>
         </div>

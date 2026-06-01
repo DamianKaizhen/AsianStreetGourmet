@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin · Asian Street Gourmet</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Inter+Tight:wght@400;500;600&family=DM+Mono:wght@400;500&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Fraunces', 'serif'],
+            body: ['"Inter Tight"', 'sans-serif'],
+            mono: ['"DM Mono"', 'monospace'],
+            zh: ['"Noto Serif TC"', 'serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root {
+      --background: oklch(0.9821 0 0);
+      --foreground: oklch(0.2435 0 0);
+      --card: oklch(0.9911 0 0);
+      --primary: oklch(0.4341 0.0392 41.9938);
+      --muted: oklch(0.9521 0 0);
+      --muted-foreground: oklch(0.5032 0 0);
+      --border: oklch(0.8822 0 0);
+      --destructive: oklch(0.6271 0.1936 33.339);
+      --good: oklch(0.55 0.13 145);
+    }
+    html, body { background: var(--background); color: var(--foreground); }
+    body { font-family: 'Inter Tight', sans-serif; }
+    .display { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
+    .mono { font-family: 'DM Mono', monospace; }
+    .zh { font-family: 'Noto Serif TC', serif; }
+
+    a, button { transition: color .2s, background .2s, border-color .2s, opacity .2s; }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid var(--destructive); outline-offset: 2px;
+    }
+
+    /* Toggle switch (CSS-only) */
+    .toggle { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle .slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: oklch(0.8 0 0); border-radius: 11px; transition: background .2s;
+    }
+    .toggle .slider::before {
+      content: ''; position: absolute; height: 18px; width: 18px; left: 2px; top: 2px;
+      background: white; border-radius: 50%; transition: transform .2s;
+      box-shadow: 0 1px 2px hsl(0 0% 0% / 0.2);
+    }
+    .toggle input:checked + .slider { background: var(--good); }
+    .toggle input:checked + .slider::before { transform: translateX(18px); }
+    .toggle input:focus-visible + .slider { outline: 2px solid var(--destructive); outline-offset: 2px; }
+    .toggle.is-busy .slider { opacity: 0.5; pointer-events: none; }
+
+    .badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.1rem 0.5rem; border-radius: 999px; font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .badge-on { background: color-mix(in oklab, var(--good) 15%, var(--background)); color: var(--good); }
+    .badge-off { background: color-mix(in oklab, var(--destructive) 15%, var(--background)); color: var(--destructive); }
+
+    .card { border: 1px solid var(--border); background: var(--card); }
+    .row { padding: 0.65rem 0; border-bottom: 1px dotted var(--border); }
+    .row:last-child { border-bottom: 0; }
+
+    .num-input {
+      width: 4.5rem; padding: 0.35rem 0.55rem;
+      border: 1px solid var(--border); background: var(--background); color: var(--foreground);
+      font-family: 'DM Mono', monospace; text-align: center; border-radius: 2px;
+    }
+
+    .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+    .seg button { padding: 0.3rem 0.7rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; background: var(--background); color: var(--foreground); }
+    .seg button.is-active { background: var(--destructive); color: white; }
+
+    details > summary { cursor: pointer; user-select: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::after { content: '▾'; margin-left: 0.5rem; transition: transform .2s; display: inline-block; opacity: 0.5; }
+    details[open] > summary::after { transform: rotate(180deg); }
+
+    .flash {
+      position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
+      padding: 0.5rem 1rem; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 0.75rem;
+      letter-spacing: 0.1em; text-transform: uppercase; z-index: 50;
+      opacity: 0; transition: opacity .25s, transform .25s;
+    }
+    .flash.is-show { opacity: 1; transform: translate(-50%, 0.5rem); }
+    .flash-good { background: var(--good); color: white; }
+    .flash-bad { background: var(--destructive); color: white; }
+  </style>
+</head>
+
+<body class="font-body antialiased">
+
+  <div id="flash" class="flash" role="status" aria-live="polite"></div>
+
+  <!-- ===== Header ===== -->
+  <header class="border-b border-[color:var(--border)]">
+    <div class="max-w-[1200px] mx-auto px-5 sm:px-8 h-[60px] flex items-center justify-between">
+      <a href="/" class="flex items-baseline gap-2 group">
+        <span class="zh font-bold text-[color:var(--destructive)] text-sm">亞洲街頭美食</span>
+        <span class="hidden sm:inline-block w-px h-3 bg-[color:var(--border)]"></span>
+        <span class="mono text-xs uppercase tracking-[0.18em] text-[color:var(--muted-foreground)] group-hover:text-[color:var(--foreground)]">← Back to site</span>
+      </a>
+      <span class="mono text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)]">Admin</span>
+      <button id="logout-btn" hidden class="mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)]">Log out</button>
+    </div>
+  </header>
+
+  <main class="max-w-[1200px] mx-auto px-5 sm:px-8 py-12">
+
+    <!-- ===== Login view ===== -->
+    <section id="login-view" class="max-w-md mx-auto pt-12">
+      <div class="text-center mb-8">
+        <p class="zh text-[color:var(--destructive)] text-base mb-2">家庭廚房 · 管理</p>
+        <h1 class="display text-4xl font-light">Sign in</h1>
+        <p class="mt-3 text-sm text-[color:var(--muted-foreground)]">Admin access only.</p>
+      </div>
+      <form id="login-form" class="card p-6 space-y-4">
+        <label class="block">
+          <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">Username</span>
+          <input name="username" type="text" autocomplete="username" required class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)]" />
+        </label>
+        <label class="block">
+          <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">Password</span>
+          <input name="password" type="password" autocomplete="current-password" required class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)]" />
+        </label>
+        <button type="submit" class="w-full mono text-xs uppercase tracking-[0.18em] py-2.5 bg-[color:var(--destructive)] text-white hover:opacity-90">Sign in</button>
+        <p id="login-error" class="text-sm text-[color:var(--destructive)] text-center" hidden></p>
+      </form>
+    </section>
+
+    <!-- ===== Admin view ===== -->
+    <section id="admin-view" hidden class="space-y-10">
+
+      <!-- Today's preview -->
+      <div>
+        <p class="mono text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--muted-foreground)] mb-3">Today · <span id="preview-date">—</span></p>
+        <h2 class="display text-3xl font-light leading-tight">What visitors see right now</h2>
+        <div id="preview-grid" class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+        <details class="mt-4">
+          <summary class="mono text-xs uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">Why are items hidden? <span id="preview-hidden-count">(0)</span></summary>
+          <ul id="preview-reasons" class="mt-3 text-sm space-y-1"></ul>
+        </details>
+      </div>
+
+      <!-- Ingredients -->
+      <div>
+        <h2 class="display text-3xl font-light leading-tight">Ingredients</h2>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Toggle off anything you've run out of today. Affected dishes hide automatically.</p>
+        <div id="ingredients-container" class="mt-5 space-y-8"></div>
+      </div>
+
+      <!-- Rotation settings -->
+      <div>
+        <h2 class="display text-3xl font-light leading-tight">Rotation</h2>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">For each category, set how many "in rotation" items appear per day. The system picks deterministically by date — same N items all day.</p>
+        <div id="rotation-container" class="mt-5 card divide-y divide-dotted divide-[color:var(--border)]"></div>
+      </div>
+
+      <!-- Menu items -->
+      <div>
+        <h2 class="display text-3xl font-light leading-tight">Menu items</h2>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Pick "Always" to show a dish whenever its ingredients are available. Pick "Rotation" to put it in the daily pool.</p>
+        <div id="menu-container" class="mt-5 space-y-8"></div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    // =========================================================
+    // Tiny DOM helpers — safer than innerHTML
+    // =========================================================
+    const $ = (sel) => document.querySelector(sel);
+
+    // Build an element with attrs and children. Strings become text nodes,
+    // so user-supplied text is never parsed as HTML.
+    function el(tag, attrs, ...kids) {
+      const e = document.createElement(tag);
+      for (const k in (attrs || {})) {
+        const v = attrs[k];
+        if (v == null) continue;
+        if (k === 'class') e.className = v;
+        else if (k === 'on' && typeof v === 'object') {
+          for (const ev in v) e.addEventListener(ev, v[ev]);
+        } else if (k === 'checked' || k === 'disabled' || k === 'hidden') {
+          if (v) e.setAttribute(k, '');
+        } else {
+          e.setAttribute(k, v);
+        }
+      }
+      for (const k of kids.flat(Infinity)) {
+        if (k == null || k === false) continue;
+        e.appendChild(typeof k === 'string' ? document.createTextNode(k) : k);
+      }
+      return e;
+    }
+
+    function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
+
+    function flash(message, kind) {
+      kind = kind || 'good';
+      const f = $('#flash');
+      f.textContent = message;
+      f.className = 'flash flash-' + kind + ' is-show';
+      clearTimeout(flash._t);
+      flash._t = setTimeout(() => { f.classList.remove('is-show'); }, 2200);
+    }
+
+    async function api(path, opts) {
+      opts = opts || {};
+      const res = await fetch(path, {
+        method: opts.method || 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        body: opts.body ? JSON.stringify(opts.body) : undefined,
+      });
+      if (res.status === 401) { showLogin(); throw new Error('unauthorized'); }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+      return data;
+    }
+
+    // =========================================================
+    // Login flow
+    // =========================================================
+    function showLogin() {
+      $('#login-view').hidden = false;
+      $('#admin-view').hidden = true;
+      $('#logout-btn').hidden = true;
+    }
+    function showAdmin() {
+      $('#login-view').hidden = true;
+      $('#admin-view').hidden = false;
+      $('#logout-btn').hidden = false;
+    }
+
+    $('#login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      const err = $('#login-error');
+      err.hidden = true;
+      try {
+        await api('/api/login', { method: 'POST', body: {
+          username: form.username.value, password: form.password.value,
+        }});
+        form.password.value = '';
+        showAdmin();
+        await loadEverything();
+      } catch (e) {
+        err.textContent = 'Invalid credentials.';
+        err.hidden = false;
+      }
+    });
+
+    $('#logout-btn').addEventListener('click', async () => {
+      try { await api('/api/logout', { method: 'POST' }); } catch {}
+      showLogin();
+    });
+
+    // =========================================================
+    // On load: probe session, show login or admin
+    // =========================================================
+    (async function init() {
+      try {
+        await api('/api/admin/ingredients');
+        showAdmin();
+        await loadEverything();
+      } catch {
+        showLogin();
+      }
+    })();
+
+    // =========================================================
+    // Load everything
+    // =========================================================
+    async function loadEverything() {
+      const [ing, menu, rot, today] = await Promise.all([
+        api('/api/admin/ingredients'),
+        api('/api/admin/menu'),
+        api('/api/admin/rotation'),
+        fetch('/api/menu-today?_=' + Date.now()).then((r) => r.json()),
+      ]);
+      renderPreview(today, menu.menu_items);
+      renderIngredients(ing.ingredients);
+      renderRotation(rot.rotation, menu.menu_items);
+      renderMenu(menu.menu_items);
+    }
+
+    async function refreshPreview() {
+      const [menu, today] = await Promise.all([
+        api('/api/admin/menu'),
+        fetch('/api/menu-today?_=' + Date.now()).then((r) => r.json()),
+      ]);
+      renderPreview(today, menu.menu_items);
+    }
+
+    // =========================================================
+    // Renderers
+    // =========================================================
+    const CATEGORY_LABELS = {
+      meat: 'Meat & poultry', seafood: 'Seafood', vegetable: 'Vegetables',
+      preserved: 'Preserved & dried', pantry: 'Pantry & frozen',
+    };
+    const MENU_CATEGORY_LABELS = {
+      rice: '蒸餸飯 · Steamed Rice Plates',
+      home: '家庭菜 · Home-Style Dishes',
+      soup: '靚湯 · Slow-Simmered Soups',
+      snack: '小食 · Snacks & Sides',
+    };
+
+    function renderPreview(today, menuItems) {
+      $('#preview-date').textContent = today.date_local || '—';
+      const grid = $('#preview-grid');
+      clear(grid);
+      const itemsByCode = Object.fromEntries(menuItems.map((m) => [m.code, m]));
+      (today.available_codes || []).forEach((code) => {
+        const m = itemsByCode[code] || {};
+        grid.appendChild(
+          el('div', { class: 'card p-3' },
+            el('p', { class: 'mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]' }, code),
+            el('p', { class: 'zh text-[color:var(--destructive)] text-sm mt-0.5' }, m.name_zh || ''),
+            el('p', { class: 'text-xs mt-0.5' }, m.name_en || '')
+          )
+        );
+      });
+
+      const reasons = today.unavailable_with_reason || {};
+      const codes = Object.keys(reasons);
+      $('#preview-hidden-count').textContent = '(' + codes.length + ')';
+      const ul = $('#preview-reasons');
+      clear(ul);
+      codes.forEach((code) => {
+        const r = reasons[code];
+        const txt = r.reason === 'missing'
+          ? code + ' — missing: ' + (r.missing || []).join(', ')
+          : code + ' — rotated off today';
+        ul.appendChild(el('li', {}, txt));
+      });
+    }
+
+    function renderIngredients(ingredients) {
+      const container = $('#ingredients-container');
+      clear(container);
+      const groups = {};
+      ingredients.forEach((i) => { (groups[i.category] ||= []).push(i); });
+
+      ['meat', 'seafood', 'vegetable', 'preserved', 'pantry'].forEach((cat) => {
+        const items = groups[cat] || [];
+        if (items.length === 0) return;
+        const isPantryCat = cat === 'pantry';
+        const list = el('div', { class: 'mt-2' });
+        items.forEach((i) => list.appendChild(ingredientRow(i)));
+
+        let section;
+        if (isPantryCat) {
+          section = el('details', { class: 'card p-5' },
+            el('summary', { class: 'display text-xl font-light flex items-center justify-between' },
+              CATEGORY_LABELS[cat],
+              el('span', { class: 'mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]' },
+                items.length + ' items · rarely changes')
+            ),
+            list
+          );
+        } else {
+          section = el('div', { class: 'card p-5' },
+            el('div', { class: 'flex items-baseline justify-between mb-2' },
+              el('h3', { class: 'display text-xl font-light' }, CATEGORY_LABELS[cat]),
+              el('span', { class: 'mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]' }, items.length + ' items')
+            ),
+            list
+          );
+        }
+        container.appendChild(section);
+      });
+    }
+
+    function ingredientRow(i) {
+      const badge = el('span', { class: 'badge ' + (i.is_available ? 'badge-on' : 'badge-off') }, i.is_available ? 'on hand' : 'out today');
+      const input = el('input', { type: 'checkbox', checked: i.is_available || null });
+      const toggle = el('label', { class: 'toggle' }, input, el('span', { class: 'slider' }));
+
+      input.addEventListener('change', async () => {
+        toggle.classList.add('is-busy');
+        try {
+          await api('/api/admin/ingredients/' + i.id, { method: 'PATCH', body: { is_available: input.checked } });
+          badge.className = 'badge ' + (input.checked ? 'badge-on' : 'badge-off');
+          badge.textContent = input.checked ? 'on hand' : 'out today';
+          flash((input.checked ? 'Marked available' : 'Marked out') + ': ' + i.name_en);
+          refreshPreview();
+        } catch {
+          input.checked = !input.checked;
+          flash('Update failed', 'bad');
+        } finally {
+          toggle.classList.remove('is-busy');
+        }
+      });
+
+      const codesText = i.used_by_codes && i.used_by_codes.length
+        ? 'Affects: ' + i.used_by_codes.join(', ')
+        : 'Not used by any item';
+
+      return el('div', { class: 'row flex items-center justify-between gap-3' },
+        el('div', { class: 'min-w-0 flex-1' },
+          el('div', { class: 'flex items-baseline gap-2' },
+            el('span', { class: 'font-medium' }, i.name_en),
+            el('span', { class: 'zh text-sm text-[color:var(--destructive)]' }, i.name_zh)
+          ),
+          el('p', { class: 'mono text-[0.6rem] uppercase tracking-[0.15em] text-[color:var(--muted-foreground)] mt-0.5' }, codesText)
+        ),
+        badge,
+        toggle
+      );
+    }
+
+    function renderRotation(rotationRows, menuItems) {
+      const container = $('#rotation-container');
+      clear(container);
+      const rotByCat = Object.fromEntries(rotationRows.map((r) => [r.category, r.pool_size]));
+      const totals = {};
+      const rotInMode = {};
+      menuItems.forEach((m) => {
+        totals[m.category] = (totals[m.category] || 0) + 1;
+        if (m.rotation_mode === 'rotation') rotInMode[m.category] = (rotInMode[m.category] || 0) + 1;
+      });
+
+      ['rice', 'home', 'soup', 'snack'].forEach((cat) => {
+        const input = el('input', {
+          type: 'number', min: '0', max: '50',
+          value: String(rotByCat[cat] ?? 0),
+          class: 'num-input',
+        });
+        input.addEventListener('change', async () => {
+          const v = Math.max(0, parseInt(input.value, 10) || 0);
+          input.value = v;
+          try {
+            await api('/api/admin/rotation', { method: 'PATCH', body: { category: cat, pool_size: v } });
+            flash('Rotation: ' + MENU_CATEGORY_LABELS[cat] + ' → ' + v);
+            refreshPreview();
+          } catch { flash('Update failed', 'bad'); }
+        });
+
+        container.appendChild(
+          el('div', { class: 'flex items-center justify-between gap-3 px-5 py-4' },
+            el('div', {},
+              el('p', { class: 'display text-lg' }, MENU_CATEGORY_LABELS[cat]),
+              el('p', { class: 'mono text-[0.65rem] uppercase tracking-[0.15em] text-[color:var(--muted-foreground)] mt-0.5' },
+                (totals[cat] || 0) + ' items total · ' + (rotInMode[cat] || 0) + ' currently in rotation')
+            ),
+            el('div', { class: 'flex items-center gap-2' },
+              el('label', { class: 'mono text-[0.7rem] uppercase tracking-[0.15em] text-[color:var(--muted-foreground)]' }, 'Show'),
+              input,
+              el('span', { class: 'mono text-[0.7rem] uppercase tracking-[0.15em] text-[color:var(--muted-foreground)]' }, 'per day')
+            )
+          )
+        );
+      });
+    }
+
+    function renderMenu(menuItems) {
+      const container = $('#menu-container');
+      clear(container);
+      const groups = {};
+      menuItems.forEach((m) => { (groups[m.category] ||= []).push(m); });
+
+      ['rice', 'home', 'soup', 'snack'].forEach((cat) => {
+        const items = groups[cat] || [];
+        if (items.length === 0) return;
+        const list = el('div', { class: 'mt-2' });
+        items.forEach((m) => list.appendChild(menuRow(m)));
+        container.appendChild(
+          el('div', { class: 'card p-5' },
+            el('div', { class: 'flex items-baseline justify-between mb-2' },
+              el('h3', { class: 'display text-xl font-light' }, MENU_CATEGORY_LABELS[cat]),
+              el('span', { class: 'mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]' }, items.length + ' items')
+            ),
+            list
+          )
+        );
+      });
+    }
+
+    function menuRow(m) {
+      const ingText = (m.ingredients || [])
+        .map((i) => i.name_en + (i.is_available ? '' : ' ⚠'))
+        .join(' · ') || '(no ingredients linked)';
+
+      const alwaysBtn = el('button',
+        { 'data-mode': 'always', class: m.rotation_mode === 'always' ? 'is-active' : '' },
+        'Always');
+      const rotBtn = el('button',
+        { 'data-mode': 'rotation', class: m.rotation_mode === 'rotation' ? 'is-active' : '' },
+        'Rotation');
+
+      [alwaysBtn, rotBtn].forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const mode = btn.dataset.mode;
+          if (mode === m.rotation_mode) return;
+          try {
+            await api('/api/admin/menu/' + m.code, { method: 'PATCH', body: { rotation_mode: mode } });
+            m.rotation_mode = mode;
+            alwaysBtn.className = mode === 'always'   ? 'is-active' : '';
+            rotBtn.className    = mode === 'rotation' ? 'is-active' : '';
+            flash(m.code + ' → ' + mode);
+            refreshPreview();
+          } catch { flash('Update failed', 'bad'); }
+        });
+      });
+
+      return el('div', { class: 'row flex items-center justify-between gap-3' },
+        el('div', { class: 'min-w-0 flex-1' },
+          el('div', { class: 'flex items-baseline gap-2' },
+            el('span', { class: 'mono text-xs text-[color:var(--muted-foreground)] w-9 shrink-0' }, m.code),
+            el('span', { class: 'zh text-base text-[color:var(--destructive)]' }, m.name_zh),
+            el('span', { class: 'text-sm' }, '· ' + m.name_en)
+          ),
+          el('p', { class: 'mono text-[0.6rem] uppercase tracking-[0.12em] text-[color:var(--muted-foreground)] mt-0.5 ml-11' }, ingText)
+        ),
+        el('div', { class: 'seg', role: 'group', 'aria-label': 'rotation mode' },
+          alwaysBtn, rotBtn
+        )
+      );
+    }
+  </script>
+</body>
+</html>

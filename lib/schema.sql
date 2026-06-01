@@ -116,24 +116,24 @@ INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_o
   ('S4', 'Daikon & Beef Brisket over Rice',                   '蘿蔔牛腩蒸飯', 'rice', 700, 4)
 ON CONFLICT (code) DO NOTHING;
 
--- 家庭菜 Home-Style Dishes ($7) — A1–A6
+-- 家庭菜 Home-Style Dishes ($8) — A1–A6
 INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_order) VALUES
-  ('A1', 'Preserved Mustard Pork Ribs',         '榨菜排骨', 'home', 700, 6),
-  ('A2', 'Steamed Chicken with Mushrooms',      '冬菇蒸雞', 'home', 700, 7),
-  ('A3', 'Preserved Mustard Pork Patty',        '梅菜肉餅', 'home', 700, 8),
-  ('A4', 'Daikon Beef Brisket',                 '蘿蔔牛腩', 'home', 700, 9),
-  ('A5', 'Bean Curd Stick Lamb Brisket',        '支竹羊腩', 'home', 700, 10),
-  ('A6', 'Taro & Roast Duck',                   '香芋燒鴨', 'home', 700, 11)
+  ('A1', 'Preserved Mustard Pork Ribs',         '榨菜排骨', 'home', 800, 6),
+  ('A2', 'Steamed Chicken with Mushrooms',      '冬菇蒸雞', 'home', 800, 7),
+  ('A3', 'Preserved Mustard Pork Patty',        '梅菜肉餅', 'home', 800, 8),
+  ('A4', 'Daikon Beef Brisket',                 '蘿蔔牛腩', 'home', 800, 9),
+  ('A5', 'Bean Curd Stick Lamb Brisket',        '支竹羊腩', 'home', 800, 10),
+  ('A6', 'Taro & Roast Duck',                   '香芋燒鴨', 'home', 800, 11)
 ON CONFLICT (code) DO NOTHING;
 
--- 家庭菜 Home-Style Dishes ($7) — B1–B6
+-- 家庭菜 Home-Style Dishes ($8) — B1–B6
 INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_order) VALUES
-  ('B1', 'Shrimp with Silky Egg',               '蝦仁滑蛋', 'home', 700, 12),
-  ('B2', 'Pomfret in Black Bean Sauce',         '豉汁倉魚', 'home', 700, 13),
-  ('B3', 'Squid with Black Bean & Pepper',      '豉椒鮮魷', 'home', 700, 14),
-  ('B4', 'Steamed Yellow Croaker',              '蒸黃花魚', 'home', 700, 15),
-  ('B5', 'Spicy Fish Paste',                    '辣椒魚滑', 'home', 700, 16),
-  ('B6', 'Pork Skin & Fish Balls',              '豬皮魚旦', 'home', 700, 17)
+  ('B1', 'Shrimp with Silky Egg',               '蝦仁滑蛋', 'home', 800, 12),
+  ('B2', 'Pomfret in Black Bean Sauce',         '豉汁倉魚', 'home', 800, 13),
+  ('B3', 'Squid with Black Bean & Pepper',      '豉椒鮮魷', 'home', 800, 14),
+  ('B4', 'Steamed Yellow Croaker',              '蒸黃花魚', 'home', 800, 15),
+  ('B5', 'Spicy Fish Paste',                    '辣椒魚滑', 'home', 800, 16),
+  ('B6', 'Pork Skin & Fish Balls',              '豬皮魚旦', 'home', 800, 17)
 ON CONFLICT (code) DO NOTHING;
 
 -- 靚湯 Slow-Simmered Soups ($3) — C1–C6

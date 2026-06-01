@@ -1,0 +1,13 @@
+{
+  "name": "asian-street-gourmet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Asian Street Gourmet — Brooklyn Cantonese home kitchen website",
+  "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.0"
+  }
+}

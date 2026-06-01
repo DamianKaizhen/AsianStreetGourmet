@@ -12,7 +12,7 @@ async function handler(req, res) {
   const rows = await sql`
     SELECT
       m.id, m.code, m.name_en, m.name_zh, m.category, m.price_cents,
-      m.rotation_mode, m.display_order, m.updated_at,
+      m.rotation_mode, m.is_available, m.display_order, m.updated_at,
       COALESCE(
         JSON_AGG(
           JSON_BUILD_OBJECT(

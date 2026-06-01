@@ -23,12 +23,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    // ----- Query 1: items + which non-pantry ingredients are unavailable -----
+    // ----- Query 1: items + per-item flag + which non-pantry ingredients are out -----
     const itemRows = await sql`
       SELECT
         m.code,
         m.category,
         m.rotation_mode,
+        m.is_available AS item_is_available,
         m.display_order,
         ARRAY_REMOVE(
           ARRAY_AGG(CASE
@@ -41,7 +42,7 @@ export default async function handler(req, res) {
       FROM menu_items m
       LEFT JOIN menu_item_ingredients mii ON mii.menu_item_id = m.id
       LEFT JOIN ingredients i ON i.id = mii.ingredient_id
-      GROUP BY m.code, m.category, m.rotation_mode, m.display_order
+      GROUP BY m.code, m.category, m.rotation_mode, m.is_available, m.display_order
       ORDER BY m.display_order
     `;
 
@@ -55,10 +56,15 @@ export default async function handler(req, res) {
     const availableSet = new Set();
     const unavailable = {};
 
-    // ----- Pass 1: items whose ingredients are all OK -----
-    // Bucket by category to apply rotation logic next.
+    // ----- Pass 1: filter by per-item flag, then by ingredients -----
+    // Reasons ranked by user-visible weight: the admin's explicit "off today"
+    // toggle takes priority over derived ingredient/rotation reasons.
     const rotationCandidates = {}; // category → [codes]
     for (const row of itemRows) {
+      if (row.item_is_available === false) {
+        unavailable[row.code] = { reason: 'unavailable_today' };
+        continue;
+      }
       const missing = row.missing || [];
       if (missing.length > 0) {
         unavailable[row.code] = { reason: 'missing', missing };
@@ -67,7 +73,6 @@ export default async function handler(req, res) {
       if (row.rotation_mode === 'always') {
         availableSet.add(row.code);
       } else {
-        // 'rotation' mode → goes through the per-category picker
         (rotationCandidates[row.category] ||= []).push(row.code);
       }
     }

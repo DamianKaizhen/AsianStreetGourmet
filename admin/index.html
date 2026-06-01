@@ -155,15 +155,15 @@
         </details>
       </div>
 
-      <!-- Ingredients -->
-      <div>
+      <!-- Ingredients (hidden for now; preserved for future re-enable) -->
+      <div hidden>
         <h2 class="display text-3xl font-light leading-tight">Ingredients</h2>
         <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Toggle off anything you've run out of today. Affected dishes hide automatically.</p>
         <div id="ingredients-container" class="mt-5 space-y-8"></div>
       </div>
 
-      <!-- Rotation settings -->
-      <div>
+      <!-- Rotation settings (hidden for now; preserved for future re-enable) -->
+      <div hidden>
         <h2 class="display text-3xl font-light leading-tight">Rotation</h2>
         <p class="text-sm text-[color:var(--muted-foreground)] mt-1">For each category, set how many "in rotation" items appear per day. The system picks deterministically by date — same N items all day.</p>
         <div id="rotation-container" class="mt-5 card divide-y divide-dotted divide-[color:var(--border)]"></div>
@@ -172,7 +172,7 @@
       <!-- Menu items -->
       <div>
         <h2 class="display text-3xl font-light leading-tight">Menu items</h2>
-        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Pick "Always" to show a dish whenever its ingredients are available. Pick "Rotation" to put it in the daily pool.</p>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Check the box for items you have today. Unchecked items appear crossed out on the public menu with a "Not available today" note.</p>
         <div id="menu-container" class="mt-5 space-y-8"></div>
       </div>
 
@@ -286,15 +286,14 @@
     // Load everything
     // =========================================================
     async function loadEverything() {
-      const [ing, menu, rot, today] = await Promise.all([
-        api('/api/admin/ingredients'),
+      // Ingredients + rotation features are hidden for now — skip those fetches.
+      // If you re-enable the hidden <div>s above, also add the corresponding
+      // api(...) calls back here and the matching render*() lines below.
+      const [menu, today] = await Promise.all([
         api('/api/admin/menu'),
-        api('/api/admin/rotation'),
         fetch('/api/menu-today?_=' + Date.now()).then((r) => r.json()),
       ]);
       renderPreview(today, menu.menu_items);
-      renderIngredients(ing.ingredients);
-      renderRotation(rot.rotation, menu.menu_items);
       renderMenu(menu.menu_items);
     }
 
@@ -492,30 +491,26 @@
     }
 
     function menuRow(m) {
-      const ingText = (m.ingredients || [])
-        .map((i) => i.name_en + (i.is_available ? '' : ' ⚠'))
-        .join(' · ') || '(no ingredients linked)';
+      const isOn = m.is_available !== false;
+      const badge = el('span', { class: 'badge ' + (isOn ? 'badge-on' : 'badge-off') }, isOn ? 'available' : 'unavailable');
+      const input = el('input', { type: 'checkbox', checked: isOn || null });
+      const toggle = el('label', { class: 'toggle' }, input, el('span', { class: 'slider' }));
 
-      const alwaysBtn = el('button',
-        { 'data-mode': 'always', class: m.rotation_mode === 'always' ? 'is-active' : '' },
-        'Always');
-      const rotBtn = el('button',
-        { 'data-mode': 'rotation', class: m.rotation_mode === 'rotation' ? 'is-active' : '' },
-        'Rotation');
-
-      [alwaysBtn, rotBtn].forEach((btn) => {
-        btn.addEventListener('click', async () => {
-          const mode = btn.dataset.mode;
-          if (mode === m.rotation_mode) return;
-          try {
-            await api('/api/admin/menu/' + m.code, { method: 'PATCH', body: { rotation_mode: mode } });
-            m.rotation_mode = mode;
-            alwaysBtn.className = mode === 'always'   ? 'is-active' : '';
-            rotBtn.className    = mode === 'rotation' ? 'is-active' : '';
-            flash(m.code + ' → ' + mode);
-            refreshPreview();
-          } catch { flash('Update failed', 'bad'); }
-        });
+      input.addEventListener('change', async () => {
+        toggle.classList.add('is-busy');
+        try {
+          await api('/api/admin/menu/' + m.code, { method: 'PATCH', body: { is_available: input.checked } });
+          m.is_available = input.checked;
+          badge.className = 'badge ' + (input.checked ? 'badge-on' : 'badge-off');
+          badge.textContent = input.checked ? 'available' : 'unavailable';
+          flash(m.code + ' → ' + (input.checked ? 'available' : 'unavailable'));
+          refreshPreview();
+        } catch {
+          input.checked = !input.checked;
+          flash('Update failed', 'bad');
+        } finally {
+          toggle.classList.remove('is-busy');
+        }
       });
 
       return el('div', { class: 'row flex items-center justify-between gap-3' },
@@ -524,12 +519,10 @@
             el('span', { class: 'mono text-xs text-[color:var(--muted-foreground)] w-9 shrink-0' }, m.code),
             el('span', { class: 'zh text-base text-[color:var(--destructive)]' }, m.name_zh),
             el('span', { class: 'text-sm' }, '· ' + m.name_en)
-          ),
-          el('p', { class: 'mono text-[0.6rem] uppercase tracking-[0.12em] text-[color:var(--muted-foreground)] mt-0.5 ml-11' }, ingText)
+          )
         ),
-        el('div', { class: 'seg', role: 'group', 'aria-label': 'rotation mode' },
-          alwaysBtn, rotBtn
-        )
+        badge,
+        toggle
       );
     }
   </script>

@@ -25,10 +25,14 @@ CREATE TABLE IF NOT EXISTS menu_items (
   name_zh       TEXT NOT NULL,
   category      TEXT NOT NULL,                       -- 'rice'|'home'|'soup'|'snack'
   price_cents   INTEGER NOT NULL,
-  rotation_mode TEXT NOT NULL DEFAULT 'always',      -- 'always'|'rotation'
+  rotation_mode TEXT NOT NULL DEFAULT 'always',      -- 'always'|'rotation' (dormant — kept for future use)
+  is_available  BOOLEAN NOT NULL DEFAULT TRUE,       -- direct per-item availability (admin toggle)
   display_order INTEGER NOT NULL,
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Idempotent migration for DBs that already have menu_items without is_available:
+ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS is_available BOOLEAN NOT NULL DEFAULT TRUE;
 
 CREATE TABLE IF NOT EXISTS menu_item_ingredients (
   menu_item_id  INTEGER NOT NULL REFERENCES menu_items(id) ON DELETE CASCADE,

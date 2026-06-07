@@ -261,6 +261,11 @@
     .menu-row.is-unavailable:hover .row-zh { color: var(--muted-foreground); }
     .menu-row.is-unavailable .leader { display: none; }
     .menu-row.is-unavailable .price { color: var(--muted-foreground); opacity: 0.55; }
+    /* When unavailable items are reordered to the bottom of a list, the
+       Tailwind `border-b` utility might leave a hanging dotted border
+       beneath the very last row. `:last-child` is +1 specificity so this
+       wins without needing !important. */
+    .menu-row:last-child { border-bottom-width: 0; }
     .unavail-badge {
       display: inline-block;
       margin-left: 0.5rem;
@@ -1254,14 +1259,21 @@
           if (!data || !Array.isArray(data.available_codes)) return;
           var available = new Set(data.available_codes);
           var items = document.querySelectorAll('[data-menu-code]');
+
+          // Pass 1: mark each unavailable item + append the red "Not available today"
+          // badge. Also collect the parent <ul>s so we know which lists to re-sort.
+          var listsToReorder = new Set();
           for (var i = 0; i < items.length; i++) {
             var li = items[i];
             var code = li.getAttribute('data-menu-code');
             if (available.has(code)) continue;
             li.classList.add('is-unavailable');
-            // Insert a small "Not available today" badge inside the dish-info
-            // div (the flex-1 wrapper), so it sits beside the dish name on
-            // wide screens and below it on mobile.
+            if (li.parentNode && li.parentNode.tagName === 'UL') {
+              listsToReorder.add(li.parentNode);
+            }
+            // Insert the badge inside the dish-info div (the flex-1 wrapper),
+            // so it sits beside the dish name on wide screens and below it
+            // on mobile.
             if (li.querySelector('.unavail-badge')) continue;
             var info = li.querySelector(':scope > div');
             if (!info) continue;
@@ -1270,6 +1282,20 @@
             badge.textContent = '· Not available today';
             info.appendChild(badge);
           }
+
+          // Pass 2: push unavailable items to the bottom of each <ul>. For 家庭菜
+          // (home-style), the A and B columns are two separate <ul>s so they
+          // sort independently — exactly what we want.
+          // appendChild() on an existing child MOVES it to the end (no clone).
+          // querySelectorAll returns elements in document order, so calling
+          // appendChild() on them in sequence preserves their relative order
+          // at the bottom.
+          listsToReorder.forEach(function (ul) {
+            var unavailables = ul.querySelectorAll(':scope > li.is-unavailable');
+            for (var j = 0; j < unavailables.length; j++) {
+              ul.appendChild(unavailables[j]);
+            }
+          });
         })
         .catch(function (err) {
           if (window.console) console.warn('[menu-today] failsafe, all items shown as available:', err);

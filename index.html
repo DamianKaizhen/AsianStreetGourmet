@@ -43,9 +43,10 @@
         if (dark) document.documentElement.classList.add('dark');
       } catch (e) {}
       try {
+        // First-time visitors land in Cantonese; users who've explicitly
+        // toggled language get their stored preference back.
         var storedLang = localStorage.getItem('asg-lang');
-        var browserLang = (navigator.language || 'en').toLowerCase();
-        var initialLang = storedLang || (browserLang.indexOf('zh') === 0 ? 'zh' : 'en');
+        var initialLang = storedLang || 'zh';
         document.documentElement.lang = initialLang === 'zh' ? 'zh-Hant' : 'en';
       } catch (e) {}
     })();
@@ -501,11 +502,17 @@
   <!-- ============== HEADER / NAV ============== -->
   <header id="site-nav" class="nav-base sticky top-0 z-40">
     <div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 h-[68px] flex items-center justify-between">
-      <a href="#top" class="flex items-baseline gap-3 group" aria-label="Asian Street Gourmet — home">
-        <span class="zh font-bold text-[1.1rem] text-[color:var(--destructive)] leading-none" lang="zh-Hant">亞洲街頭美食</span>
-        <span class="hidden sm:inline-block w-px h-4 bg-[color:var(--border)]"></span>
-        <span class="hidden sm:inline-block display-tight text-[0.95rem] font-semibold tracking-tight text-[color:var(--foreground)]">Asian Street Gourmet</span>
-      </a>
+      <div class="flex items-center gap-3 sm:gap-4">
+        <a href="#top" class="flex items-baseline gap-3 group" aria-label="Asian Street Gourmet — home">
+          <span class="zh font-bold text-[1.1rem] text-[color:var(--destructive)] leading-none" lang="zh-Hant">亞洲街頭美食</span>
+          <span class="hidden sm:inline-block w-px h-4 bg-[color:var(--border)]"></span>
+          <span class="hidden sm:inline-block display-tight text-[0.95rem] font-semibold tracking-tight text-[color:var(--foreground)]">Asian Street Gourmet</span>
+        </a>
+        <span id="nav-closed-notice" hidden class="mono-code text-[0.6rem] sm:text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--destructive)] flex items-center gap-1.5 leading-none">
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-[color:var(--destructive)]"></span>
+          <span data-closed-text></span>
+        </span>
+      </div>
 
       <nav aria-label="Primary" class="hidden lg:flex items-center gap-9 text-[0.78rem] mono-code uppercase tracking-[0.18em]">
         <a class="nav-link" href="#story" data-i18n="nav.story">Story</a>
@@ -1200,8 +1207,8 @@
       }
 
       var stored = (function () { try { return localStorage.getItem('asg-lang'); } catch (e) { return null; } })();
-      var browserLang = (navigator.language || 'en').toLowerCase();
-      var initialLang = stored || (browserLang.indexOf('zh') === 0 ? 'zh' : 'en');
+      // Default to Cantonese for first-time visitors; respect stored toggle thereafter.
+      var initialLang = stored || 'zh';
       applyLang(initialLang);
 
       Array.prototype.forEach.call(doc.querySelectorAll('[data-lang-toggle]'), function (btn) {
@@ -1343,7 +1350,10 @@
     // Failsafe: any error leaves the static HTML hours intact and shows no
     // closed notice. Visitors still see the canonical schedule.
     (function () {
-      var DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      var DAY_NAMES_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      var DAY_NAMES_ZH = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+
+      function isZhMode() { return document.documentElement.lang === 'zh-Hant'; }
 
       // "11:00" → 660  ;  "21:00" → 1260
       function timeMins(hhmm) {
@@ -1361,6 +1371,17 @@
         var hr12 = h === 0 ? 12 : (h > 12 ? h - 12 : h);
         var ampm = h < 12 ? 'am' : 'pm';
         return m === 0 ? hr12 + ampm : hr12 + ':' + String(m).padStart(2, '0') + ampm;
+      }
+
+      // "11:00" → "上午11時"  ;  "21:00" → "晚上9時"
+      function fmtZh(hhmm) {
+        if (typeof hhmm !== 'string') return '';
+        var p = hhmm.split(':');
+        var h = parseInt(p[0], 10);
+        var m = parseInt(p[1], 10);
+        var prefix = h < 12 ? '上午' : '晚上';
+        var hr12 = h === 0 ? 12 : (h > 12 ? h - 12 : h);
+        return m === 0 ? prefix + hr12 + '時' : prefix + hr12 + '時' + m + '分';
       }
 
       // Current weekday (0=Sun) + minutes-since-midnight in America/New_York.
@@ -1422,20 +1443,40 @@
         return null;
       }
 
-      function closedMessage(now, hours) {
-        var next = findNextOpening(hours, now);
-        if (!next) return 'Currently closed';
-        if (next.daysAhead === 0) return 'Closed · Opens at ' + fmt12(next.opens);
-        if (next.daysAhead === 1) return 'Closed · Opens tomorrow at ' + fmt12(next.opens);
-        return 'Closed · Opens ' + DAY_NAMES[next.day] + ' at ' + fmt12(next.opens);
+      // Short status — for nav, where space is limited.
+      function shortClosedText() {
+        return isZhMode() ? '休息中' : 'Closed';
       }
 
-      function showClosedNotice(msg) {
+      // Full message — for hero CTA and Order CTA strip, where there's room.
+      function fullClosedText(now, hours) {
+        var next = findNextOpening(hours, now);
+        var zh = isZhMode();
+        if (!next) return zh ? '現已休息' : 'Currently closed';
+        if (zh) {
+          var zhTime = fmtZh(next.opens);
+          if (next.daysAhead === 0) return '休息中 · ' + zhTime + '開門';
+          if (next.daysAhead === 1) return '休息中 · 明天' + zhTime + '開門';
+          return '休息中 · ' + DAY_NAMES_ZH[next.day] + zhTime + '開門';
+        }
+        var t = fmt12(next.opens);
+        if (next.daysAhead === 0) return 'Closed · Opens at ' + t;
+        if (next.daysAhead === 1) return 'Closed · Opens tomorrow at ' + t;
+        return 'Closed · Opens ' + DAY_NAMES_EN[next.day] + ' at ' + t;
+      }
+
+      function showClosedNotices(short, full) {
+        var navEl = document.getElementById('nav-closed-notice');
+        if (navEl) {
+          var navLabel = navEl.querySelector('[data-closed-text]');
+          if (navLabel) navLabel.textContent = short;
+          navEl.hidden = false;
+        }
         ['hero-closed-notice', 'cta-closed-notice'].forEach(function (id) {
           var el = document.getElementById(id);
           if (!el) return;
           var label = el.querySelector('[data-closed-text]');
-          if (label) label.textContent = msg;
+          if (label) label.textContent = full;
           el.hidden = false;
         });
       }
@@ -1455,7 +1496,7 @@
             && now.mins >= timeMins(today.opens) && now.mins < timeMins(today.closes));
 
           if (!isOpenNow) {
-            showClosedNotice(closedMessage(now, data.hours));
+            showClosedNotices(shortClosedText(), fullClosedText(now, data.hours));
           }
         })
         .catch(function (err) {

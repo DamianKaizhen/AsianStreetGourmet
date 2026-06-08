@@ -581,9 +581,13 @@
             A neighborhood family kitchen in Brooklyn, plating $7 steamed rice plates, simmered soups, and the home-style dishes you grew up eating — or wish you had.
           </p>
 
-          <div class="mt-10 flex flex-wrap gap-3">
+          <div class="mt-10 flex flex-wrap items-center gap-3 gap-y-3">
             <a href="#menu" class="btn btn-ghost" data-i18n="hero.cta1">See the Menu →</a>
             <a href="tel:+19177236262" class="btn btn-primary" data-i18n="hero.cta2">Call 917-723-6262</a>
+            <span id="hero-closed-notice" hidden class="mono-code text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--destructive)] flex items-center gap-2">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-[color:var(--destructive)]"></span>
+              <span data-closed-text></span>
+            </span>
           </div>
         </div>
 
@@ -866,13 +870,13 @@
             <p class="rule-mark mb-6">Hours · 營業時間</p>
             <!-- PLACEHOLDER: confirm actual hours with client -->
             <ul class="divide-y divide-dotted divide-[color:var(--border)]">
-              <li class="flex justify-between py-3" data-day="1"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.mon">Mon</span><span class="text-[color:var(--muted-foreground)] text-sm" data-i18n="hours.closed">Closed</span></li>
-              <li class="flex justify-between py-3" data-day="2"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.tue">Tue</span><span class="text-sm">11:00 — 21:00</span></li>
-              <li class="flex justify-between py-3" data-day="3"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.wed">Wed</span><span class="text-sm">11:00 — 21:00</span></li>
-              <li class="flex justify-between py-3" data-day="4"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.thu">Thu</span><span class="text-sm">11:00 — 21:00</span></li>
-              <li class="flex justify-between py-3" data-day="5"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.fri">Fri</span><span class="text-sm">11:00 — 22:00</span></li>
-              <li class="flex justify-between py-3" data-day="6"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.sat">Sat</span><span class="text-sm">11:00 — 22:00</span></li>
-              <li class="flex justify-between py-3" data-day="0"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.sun">Sun</span><span class="text-sm">11:00 — 21:00</span></li>
+              <li class="flex justify-between py-3" data-day="1"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.mon">Mon</span><span data-hours-time class="text-[color:var(--muted-foreground)] text-sm" data-i18n="hours.closed">Closed</span></li>
+              <li class="flex justify-between py-3" data-day="2"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.tue">Tue</span><span data-hours-time class="text-sm">11:00 — 21:00</span></li>
+              <li class="flex justify-between py-3" data-day="3"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.wed">Wed</span><span data-hours-time class="text-sm">11:00 — 21:00</span></li>
+              <li class="flex justify-between py-3" data-day="4"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.thu">Thu</span><span data-hours-time class="text-sm">11:00 — 21:00</span></li>
+              <li class="flex justify-between py-3" data-day="5"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.fri">Fri</span><span data-hours-time class="text-sm">11:00 — 22:00</span></li>
+              <li class="flex justify-between py-3" data-day="6"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.sat">Sat</span><span data-hours-time class="text-sm">11:00 — 22:00</span></li>
+              <li class="flex justify-between py-3" data-day="0"><span class="mono-code text-sm uppercase tracking-[0.16em]" data-i18n="day.sun">Sun</span><span data-hours-time class="text-sm">11:00 — 21:00</span></li>
             </ul>
             <p data-i18n="hours.lastorder" class="mt-5 text-xs mono-code uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">Last orders 30 min before close</p>
           </article>
@@ -956,6 +960,10 @@
             <p data-i18n="cta.tapcall" class="mono-code text-xs uppercase tracking-[0.22em] text-white/80 mb-3">Tap to call</p>
             <p class="display font-light leading-none group-hover:tracking-tight transition-all" style="font-size: clamp(2.6rem, 7vw, 5.5rem);">917·723·6262</p>
             <p data-i18n="cta.subline" class="mono-code text-xs uppercase tracking-[0.22em] text-white/80 mt-4">Daily · 11am – 9pm · 84 Avenue O</p>
+            <p id="cta-closed-notice" hidden class="mono-code text-xs uppercase tracking-[0.22em] text-white mt-3 flex items-center gap-2 lg:justify-end">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-white"></span>
+              <span data-closed-text></span>
+            </p>
           </a>
         </div>
       </div>
@@ -1323,6 +1331,135 @@
         })
         .catch(function (err) {
           if (window.console) console.warn('[menu-today] failsafe, all items shown as available:', err);
+        });
+    })();
+
+    // ---------- Dynamic hours + "currently closed" notice ----------
+    // Fetches /api/hours, populates the Visit-section hours card, and if
+    // "now" (in America/New_York time) falls outside today's open window,
+    // reveals a small "Closed · Opens at …" notice next to the hero CTAs
+    // and inside the Order CTA strip.
+    //
+    // Failsafe: any error leaves the static HTML hours intact and shows no
+    // closed notice. Visitors still see the canonical schedule.
+    (function () {
+      var DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+      // "11:00" → 660  ;  "21:00" → 1260
+      function timeMins(hhmm) {
+        if (typeof hhmm !== 'string' || hhmm.length < 4) return null;
+        var p = hhmm.split(':');
+        return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+      }
+
+      // "11:00" → "11am"  ;  "13:30" → "1:30pm"  ;  "21:00" → "9pm"
+      function fmt12(hhmm) {
+        if (typeof hhmm !== 'string') return '';
+        var p = hhmm.split(':');
+        var h = parseInt(p[0], 10);
+        var m = parseInt(p[1], 10);
+        var hr12 = h === 0 ? 12 : (h > 12 ? h - 12 : h);
+        var ampm = h < 12 ? 'am' : 'pm';
+        return m === 0 ? hr12 + ampm : hr12 + ':' + String(m).padStart(2, '0') + ampm;
+      }
+
+      // Current weekday (0=Sun) + minutes-since-midnight in America/New_York.
+      function nowInNY() {
+        var fmt = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'America/New_York',
+          weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
+        });
+        var parts = {};
+        fmt.formatToParts(new Date()).forEach(function (p) { parts[p.type] = p.value; });
+        var map = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+        var day = map[parts.weekday];
+        if (day == null) day = 0;
+        // Intl returns "24" for midnight in some locales; treat that as 0.
+        var h = parseInt(parts.hour, 10);
+        if (h === 24) h = 0;
+        return { day: day, mins: h * 60 + parseInt(parts.minute, 10) };
+      }
+
+      function populateHoursCard(hours) {
+        hours.forEach(function (h) {
+          var row = document.querySelector('[data-day="' + h.day_of_week + '"]');
+          if (!row) return;
+          var valueSpan = row.querySelector('[data-hours-time]');
+          if (!valueSpan) return;
+          if (h.is_open && h.opens && h.closes) {
+            // Plain time string — same in EN and ZH, no data-i18n needed.
+            valueSpan.removeAttribute('data-i18n');
+            valueSpan.textContent = h.opens + ' — ' + h.closes;
+            valueSpan.classList.remove('text-[color:var(--muted-foreground)]');
+            valueSpan.classList.add('text-sm');
+          } else {
+            // Closed — re-attach data-i18n so the language toggle still works.
+            valueSpan.setAttribute('data-i18n', 'hours.closed');
+            // Pick the right translation for the current language right now.
+            var lang = document.documentElement.lang === 'zh-Hant' ? 'zh' : 'en';
+            var dict = (window.LANG_STRINGS && window.LANG_STRINGS[lang]) || {};
+            valueSpan.textContent = dict['hours.closed'] || 'Closed';
+            valueSpan.classList.add('text-[color:var(--muted-foreground)]');
+            valueSpan.classList.add('text-sm');
+          }
+        });
+      }
+
+      function findNextOpening(hours, now) {
+        // Open later today?
+        var today = hours.find(function (h) { return h.day_of_week === now.day; });
+        if (today && today.is_open && today.opens && timeMins(today.opens) > now.mins) {
+          return { day: now.day, opens: today.opens, daysAhead: 0 };
+        }
+        // Otherwise find the next is_open day within the next 7 days
+        for (var i = 1; i <= 7; i++) {
+          var d = (now.day + i) % 7;
+          var dayH = hours.find(function (h) { return h.day_of_week === d; });
+          if (dayH && dayH.is_open && dayH.opens) {
+            return { day: d, opens: dayH.opens, daysAhead: i };
+          }
+        }
+        return null;
+      }
+
+      function closedMessage(now, hours) {
+        var next = findNextOpening(hours, now);
+        if (!next) return 'Currently closed';
+        if (next.daysAhead === 0) return 'Closed · Opens at ' + fmt12(next.opens);
+        if (next.daysAhead === 1) return 'Closed · Opens tomorrow at ' + fmt12(next.opens);
+        return 'Closed · Opens ' + DAY_NAMES[next.day] + ' at ' + fmt12(next.opens);
+      }
+
+      function showClosedNotice(msg) {
+        ['hero-closed-notice', 'cta-closed-notice'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          var label = el.querySelector('[data-closed-text]');
+          if (label) label.textContent = msg;
+          el.hidden = false;
+        });
+      }
+
+      fetch('/api/hours', { cache: 'no-store' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function (data) {
+          if (!data || !Array.isArray(data.hours)) return;
+          populateHoursCard(data.hours);
+
+          var now = nowInNY();
+          var today = data.hours.find(function (h) { return h.day_of_week === now.day; });
+          var isOpenNow = !!(today && today.is_open && today.opens && today.closes
+            && now.mins >= timeMins(today.opens) && now.mins < timeMins(today.closes));
+
+          if (!isOpenNow) {
+            showClosedNotice(closedMessage(now, data.hours));
+          }
+        })
+        .catch(function (err) {
+          if (window.console) console.warn('[hours] failsafe, static HTML hours kept:', err);
         });
     })();
   </script>

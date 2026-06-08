@@ -45,6 +45,17 @@ CREATE TABLE IF NOT EXISTS rotation_settings (
   pool_size  INTEGER NOT NULL DEFAULT 0
 );
 
+-- Opening hours, one row per day-of-week (0=Sun, 6=Sat to match JS Date.getDay()).
+-- opens/closes are 24-hour "HH:MM" strings, NULL when is_open=false.
+CREATE TABLE IF NOT EXISTS hours (
+  day_of_week  INTEGER PRIMARY KEY,
+  is_open      BOOLEAN NOT NULL DEFAULT TRUE,
+  opens        TEXT,
+  closes       TEXT,
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CHECK (day_of_week >= 0 AND day_of_week <= 6)
+);
+
 -- ============================================================
 -- 2. INGREDIENTS (seed)
 -- ============================================================
@@ -213,6 +224,17 @@ INSERT INTO rotation_settings (category, pool_size) VALUES
   ('soup',  0),
   ('snack', 0)
 ON CONFLICT (category) DO NOTHING;
+
+-- Seed weekly opening hours (matches existing visible HTML)
+INSERT INTO hours (day_of_week, is_open, opens, closes) VALUES
+  (0, TRUE,  '11:00', '21:00'),  -- Sun
+  (1, FALSE, NULL,    NULL),     -- Mon (closed)
+  (2, TRUE,  '11:00', '21:00'),  -- Tue
+  (3, TRUE,  '11:00', '21:00'),  -- Wed
+  (4, TRUE,  '11:00', '21:00'),  -- Thu
+  (5, TRUE,  '11:00', '22:00'),  -- Fri
+  (6, TRUE,  '11:00', '22:00')   -- Sat
+ON CONFLICT (day_of_week) DO NOTHING;
 
 -- ============================================================
 -- DONE. Verify with:

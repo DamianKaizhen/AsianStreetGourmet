@@ -169,10 +169,17 @@
         <div id="rotation-container" class="mt-5 card divide-y divide-dotted divide-[color:var(--border)]"></div>
       </div>
 
+      <!-- Hours -->
+      <div>
+        <h2 class="display text-3xl font-light leading-tight">Hours</h2>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Set opening and closing times for each day. Times are in 24-hour format (NY local). Toggle a day off to mark it closed.</p>
+        <div id="hours-container" class="mt-5 card divide-y divide-dotted divide-[color:var(--border)]"></div>
+      </div>
+
       <!-- Menu items -->
       <div>
         <h2 class="display text-3xl font-light leading-tight">Menu items</h2>
-        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Check the box for items you have today. Unchecked items appear crossed out on the public menu with a "Not available today" note.</p>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Check the box for items you have today. Unchecked items are hidden from the public menu.</p>
         <div id="menu-container" class="mt-5 space-y-8"></div>
       </div>
 
@@ -289,11 +296,13 @@
       // Ingredients + rotation features are hidden for now — skip those fetches.
       // If you re-enable the hidden <div>s above, also add the corresponding
       // api(...) calls back here and the matching render*() lines below.
-      const [menu, today] = await Promise.all([
+      const [menu, today, hours] = await Promise.all([
         api('/api/admin/menu'),
         fetch('/api/menu-today?_=' + Date.now()).then((r) => r.json()),
+        fetch('/api/hours?_=' + Date.now()).then((r) => r.json()),
       ]);
       renderPreview(today, menu.menu_items);
+      renderHours(hours.hours);
       renderMenu(menu.menu_items);
     }
 
@@ -465,6 +474,90 @@
           )
         );
       });
+    }
+
+    // =========================================================
+    // Hours — 7 day rows with open/closed toggle + two time inputs
+    // =========================================================
+    const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    function renderHours(hoursRows) {
+      const container = $('#hours-container');
+      clear(container);
+      // Index by day_of_week for stable rendering 0..6
+      const byDay = {};
+      hoursRows.forEach((h) => { byDay[h.day_of_week] = h; });
+
+      for (let d = 0; d < 7; d++) {
+        const h = byDay[d] || { day_of_week: d, is_open: false, opens: null, closes: null };
+        container.appendChild(hoursRow(h));
+      }
+    }
+
+    function hoursRow(h) {
+      const opensInput = el('input', {
+        type: 'time',
+        value: h.opens || '11:00',
+        class: 'num-input',
+        style: 'width: 6rem;',
+      });
+      const closesInput = el('input', {
+        type: 'time',
+        value: h.closes || '21:00',
+        class: 'num-input',
+        style: 'width: 6rem;',
+      });
+      if (!h.is_open) {
+        opensInput.disabled = true;
+        closesInput.disabled = true;
+        opensInput.style.opacity = '0.4';
+        closesInput.style.opacity = '0.4';
+      }
+
+      const toggleInput = el('input', { type: 'checkbox', checked: h.is_open || null });
+      const toggle = el('label', { class: 'toggle' }, toggleInput, el('span', { class: 'slider' }));
+
+      async function save() {
+        toggle.classList.add('is-busy');
+        try {
+          const body = { is_open: toggleInput.checked };
+          if (toggleInput.checked) {
+            body.opens = opensInput.value;
+            body.closes = closesInput.value;
+          }
+          await api('/api/admin/hours/' + h.day_of_week, { method: 'PATCH', body: body });
+          h.is_open = toggleInput.checked;
+          h.opens = body.opens || null;
+          h.closes = body.closes || null;
+          // Reflect open/closed state in disabled-ness of time inputs
+          const enabled = toggleInput.checked;
+          opensInput.disabled = !enabled;
+          closesInput.disabled = !enabled;
+          opensInput.style.opacity = enabled ? '1' : '0.4';
+          closesInput.style.opacity = enabled ? '1' : '0.4';
+          flash(DAY_NAMES[h.day_of_week] + ' → ' + (enabled ? body.opens + '–' + body.closes : 'closed'));
+        } catch (err) {
+          // Revert visual state on failure
+          toggleInput.checked = h.is_open;
+          flash('Update failed', 'bad');
+        } finally {
+          toggle.classList.remove('is-busy');
+        }
+      }
+
+      toggleInput.addEventListener('change', save);
+      opensInput.addEventListener('change', () => { if (toggleInput.checked) save(); });
+      closesInput.addEventListener('change', () => { if (toggleInput.checked) save(); });
+
+      return el('div', { class: 'flex items-center justify-between gap-3 px-5 py-3' },
+        el('p', { class: 'mono text-sm uppercase tracking-[0.18em] w-12' }, DAY_NAMES[h.day_of_week]),
+        el('div', { class: 'flex items-center gap-2 flex-1 justify-end' },
+          opensInput,
+          el('span', { class: 'text-[color:var(--muted-foreground)]' }, '—'),
+          closesInput
+        ),
+        toggle
+      );
     }
 
     function renderMenu(menuItems) {

@@ -249,7 +249,24 @@
     .menu-row:hover .leader { border-bottom-style: dashed; border-bottom-color: var(--destructive); }
     .menu-row:hover .row-zh { color: var(--destructive); }
 
-    /* Unavailable item treatment — muted strikethrough text + small red badge */
+    /* === UNAVAILABLE ITEM HANDLING ===
+       Active behavior: items marked .is-unavailable are HIDDEN entirely.
+       To revert to "show with strikethrough + Not available today badge",
+       comment out the next rule. The JS still does all the marking,
+       badge insertion, and reorder work — those classes/elements just
+       don't render with `display: none` active. */
+    .menu-row.is-unavailable { display: none; }
+
+    /* When an originally-last item (S4, A6, B6, C6, D6) is the one
+       hidden, the new visually-last row would otherwise have a hanging
+       dotted border-b. Strip it: target "an available row with no
+       available row after it" — i.e., the last visible row. */
+    ul > .menu-row:not(.is-unavailable):not(:has(~ .menu-row:not(.is-unavailable))) {
+      border-bottom-width: 0;
+    }
+
+    /* Strikethrough / badge / muted styling — preserved below in case the
+       hide rule above gets reverted. With hide active, none of this paints. */
     .menu-row.is-unavailable .row-zh,
     .menu-row.is-unavailable > div > span:not(.unavail-badge):not(.mono-code) {
       text-decoration: line-through;

@@ -314,7 +314,7 @@
         api('/api/admin/menu'),
         fetch('/api/menu-today?_=' + Date.now()).then((r) => r.json()),
         fetch('/api/hours?_=' + Date.now()).then((r) => r.json()),
-        fetch('/api/cart-status?_=' + Date.now()).then((r) => r.json()),
+        fetch('/api/cart?_=' + Date.now()).then((r) => r.json()),
       ]);
       renderCartToggle(cartStatus.cart_enabled === true);
       renderPreview(today, menu.menu_items);

@@ -273,7 +273,7 @@
       const err = $('#login-error');
       err.hidden = true;
       try {
-        await api('/api/login', { method: 'POST', body: {
+        await api('/api/auth', { method: 'POST', body: {
           username: form.username.value, password: form.password.value,
         }});
         form.password.value = '';
@@ -286,7 +286,7 @@
     });
 
     $('#logout-btn').addEventListener('click', async () => {
-      try { await api('/api/logout', { method: 'POST' }); } catch {}
+      try { await api('/api/auth', { method: 'DELETE' }); } catch {}
       showLogin();
     });
 
@@ -457,7 +457,7 @@
       input.addEventListener('change', async () => {
         toggle.classList.add('is-busy');
         try {
-          await api('/api/admin/ingredients/' + i.id, { method: 'PATCH', body: { is_available: input.checked } });
+          await api('/api/admin/ingredients', { method: 'PATCH', body: { id: i.id, is_available: input.checked } });
           badge.className = 'badge ' + (input.checked ? 'badge-on' : 'badge-off');
           badge.textContent = input.checked ? 'on hand' : 'out today';
           flash((input.checked ? 'Marked available' : 'Marked out') + ': ' + i.name_en);
@@ -647,7 +647,7 @@
       input.addEventListener('change', async () => {
         toggle.classList.add('is-busy');
         try {
-          await api('/api/admin/menu/' + m.code, { method: 'PATCH', body: { is_available: input.checked } });
+          await api('/api/admin/menu', { method: 'PATCH', body: { code: m.code, is_available: input.checked } });
           m.is_available = input.checked;
           badge.className = 'badge ' + (input.checked ? 'badge-on' : 'badge-off');
           badge.textContent = input.checked ? 'available' : 'unavailable';

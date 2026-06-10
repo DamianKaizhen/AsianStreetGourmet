@@ -144,6 +144,20 @@
     <!-- ===== Admin view ===== -->
     <section id="admin-view" hidden class="space-y-10">
 
+      <!-- Online Ordering toggle -->
+      <div>
+        <h2 class="display text-3xl font-light leading-tight">Online Ordering</h2>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">When OFF, the cart and checkout are hidden from the public site. Phone-order CTAs always remain.</p>
+        <div id="cart-toggle-container" class="mt-5 card p-5 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span id="cart-state-pill" class="badge badge-off">Off</span>
+            <span class="text-sm text-[color:var(--muted-foreground)]">Cart on the public site</span>
+          </div>
+          <!-- toggle injected by JS -->
+          <div id="cart-toggle-slot"></div>
+        </div>
+      </div>
+
       <!-- Today's preview -->
       <div>
         <p class="mono text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--muted-foreground)] mb-3">Today · <span id="preview-date">—</span></p>
@@ -296,11 +310,13 @@
       // Ingredients + rotation features are hidden for now — skip those fetches.
       // If you re-enable the hidden <div>s above, also add the corresponding
       // api(...) calls back here and the matching render*() lines below.
-      const [menu, today, hours] = await Promise.all([
+      const [menu, today, hours, cartStatus] = await Promise.all([
         api('/api/admin/menu'),
         fetch('/api/menu-today?_=' + Date.now()).then((r) => r.json()),
         fetch('/api/hours?_=' + Date.now()).then((r) => r.json()),
+        fetch('/api/cart-status?_=' + Date.now()).then((r) => r.json()),
       ]);
+      renderCartToggle(cartStatus.cart_enabled === true);
       renderPreview(today, menu.menu_items);
       renderHours(hours.hours);
       renderMenu(menu.menu_items);
@@ -327,6 +343,45 @@
       soup: '靚湯 · Slow-Simmered Soups',
       snack: '小食 · Snacks & Sides',
     };
+
+    // =========================================================
+    // Cart-feature toggle (top of admin)
+    // =========================================================
+    function renderCartToggle(enabled) {
+      const slot = $('#cart-toggle-slot');
+      const pill = $('#cart-state-pill');
+      if (!slot || !pill) return;
+
+      // Reflect current state
+      function setPill(on) {
+        pill.className = 'badge ' + (on ? 'badge-on' : 'badge-off');
+        pill.textContent = on ? 'On' : 'Off';
+      }
+      setPill(enabled);
+
+      const input = el('input', { type: 'checkbox', checked: enabled || null });
+      const toggle = el('label', { class: 'toggle' }, input, el('span', { class: 'slider' }));
+
+      input.addEventListener('change', async () => {
+        toggle.classList.add('is-busy');
+        const next = input.checked;
+        try {
+          await api('/api/admin/settings/cart-enabled', {
+            method: 'PATCH', body: { enabled: next },
+          });
+          setPill(next);
+          flash('Online ordering: ' + (next ? 'ENABLED' : 'DISABLED'));
+        } catch {
+          input.checked = !next;
+          flash('Update failed', 'bad');
+        } finally {
+          toggle.classList.remove('is-busy');
+        }
+      });
+
+      clear(slot);
+      slot.appendChild(toggle);
+    }
 
     function renderPreview(today, menuItems) {
       $('#preview-date').textContent = today.date_local || '—';

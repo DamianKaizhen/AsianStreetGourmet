@@ -237,9 +237,69 @@ INSERT INTO hours (day_of_week, is_open, opens, closes) VALUES
 ON CONFLICT (day_of_week) DO NOTHING;
 
 -- ============================================================
+-- ORDERS (online ordering, Tier 1 — pay at pickup)
+-- ============================================================
+-- One row per online order. Items live in order_items below.
+-- Snapshot pattern: name_en/name_zh/price_cents are copied to order_items
+-- at order time, so the order stays correct even if the menu changes.
+
+CREATE TABLE IF NOT EXISTS orders (
+  id                  SERIAL PRIMARY KEY,
+  pickup_code         TEXT UNIQUE NOT NULL,  -- 4 alphanumeric, [A-Z0-9], e.g. 'A7K2'
+  customer_name       TEXT NOT NULL,
+  customer_phone      TEXT,                  -- OPTIONAL
+  customer_email      TEXT,                  -- OPTIONAL
+  notes               TEXT,
+  subtotal_cents      INTEGER NOT NULL,
+  tax_cents           INTEGER NOT NULL,      -- 8.875% NYC sales tax, server-computed
+  total_cents         INTEGER NOT NULL,
+  estimated_wait_min  INTEGER NOT NULL,      -- shown to customer at submission
+  status              TEXT NOT NULL DEFAULT 'received',
+                      -- received → preparing → ready → picked_up → cancelled
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS order_items (
+  id               SERIAL PRIMARY KEY,
+  order_id         INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  menu_code        TEXT NOT NULL,        -- 'S1', 'A4', etc.
+  name_en          TEXT NOT NULL,        -- snapshot
+  name_zh          TEXT NOT NULL,        -- snapshot
+  quantity         INTEGER NOT NULL CHECK (quantity > 0),
+  price_cents      INTEGER NOT NULL,     -- snapshot of menu price at order time
+  line_total_cents INTEGER NOT NULL
+);
+
+-- Hot path for the admin list view: filter by status, newest first
+CREATE INDEX IF NOT EXISTS idx_orders_status_created
+  ON orders(status, created_at DESC);
+
+-- ============================================================
+-- SETTINGS (generic key-value feature flags)
+-- ============================================================
+-- Used now only for the cart on/off switch. Future flags (e.g.
+-- "holiday banner active") would slot in here without schema change.
+
+CREATE TABLE IF NOT EXISTS settings (
+  key         TEXT PRIMARY KEY,
+  value       TEXT NOT NULL,            -- store as text, parse as needed
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Cart starts DISABLED. Family enables it from /admin/ when they're
+-- ready to take online orders.
+INSERT INTO settings (key, value) VALUES ('cart_enabled', 'false')
+ON CONFLICT (key) DO NOTHING;
+
+-- ============================================================
 -- DONE. Verify with:
 --   SELECT COUNT(*) FROM ingredients;         -- 35
 --   SELECT COUNT(*) FROM menu_items;          -- 28
 --   SELECT COUNT(*) FROM menu_item_ingredients; -- 53
 --   SELECT COUNT(*) FROM rotation_settings;   -- 4
+--   SELECT COUNT(*) FROM hours;               -- 7
+--   SELECT COUNT(*) FROM orders;              -- 0 initially
+--   SELECT COUNT(*) FROM order_items;         -- 0 initially
+--   SELECT COUNT(*) FROM settings;            -- 1 (cart_enabled)
 -- ============================================================

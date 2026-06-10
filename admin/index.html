@@ -158,6 +158,22 @@
         </div>
       </div>
 
+      <!-- Orders (online orders inbox) -->
+      <div>
+        <div class="flex items-baseline justify-between gap-3">
+          <h2 class="display text-3xl font-light leading-tight">Orders</h2>
+          <span id="orders-poll-state" class="mono text-[0.65rem] uppercase tracking-[0.22em] text-[color:var(--muted-foreground)]">Auto-refresh on</span>
+        </div>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Active orders show automatically. New ones chime. From the last 24 hours.</p>
+
+        <div id="orders-filter-pills" class="mt-4 flex flex-wrap gap-2"></div>
+
+        <div id="orders-list" class="mt-5 space-y-3"></div>
+        <div id="orders-empty" class="mt-5 card p-8 text-center text-sm text-[color:var(--muted-foreground)]" hidden>
+          No orders in this view yet.
+        </div>
+      </div>
+
       <!-- Today's preview -->
       <div>
         <p class="mono text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--muted-foreground)] mb-3">Today · <span id="preview-date">—</span></p>
@@ -286,6 +302,7 @@
     });
 
     $('#logout-btn').addEventListener('click', async () => {
+      stopOrdersPolling();
       try { await api('/api/auth', { method: 'DELETE' }); } catch {}
       showLogin();
     });
@@ -320,6 +337,11 @@
       renderPreview(today, menu.menu_items);
       renderHours(hours.hours);
       renderMenu(menu.menu_items);
+
+      // Orders inbox: initial fetch (no chime — see highestSeenOrderId guard
+      // inside fetchOrders) then begin 15-second polling.
+      await fetchOrders();
+      startOrdersPolling();
     }
 
     async function refreshPreview() {
@@ -382,6 +404,237 @@
       clear(slot);
       slot.appendChild(toggle);
     }
+
+    // =========================================================
+    // Orders inbox (online ordering)
+    // =========================================================
+    const ORDER_STATUS_LABELS = {
+      received: 'Received',
+      preparing: 'Preparing',
+      ready: 'Ready',
+      picked_up: 'Picked up',
+      cancelled: 'Cancelled',
+    };
+    // Status flow: clicking the "next" pill advances; cancel goes to cancelled.
+    const NEXT_STATUS = {
+      received: 'preparing',
+      preparing: 'ready',
+      ready: 'picked_up',
+    };
+    const ORDER_FILTERS = [
+      { id: 'active',    label: 'Active',     statuses: ['received', 'preparing', 'ready'] },
+      { id: 'picked_up', label: 'Picked up',  statuses: ['picked_up'] },
+      { id: 'cancelled', label: 'Cancelled',  statuses: ['cancelled'] },
+      { id: 'all',       label: 'All',        statuses: ['received', 'preparing', 'ready', 'picked_up', 'cancelled'] },
+    ];
+
+    let allOrders = [];
+    let currentFilter = 'active';
+    let highestSeenOrderId = 0;
+    let pollInterval = null;
+    let audioCtx = null;
+
+    function renderFilterPills() {
+      const c = $('#orders-filter-pills');
+      clear(c);
+      ORDER_FILTERS.forEach((f) => {
+        const count = allOrders.filter((o) => f.statuses.includes(o.status)).length;
+        const pill = el('button', {
+          type: 'button',
+          class: 'px-3 py-1.5 mono text-[0.7rem] uppercase tracking-[0.18em] border transition-colors',
+          'data-filter': f.id,
+          style: 'border-radius: 2px;',
+        }, f.label + ' (' + count + ')');
+        if (f.id === currentFilter) {
+          pill.style.background = 'var(--destructive)';
+          pill.style.color = 'white';
+          pill.style.borderColor = 'var(--destructive)';
+        } else {
+          pill.style.background = 'transparent';
+          pill.style.color = 'var(--foreground)';
+          pill.style.borderColor = 'var(--border)';
+        }
+        pill.addEventListener('click', () => {
+          currentFilter = f.id;
+          renderFilterPills();
+          renderOrdersList();
+        });
+        c.appendChild(pill);
+      });
+    }
+
+    function renderOrdersList() {
+      const list = $('#orders-list');
+      const empty = $('#orders-empty');
+      clear(list);
+      const filter = ORDER_FILTERS.find((f) => f.id === currentFilter) || ORDER_FILTERS[0];
+      const visible = allOrders.filter((o) => filter.statuses.includes(o.status));
+      empty.hidden = visible.length > 0;
+      visible.forEach((o) => list.appendChild(orderCard(o)));
+    }
+
+    function orderCard(o) {
+      const card = el('div', { class: 'card p-5' });
+      // Header row: pickup code + status + relative time
+      const head = el('div', { class: 'flex items-baseline justify-between gap-3 mb-3' });
+      const left = el('div', { class: 'flex items-baseline gap-3' });
+      left.appendChild(el('span', { class: 'display text-3xl text-[color:var(--destructive)] font-medium', style: 'letter-spacing: 0.06em;' }, o.pickup_code));
+      left.appendChild(el('span', { class: 'badge ' + (o.status === 'cancelled' ? 'badge-off' : 'badge-on') }, ORDER_STATUS_LABELS[o.status] || o.status));
+      head.appendChild(left);
+      head.appendChild(el('span', { class: 'mono text-xs text-[color:var(--muted-foreground)]' }, relativeTime(o.created_at)));
+      card.appendChild(head);
+
+      // Customer row
+      const cust = el('p', { class: 'text-sm mb-3' });
+      cust.appendChild(el('span', { class: 'font-medium' }, o.customer_name));
+      if (o.customer_phone) {
+        cust.appendChild(document.createTextNode(' · '));
+        const phoneLink = el('a', { href: 'tel:' + o.customer_phone.replace(/[^\d+]/g, ''), class: 'underline hover:text-[color:var(--destructive)]' }, '📞 ' + o.customer_phone);
+        cust.appendChild(phoneLink);
+      }
+      if (o.customer_email) {
+        cust.appendChild(document.createTextNode(' · '));
+        cust.appendChild(el('span', { class: 'text-[color:var(--muted-foreground)]' }, o.customer_email));
+      }
+      card.appendChild(cust);
+
+      // Items
+      const items = el('ul', { class: 'space-y-1 mb-3 text-sm' });
+      (o.items || []).forEach((it) => {
+        const row = el('li', { class: 'flex items-baseline gap-2' });
+        row.appendChild(el('span', { class: 'mono text-xs text-[color:var(--muted-foreground)] w-9 shrink-0' }, it.menu_code));
+        row.appendChild(el('span', { class: 'mono text-xs text-[color:var(--muted-foreground)]' }, '×' + it.quantity));
+        row.appendChild(el('span', { class: 'zh text-base text-[color:var(--destructive)]' }, it.name_zh));
+        row.appendChild(el('span', { class: 'flex-1' }, '· ' + it.name_en));
+        row.appendChild(el('span', { class: 'mono text-xs' }, '$' + (it.line_total_cents / 100).toFixed(2)));
+        items.appendChild(row);
+      });
+      card.appendChild(items);
+
+      // Notes
+      if (o.notes) {
+        const noteEl = el('p', { class: 'text-xs italic text-[color:var(--muted-foreground)] mb-3' }, '“' + o.notes + '”');
+        card.appendChild(noteEl);
+      }
+
+      // Totals
+      const totals = el('p', { class: 'text-xs text-[color:var(--muted-foreground)] mb-4' },
+        'Total $' + (o.total_cents / 100).toFixed(2) + ' (subtotal $' + (o.subtotal_cents / 100).toFixed(2) + ' + tax $' + (o.tax_cents / 100).toFixed(2) + ') · Ready in ~' + o.estimated_wait_min + ' min'
+      );
+      card.appendChild(totals);
+
+      // Actions
+      const actions = el('div', { class: 'flex flex-wrap gap-2' });
+      const next = NEXT_STATUS[o.status];
+      if (next) {
+        const btn = el('button', { type: 'button', class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 bg-[color:var(--destructive)] text-white', style: 'border-radius: 2px;' }, 'Mark ' + ORDER_STATUS_LABELS[next].toLowerCase());
+        btn.addEventListener('click', () => updateOrderStatus(o.id, next));
+        actions.appendChild(btn);
+      }
+      if (o.status !== 'cancelled' && o.status !== 'picked_up') {
+        const cancelBtn = el('button', { type: 'button', class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border', style: 'border-radius: 2px; border-color: var(--border); color: var(--muted-foreground);' }, 'Cancel');
+        cancelBtn.addEventListener('click', () => {
+          if (confirm('Cancel order ' + o.pickup_code + '?')) updateOrderStatus(o.id, 'cancelled');
+        });
+        actions.appendChild(cancelBtn);
+      }
+      if (o.status === 'cancelled' || o.status === 'picked_up') {
+        const revertBtn = el('button', { type: 'button', class: 'mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]', style: 'background: none; border: none; cursor: pointer;' }, '⤺ Revert to received');
+        revertBtn.addEventListener('click', () => updateOrderStatus(o.id, 'received'));
+        actions.appendChild(revertBtn);
+      }
+      card.appendChild(actions);
+
+      return card;
+    }
+
+    function relativeTime(iso) {
+      const t = new Date(iso).getTime();
+      if (isNaN(t)) return '';
+      const diffSec = Math.round((Date.now() - t) / 1000);
+      if (diffSec < 30) return 'just now';
+      if (diffSec < 60) return diffSec + 's ago';
+      const min = Math.floor(diffSec / 60);
+      if (min < 60) return min + ' min ago';
+      const hr = Math.floor(min / 60);
+      return hr + 'h ' + (min - hr * 60) + 'm ago';
+    }
+
+    async function fetchOrders() {
+      try {
+        const data = await api('/api/admin/orders');
+        const orders = data.orders || [];
+
+        // Detect new orders (only chime if we've seen at least one fetch before)
+        const newMaxId = orders.reduce((m, o) => Math.max(m, o.id), 0);
+        if (highestSeenOrderId > 0 && newMaxId > highestSeenOrderId) {
+          const newCount = orders.filter((o) => o.id > highestSeenOrderId).length;
+          playChime();
+          flash('New order' + (newCount > 1 ? 's' : '') + ' received');
+        }
+        highestSeenOrderId = Math.max(highestSeenOrderId, newMaxId);
+
+        allOrders = orders;
+        renderFilterPills();
+        renderOrdersList();
+      } catch (e) {
+        // Silent — polling will retry. Show a subtle indicator next time.
+      }
+    }
+
+    async function updateOrderStatus(id, status) {
+      try {
+        await api('/api/admin/orders', { method: 'PATCH', body: { id: id, status: status } });
+        flash('Order updated → ' + status);
+        await fetchOrders();
+      } catch {
+        flash('Update failed', 'bad');
+      }
+    }
+
+    function playChime() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const o1 = audioCtx.createOscillator();
+        const g1 = audioCtx.createGain();
+        o1.connect(g1); g1.connect(audioCtx.destination);
+        o1.type = 'sine'; o1.frequency.value = 880;
+        g1.gain.setValueAtTime(0, audioCtx.currentTime);
+        g1.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.01);
+        g1.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.25);
+        o1.start(); o1.stop(audioCtx.currentTime + 0.25);
+        // Second tone for a two-note chime
+        const o2 = audioCtx.createOscillator();
+        const g2 = audioCtx.createGain();
+        o2.connect(g2); g2.connect(audioCtx.destination);
+        o2.type = 'sine'; o2.frequency.value = 1320;
+        g2.gain.setValueAtTime(0, audioCtx.currentTime + 0.18);
+        g2.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.19);
+        g2.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+        o2.start(audioCtx.currentTime + 0.18); o2.stop(audioCtx.currentTime + 0.5);
+      } catch {}
+    }
+
+    function startOrdersPolling() {
+      if (pollInterval) return;
+      pollInterval = setInterval(fetchOrders, 15000);
+      const ind = $('#orders-poll-state');
+      if (ind) ind.textContent = 'Auto-refresh on';
+    }
+
+    function stopOrdersPolling() {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+        const ind = $('#orders-poll-state');
+        if (ind) ind.textContent = 'Paused (tab hidden)';
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopOrdersPolling();
+      else if (!$('#admin-view').hidden) { fetchOrders(); startOrdersPolling(); }
+    });
 
     function renderPreview(today, menuItems) {
       $('#preview-date').textContent = today.date_local || '—';

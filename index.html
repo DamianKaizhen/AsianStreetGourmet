@@ -215,6 +215,267 @@
 
     .img-ph { background: linear-gradient(135deg, var(--muted), var(--card)); }
 
+    /* === CART (online ordering) === */
+    .cart-add-btn {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      padding: 0.2rem 0.5rem;
+      margin-left: 0.5rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--destructive);
+      border: 1px solid var(--border); border-radius: 2px;
+      background: transparent; cursor: pointer;
+      transition: border-color .2s, background .2s, color .2s;
+      white-space: nowrap;
+    }
+    .cart-add-btn:hover { border-color: var(--destructive); background: color-mix(in oklab, var(--destructive) 8%, transparent); }
+    .cart-add-btn:active { transform: translateY(1px); }
+    .cart-add-btn .plus { font-weight: 700; font-size: 0.85rem; line-height: 1; }
+    .cart-add-btn[data-just-added] { background: var(--destructive); color: white; border-color: var(--destructive); }
+    .menu-row.is-unavailable .cart-add-btn { display: none; }
+
+    .nav-cart-badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0 0.7rem; height: 2.5rem;
+      border: 1px solid var(--border); border-radius: 2px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--foreground); background: transparent;
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+      white-space: nowrap;
+    }
+    .nav-cart-badge:hover { border-color: var(--destructive); color: var(--destructive); }
+    .nav-cart-badge .badge-count { font-weight: 600; color: var(--destructive); }
+
+    .cart-backdrop {
+      position: fixed; inset: 0;
+      background: hsl(0 0% 0% / 0.45);
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s ease;
+      z-index: 60;
+    }
+    .cart-backdrop.is-open { opacity: 1; pointer-events: auto; }
+
+    .cart-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 100%; max-width: 460px;
+      background: var(--background);
+      border-left: 1px solid var(--border);
+      box-shadow: -8px 0 32px hsl(0 0% 0% / 0.15);
+      transform: translateX(100%);
+      transition: transform .35s cubic-bezier(.2,.7,.2,1);
+      z-index: 61;
+      display: flex; flex-direction: column;
+    }
+    .cart-drawer.is-open { transform: translateX(0); }
+
+    .cart-header {
+      flex-shrink: 0;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .cart-body { flex: 1; overflow-y: auto; padding: 1.25rem 1.5rem; }
+    .cart-footer {
+      flex-shrink: 0;
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    .cart-close-btn {
+      width: 2rem; height: 2rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border); border-radius: 2px;
+      background: transparent; cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .cart-close-btn:hover { border-color: var(--destructive); color: var(--destructive); }
+
+    .cart-line {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 0.5rem 1rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px dotted var(--border);
+    }
+    .cart-line:last-child { border-bottom: 0; }
+    .cart-line-code {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted-foreground);
+    }
+    .cart-line-zh { font-family: 'Noto Serif TC', serif; font-weight: 500; color: var(--destructive); }
+    .cart-line-en { font-size: 0.85rem; color: var(--muted-foreground); }
+    .cart-line-price {
+      font-family: 'Fraunces', serif; font-variation-settings: 'opsz' 144;
+      font-size: 1.1rem; text-align: right;
+    }
+    .cart-qty { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.35rem; }
+    .cart-qty-btn {
+      width: 1.5rem; height: 1.5rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border); border-radius: 2px;
+      background: transparent; cursor: pointer;
+      font-size: 0.9rem; line-height: 1; font-weight: 600;
+      color: var(--foreground);
+      transition: border-color .2s, color .2s;
+    }
+    .cart-qty-btn:hover { border-color: var(--destructive); color: var(--destructive); }
+    .cart-qty-count { font-family: 'DM Mono', monospace; font-size: 0.85rem; min-width: 1.5rem; text-align: center; }
+    .cart-line-remove {
+      align-self: end;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--muted-foreground);
+      background: none; border: none; cursor: pointer; padding: 0;
+    }
+    .cart-line-remove:hover { color: var(--destructive); text-decoration: underline; }
+
+    .cart-totals { padding-top: 0.5rem; }
+    .cart-totals-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 0.35rem 0;
+      font-size: 0.85rem;
+      color: var(--muted-foreground);
+    }
+    .cart-totals-row.is-total {
+      padding-top: 0.85rem; margin-top: 0.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 1rem; color: var(--foreground);
+    }
+    .cart-totals-row .price {
+      font-family: 'Fraunces', serif; font-variation-settings: 'opsz' 144;
+    }
+    .cart-totals-row.is-total .price { font-size: 1.3rem; font-weight: 500; }
+    .cart-wait {
+      margin-top: 0.85rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted-foreground);
+    }
+
+    .cart-checkout-btn {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.9rem 1.4rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem; letter-spacing: 0.16em; text-transform: uppercase;
+      background: var(--destructive); color: white;
+      border: 1.5px solid var(--destructive); border-radius: 2px;
+      cursor: pointer;
+      transition: opacity .2s, transform .2s;
+    }
+    .cart-checkout-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .cart-checkout-btn:disabled {
+      background: var(--muted); color: var(--muted-foreground);
+      border-color: var(--border); cursor: not-allowed; transform: none; opacity: 1;
+    }
+
+    .cart-closed-msg {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border: 1px dashed var(--destructive); border-radius: 2px;
+      font-size: 0.85rem; color: var(--destructive); text-align: center;
+    }
+
+    .cart-empty {
+      padding: 3rem 1rem;
+      text-align: center;
+      color: var(--muted-foreground);
+      font-size: 0.9rem;
+    }
+
+    /* Checkout form view */
+    .cart-form-group { margin-bottom: 1rem; }
+    .cart-form-group label {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted-foreground);
+      margin-bottom: 0.35rem;
+    }
+    .cart-form-group .hint {
+      display: block;
+      font-family: 'Inter Tight', sans-serif;
+      font-size: 0.7rem; letter-spacing: normal; text-transform: none;
+      color: var(--muted-foreground);
+      margin-top: 0.2rem;
+      font-style: italic;
+    }
+    .cart-form-group input, .cart-form-group textarea {
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--border);
+      background: var(--background); color: var(--foreground);
+      font-family: 'Inter Tight', sans-serif;
+      font-size: 0.95rem;
+      border-radius: 2px;
+    }
+    .cart-form-group input:focus, .cart-form-group textarea:focus {
+      outline: 2px solid var(--destructive); outline-offset: 1px;
+    }
+    .cart-form-group textarea { min-height: 4rem; resize: vertical; }
+
+    .cart-back-btn {
+      margin-bottom: 1rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted-foreground);
+      background: none; border: none; cursor: pointer; padding: 0;
+    }
+    .cart-back-btn:hover { color: var(--destructive); }
+
+    .cart-error {
+      margin-top: 0.75rem;
+      padding: 0.7rem 1rem;
+      border: 1px solid var(--destructive); border-radius: 2px;
+      font-size: 0.85rem; color: var(--destructive);
+      background: color-mix(in oklab, var(--destructive) 8%, var(--background));
+    }
+
+    /* Success view */
+    .cart-success-code {
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 144, 'SOFT' 0;
+      font-size: 4.5rem; font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--destructive);
+      text-align: center; line-height: 1;
+      margin: 1rem 0 0.5rem;
+    }
+    .cart-success-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--muted-foreground); text-align: center;
+    }
+    .cart-success-msg {
+      margin-top: 1rem;
+      font-size: 0.95rem; line-height: 1.6;
+      color: var(--foreground); text-align: center;
+    }
+    .cart-success-summary {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px dotted var(--border);
+      font-size: 0.85rem; color: var(--muted-foreground);
+    }
+    .cart-success-summary .row { display: flex; justify-content: space-between; padding: 0.2rem 0; }
+    .cart-success-done-btn {
+      width: 100%; margin-top: 1.25rem; padding: 0.85rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase;
+      background: transparent; color: var(--foreground);
+      border: 1.5px solid var(--foreground); border-radius: 2px;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .cart-success-done-btn:hover { background: var(--foreground); color: var(--background); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cart-backdrop, .cart-drawer { transition: none; }
+    }
+
     .menu-tabs { backdrop-filter: blur(10px) saturate(1.2); }
 
     .nav-base { transition: background-color .35s ease, box-shadow .35s ease, border-color .35s ease; }
@@ -516,6 +777,10 @@
       </nav>
 
       <div class="flex items-center gap-2">
+        <button id="nav-cart-btn" type="button" aria-label="Open cart" hidden class="nav-cart-badge">
+          <span aria-hidden="true">🛒</span>
+          <span class="badge-count" data-cart-count>0</span>
+        </button>
         <button id="lang-toggle" type="button" aria-label="Switch language to Chinese" class="lang-pill" data-lang-toggle>
           <span class="l-en">EN</span>
           <span class="l-sep" aria-hidden="true">·</span>
@@ -1097,7 +1362,34 @@
         'footer.menu': 'The Menu',
         'footer.gallery': 'Gallery',
         'footer.hours': 'Hours & Address',
-        'footer.contact': 'Contact'
+        'footer.contact': 'Contact',
+        // Cart / online ordering
+        'cart.add': 'Add',
+        'cart.remove': 'Remove',
+        'cart.eyebrow': 'Your order',
+        'cart.title': 'Cart',
+        'cart.empty': 'Your cart is empty. Add items from the menu.',
+        'cart.subtotal': 'Subtotal',
+        'cart.tax': 'Tax (8.875%)',
+        'cart.total': 'Total',
+        'cart.readyIn': 'Ready in',
+        'cart.minutes': 'min',
+        'cart.checkout': 'Checkout',
+        'cart.callInstead': 'Call 917-723-6262 to place a phone order',
+        'cart.back': '← Back to cart',
+        'cart.name': 'Name',
+        'cart.phone': 'Phone',
+        'cart.phoneHint': 'Optional — so we can call if there\'s a question.',
+        'cart.email': 'Email',
+        'cart.emailHint': 'Optional — we won\'t send marketing.',
+        'cart.notes': 'Special instructions',
+        'cart.payAtPickup': 'Pay at pickup',
+        'cart.submit': 'Submit order',
+        'cart.successLabel': 'Your pickup code',
+        'cart.successMsg': 'Ready in about',
+        'cart.pickupAt': 'Pickup at 84 Avenue O · Brooklyn',
+        'cart.successInstr': 'Show your code at the counter. Pay at pickup.',
+        'cart.done': 'Done'
       },
       zh: {
         'skip': '跳至內容',
@@ -1169,7 +1461,34 @@
         'footer.menu': '餐牌',
         'footer.gallery': '相片',
         'footer.hours': '營業時間 同 地址',
-        'footer.contact': '聯絡'
+        'footer.contact': '聯絡',
+        // Cart / online ordering
+        'cart.add': '加',
+        'cart.remove': '刪除',
+        'cart.eyebrow': '你嘅訂單',
+        'cart.title': '訂單',
+        'cart.empty': '訂單係空嘅。喺餐牌度揀餸。',
+        'cart.subtotal': '小計',
+        'cart.tax': '稅 (8.875%)',
+        'cart.total': '總計',
+        'cart.readyIn': '準備時間',
+        'cart.minutes': '分鐘',
+        'cart.checkout': '結賬',
+        'cart.callInstead': '致電 917-723-6262 用電話落單',
+        'cart.back': '← 返回訂單',
+        'cart.name': '姓名',
+        'cart.phone': '電話',
+        'cart.phoneHint': '可選 — 我哋有疑問可以打畀你。',
+        'cart.email': '電郵',
+        'cart.emailHint': '可選 — 我哋唔會發推廣訊息。',
+        'cart.notes': '特別要求',
+        'cart.payAtPickup': '到店付款',
+        'cart.submit': '確認訂單',
+        'cart.successLabel': '你嘅取餐編號',
+        'cart.successMsg': '約',
+        'cart.pickupAt': '取餐地點：84 Avenue O · Brooklyn',
+        'cart.successInstr': '到櫃枱出示編號，現場付款。',
+        'cart.done': '完成'
       }
     };
 
@@ -1495,6 +1814,11 @@
           var isOpenNow = !!(today && today.is_open && today.opens && today.closes
             && now.mins >= timeMins(today.opens) && now.mins < timeMins(today.closes));
 
+          // Expose for the cart drawer (and any other consumer) so they can
+          // gate "checkout" vs "currently closed" without re-doing the
+          // timezone/hours math themselves.
+          window.__asgClosedNow = !isOpenNow;
+
           if (!isOpenNow) {
             showClosedNotices(shortClosedText(), fullClosedText(now, data.hours));
           }
@@ -1503,6 +1827,530 @@
           if (window.console) console.warn('[hours] failsafe, static HTML hours kept:', err);
         });
     })();
+
+    // ---------- Online ordering cart ----------
+    // Mounted only if /api/cart returns cart_enabled=true. All cart state
+    // lives in localStorage under 'asg-cart' as { items: [{code, qty}] }.
+    // Snapshot of menu prices/names is NOT stored — we look them up from
+    // the DOM at render-time and re-resolve server-side at checkout.
+    (function () {
+      var STORAGE_KEY = 'asg-cart';
+      var SESSION_SUCCESS_KEY = 'asg-cart-success';
+      var cart = { items: [] };
+      var menuLookup = {}; // code → { zh, en, price_cents }
+      var currentTotals = null; // populated by /api/cart POST
+
+      function loadCart() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (parsed && Array.isArray(parsed.items)) {
+              cart = { items: parsed.items.filter(function (i) {
+                return i && typeof i.code === 'string' && Number.isInteger(i.qty) && i.qty > 0;
+              }) };
+            }
+          }
+        } catch {}
+      }
+
+      function saveCart() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); } catch {}
+      }
+
+      function buildMenuLookup() {
+        var rows = document.querySelectorAll('[data-menu-code]');
+        rows.forEach(function (li) {
+          var code = li.getAttribute('data-menu-code');
+          if (!code) return;
+          var zh = li.querySelector('.row-zh');
+          var en = li.querySelector('.row-zh + span');
+          // Price text is "$7" or "$8" → cents
+          var priceEl = li.querySelector('.price');
+          var priceText = priceEl ? priceEl.textContent.replace(/[^\d]/g, '') : '0';
+          var price_cents = parseInt(priceText, 10) * 100;
+          menuLookup[code] = {
+            zh: zh ? zh.textContent.trim() : '',
+            en: en ? en.textContent.trim() : '',
+            price_cents: price_cents,
+          };
+        });
+      }
+
+      function getCartCount() {
+        return cart.items.reduce(function (sum, i) { return sum + i.qty; }, 0);
+      }
+
+      function updateNavBadge() {
+        var btn = document.getElementById('nav-cart-btn');
+        if (!btn) return;
+        var count = getCartCount();
+        var countEl = btn.querySelector('[data-cart-count]');
+        if (countEl) countEl.textContent = count;
+        btn.hidden = count === 0;
+      }
+
+      function addToCart(code) {
+        var existing = cart.items.find(function (i) { return i.code === code; });
+        if (existing) existing.qty++;
+        else cart.items.push({ code: code, qty: 1 });
+        saveCart();
+        updateNavBadge();
+      }
+
+      function changeQty(code, delta) {
+        var existing = cart.items.find(function (i) { return i.code === code; });
+        if (!existing) return;
+        existing.qty += delta;
+        if (existing.qty <= 0) {
+          cart.items = cart.items.filter(function (i) { return i.code !== code; });
+        }
+        saveCart();
+        updateNavBadge();
+        renderCartList();
+      }
+
+      function removeFromCart(code) {
+        cart.items = cart.items.filter(function (i) { return i.code !== code; });
+        saveCart();
+        updateNavBadge();
+        renderCartList();
+      }
+
+      function clearCart() {
+        cart.items = [];
+        saveCart();
+        updateNavBadge();
+      }
+
+      function fmtMoney(cents) {
+        return '$' + (cents / 100).toFixed(2);
+      }
+
+      // ---- Add buttons on every menu row ----
+      function injectAddButtons() {
+        var lang = document.documentElement.lang === 'zh-Hant' ? 'zh' : 'en';
+        var dict = (window.LANG_STRINGS && window.LANG_STRINGS[lang]) || {};
+        var addLabel = dict['cart.add'] || 'Add';
+        var rows = document.querySelectorAll('[data-menu-code]');
+        rows.forEach(function (li) {
+          var code = li.getAttribute('data-menu-code');
+          if (!code) return;
+          // Skip if already has one (e.g., applyLang re-runs)
+          if (li.querySelector('.cart-add-btn')) return;
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'cart-add-btn';
+          btn.setAttribute('data-cart-add', code);
+          btn.setAttribute('aria-label', 'Add ' + code + ' to cart');
+          // Build via DOM to avoid XSS-flag heuristics and to give the
+          // label span a data-i18n attribute so language toggling
+          // re-translates it automatically.
+          var plus = document.createElement('span');
+          plus.className = 'plus';
+          plus.textContent = '+';
+          var label = document.createElement('span');
+          label.setAttribute('data-i18n', 'cart.add');
+          label.textContent = addLabel;
+          btn.appendChild(plus);
+          btn.appendChild(label);
+          btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            addToCart(code);
+            // Flash visual feedback
+            btn.setAttribute('data-just-added', 'true');
+            setTimeout(function () { btn.removeAttribute('data-just-added'); }, 350);
+          });
+          li.appendChild(btn);
+        });
+      }
+
+      // ---- Cart drawer UI ----
+      function openDrawer(view) {
+        view = view || 'list';
+        document.getElementById('cart-backdrop').classList.add('is-open');
+        var drawer = document.getElementById('cart-drawer');
+        drawer.classList.add('is-open');
+        drawer.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        showView(view);
+        if (view === 'list') renderCartList();
+      }
+
+      function closeDrawer() {
+        document.getElementById('cart-backdrop').classList.remove('is-open');
+        var drawer = document.getElementById('cart-drawer');
+        drawer.classList.remove('is-open');
+        drawer.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      function showView(view) {
+        ['list', 'checkout', 'success'].forEach(function (v) {
+          var body = document.getElementById('cart-view-' + v);
+          var footer = document.getElementById('cart-footer-' + v);
+          if (body) body.hidden = v !== view;
+          if (footer) footer.hidden = v !== view;
+        });
+      }
+
+      function renderCartList() {
+        var linesEl = document.getElementById('cart-lines');
+        var emptyEl = document.getElementById('cart-empty-state');
+        var totalsEl = document.getElementById('cart-totals');
+        if (!linesEl) return;
+        while (linesEl.firstChild) linesEl.removeChild(linesEl.firstChild);
+        if (cart.items.length === 0) {
+          emptyEl.hidden = false;
+          totalsEl.hidden = true;
+          return;
+        }
+        emptyEl.hidden = true;
+
+        var subtotalCents = 0;
+        cart.items.forEach(function (item) {
+          var info = menuLookup[item.code];
+          if (!info) return;
+          var lineCents = info.price_cents * item.qty;
+          subtotalCents += lineCents;
+          linesEl.appendChild(buildLineRow(item.code, info, item.qty, lineCents));
+        });
+
+        var taxCents = Math.round(subtotalCents * 0.08875);
+        var totalCents = subtotalCents + taxCents;
+        currentTotals = { subtotalCents: subtotalCents, taxCents: taxCents, totalCents: totalCents };
+
+        document.querySelector('[data-cart-subtotal]').textContent = fmtMoney(subtotalCents);
+        document.querySelector('[data-cart-tax]').textContent = fmtMoney(taxCents);
+        document.querySelector('[data-cart-total]').textContent = fmtMoney(totalCents);
+        document.querySelector('[data-cart-total2]').textContent = fmtMoney(totalCents);
+
+        var waitMin = computeEstimatedWait();
+        document.querySelector('[data-cart-wait]').textContent = waitMin;
+        document.querySelector('[data-cart-wait2]').textContent = waitMin;
+
+        totalsEl.hidden = false;
+
+        // If currently closed, swap checkout button for the closed message
+        var checkoutBtn = document.getElementById('cart-checkout-btn');
+        var closedMsg = document.getElementById('cart-closed-msg');
+        var isClosed = window.__asgClosedNow === true;
+        checkoutBtn.style.display = isClosed ? 'none' : '';
+        closedMsg.hidden = !isClosed;
+      }
+
+      function buildLineRow(code, info, qty, lineCents) {
+        var wrap = document.createElement('div');
+        wrap.className = 'cart-line';
+
+        var left = document.createElement('div');
+        var codeEl = document.createElement('div');
+        codeEl.className = 'cart-line-code';
+        codeEl.textContent = code;
+        left.appendChild(codeEl);
+        var zhEl = document.createElement('div');
+        zhEl.className = 'cart-line-zh';
+        zhEl.textContent = info.zh;
+        left.appendChild(zhEl);
+        var enEl = document.createElement('div');
+        enEl.className = 'cart-line-en';
+        enEl.textContent = info.en;
+        left.appendChild(enEl);
+
+        var qtyWrap = document.createElement('div');
+        qtyWrap.className = 'cart-qty';
+        var minus = document.createElement('button');
+        minus.type = 'button'; minus.className = 'cart-qty-btn'; minus.textContent = '−';
+        minus.addEventListener('click', function () { changeQty(code, -1); });
+        var count = document.createElement('span');
+        count.className = 'cart-qty-count'; count.textContent = qty;
+        var plus = document.createElement('button');
+        plus.type = 'button'; plus.className = 'cart-qty-btn'; plus.textContent = '+';
+        plus.addEventListener('click', function () { changeQty(code, 1); });
+        qtyWrap.appendChild(minus); qtyWrap.appendChild(count); qtyWrap.appendChild(plus);
+        left.appendChild(qtyWrap);
+
+        var right = document.createElement('div');
+        var priceEl = document.createElement('div');
+        priceEl.className = 'cart-line-price';
+        priceEl.textContent = fmtMoney(lineCents);
+        right.appendChild(priceEl);
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'cart-line-remove';
+        var lang = document.documentElement.lang === 'zh-Hant' ? 'zh' : 'en';
+        var dict = (window.LANG_STRINGS && window.LANG_STRINGS[lang]) || {};
+        removeBtn.textContent = dict['cart.remove'] || 'Remove';
+        removeBtn.addEventListener('click', function () { removeFromCart(code); });
+        right.appendChild(removeBtn);
+
+        wrap.appendChild(left);
+        wrap.appendChild(right);
+        return wrap;
+      }
+
+      function computeEstimatedWait() {
+        var WAIT = { rice: 15, home: 20, soup: 10, snack: 5 };
+        var max = 0;
+        cart.items.forEach(function (item) {
+          var cat = codeToCategory(item.code);
+          var w = WAIT[cat] || 5;
+          if (w > max) max = w;
+        });
+        return max || 5;
+      }
+
+      function codeToCategory(code) {
+        var c = (code || '').charAt(0);
+        if (c === 'S') return 'rice';
+        if (c === 'A' || c === 'B') return 'home';
+        if (c === 'C') return 'soup';
+        if (c === 'D') return 'snack';
+        return 'snack';
+      }
+
+      // ---- Checkout flow ----
+      function goToCheckout() {
+        if (cart.items.length === 0) return;
+        if (window.__asgClosedNow) return;
+        // Snapshot current totals before user fills in name
+        renderCheckoutTotals();
+        showView('checkout');
+        document.getElementById('cart-checkout-error').hidden = true;
+        setTimeout(function () { document.getElementById('ck-name').focus(); }, 100);
+        validateForm();
+      }
+
+      function renderCheckoutTotals() {
+        if (!currentTotals) return;
+        document.querySelector('[data-cart-total2]').textContent = fmtMoney(currentTotals.totalCents);
+        document.querySelector('[data-cart-wait2]').textContent = computeEstimatedWait();
+      }
+
+      function validateForm() {
+        var name = document.getElementById('ck-name').value.trim();
+        var btn = document.getElementById('cart-submit-btn');
+        btn.disabled = name.length === 0;
+      }
+
+      async function submitOrder() {
+        var btn = document.getElementById('cart-submit-btn');
+        var errEl = document.getElementById('cart-checkout-error');
+        var name = document.getElementById('ck-name').value.trim();
+        var phone = document.getElementById('ck-phone').value.trim();
+        var email = document.getElementById('ck-email').value.trim();
+        var notes = document.getElementById('ck-notes').value.trim();
+        if (!name) return;
+
+        btn.disabled = true;
+        var origText = btn.textContent;
+        btn.textContent = '...';
+        errEl.hidden = true;
+
+        try {
+          var res = await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              items: cart.items.map(function (i) { return { code: i.code, quantity: i.qty }; }),
+              customer_name: name,
+              customer_phone: phone || undefined,
+              customer_email: email || undefined,
+              notes: notes || undefined,
+            }),
+          });
+          var data = await res.json().catch(function () { return {}; });
+          if (!res.ok) {
+            var msg = data.error || 'Failed to submit order (HTTP ' + res.status + ')';
+            errEl.textContent = msg;
+            errEl.hidden = false;
+            btn.disabled = false;
+            btn.textContent = origText;
+            return;
+          }
+          // Success! Store the pickup info for re-display on refresh.
+          try {
+            sessionStorage.setItem(SESSION_SUCCESS_KEY, JSON.stringify({
+              pickup_code: data.pickup_code,
+              estimated_wait_min: data.estimated_wait_min,
+              subtotal_cents: data.subtotal_cents,
+              tax_cents: data.tax_cents,
+              total_cents: data.total_cents,
+            }));
+          } catch {}
+          showSuccess(data);
+          clearCart();
+        } catch (err) {
+          errEl.textContent = 'Network error. Please try again or call 917-723-6262.';
+          errEl.hidden = false;
+          btn.disabled = false;
+          btn.textContent = origText;
+        }
+      }
+
+      function showSuccess(data) {
+        document.querySelector('[data-cart-pickup-code]').textContent = data.pickup_code;
+        document.querySelector('[data-cart-wait3]').textContent = data.estimated_wait_min;
+        document.querySelector('[data-cart-summary-subtotal]').textContent = fmtMoney(data.subtotal_cents);
+        document.querySelector('[data-cart-summary-tax]').textContent = fmtMoney(data.tax_cents);
+        document.querySelector('[data-cart-summary-total]').textContent = fmtMoney(data.total_cents);
+        showView('success');
+      }
+
+      // Restore the success view if the user reloaded after a successful order
+      function restoreSuccessIfAny() {
+        try {
+          var raw = sessionStorage.getItem(SESSION_SUCCESS_KEY);
+          if (!raw) return false;
+          var data = JSON.parse(raw);
+          if (!data || !data.pickup_code) return false;
+          showSuccess(data);
+          return true;
+        } catch { return false; }
+      }
+
+      // ---- Mount ----
+      async function mount() {
+        try {
+          var res = await fetch('/api/cart', { cache: 'no-store' });
+          if (!res.ok) return; // failsafe: don't mount
+          var status = await res.json();
+          if (!status || status.cart_enabled !== true) return;
+        } catch {
+          return; // failsafe
+        }
+
+        // Cart is enabled — wire everything up
+        loadCart();
+        buildMenuLookup();
+        injectAddButtons();
+        updateNavBadge();
+
+        document.getElementById('nav-cart-btn').addEventListener('click', function () { openDrawer('list'); });
+        document.getElementById('cart-close').addEventListener('click', closeDrawer);
+        document.getElementById('cart-backdrop').addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && document.getElementById('cart-drawer').classList.contains('is-open')) {
+            closeDrawer();
+          }
+        });
+        document.getElementById('cart-checkout-btn').addEventListener('click', goToCheckout);
+        document.getElementById('cart-back-btn').addEventListener('click', function () { showView('list'); renderCartList(); });
+        document.getElementById('ck-name').addEventListener('input', validateForm);
+        document.getElementById('cart-submit-btn').addEventListener('click', submitOrder);
+        document.getElementById('cart-done-btn').addEventListener('click', function () {
+          try { sessionStorage.removeItem(SESSION_SUCCESS_KEY); } catch {}
+          closeDrawer();
+          // After a brief delay, also reset view to list for next time
+          setTimeout(function () { showView('list'); }, 400);
+        });
+
+        // If the user reloaded after a successful order, restore that view
+        // and auto-open the drawer
+        if (restoreSuccessIfAny()) {
+          openDrawer('success');
+        }
+      }
+
+      mount();
+    })();
   </script>
+
+  <!-- ============== CART DRAWER (online ordering) ============== -->
+  <!-- Hidden by default; only mounted/shown when cart_enabled=true.
+       Three internal views (cart / checkout / success) swapped via JS. -->
+  <div id="cart-backdrop" class="cart-backdrop" aria-hidden="true"></div>
+  <aside id="cart-drawer" class="cart-drawer" role="dialog" aria-labelledby="cart-title" aria-hidden="true">
+    <div class="cart-header">
+      <div>
+        <p class="mono-code text-[0.65rem] uppercase tracking-[0.22em] text-[color:var(--muted-foreground)]" data-i18n="cart.eyebrow">Your order</p>
+        <h2 id="cart-title" class="display text-2xl font-light leading-tight mt-1" data-i18n="cart.title">訂單</h2>
+      </div>
+      <button id="cart-close" type="button" class="cart-close-btn" aria-label="Close cart">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- VIEW 1: cart list -->
+    <div id="cart-view-list" class="cart-body">
+      <div id="cart-lines"></div>
+      <div id="cart-empty-state" class="cart-empty" hidden>
+        <p data-i18n="cart.empty">Your cart is empty.</p>
+      </div>
+    </div>
+    <div id="cart-footer-list" class="cart-footer">
+      <div id="cart-totals" class="cart-totals" hidden>
+        <div class="cart-totals-row">
+          <span data-i18n="cart.subtotal">Subtotal</span>
+          <span class="price"><span data-cart-subtotal>$0.00</span></span>
+        </div>
+        <div class="cart-totals-row">
+          <span data-i18n="cart.tax">Tax (8.875%)</span>
+          <span class="price"><span data-cart-tax>$0.00</span></span>
+        </div>
+        <div class="cart-totals-row is-total">
+          <span data-i18n="cart.total">Total</span>
+          <span class="price"><span data-cart-total>$0.00</span></span>
+        </div>
+        <p class="cart-wait"><span data-i18n="cart.readyIn">Ready in</span> ~<span data-cart-wait>15</span> <span data-i18n="cart.minutes">min</span></p>
+        <button id="cart-checkout-btn" type="button" class="cart-checkout-btn" data-i18n="cart.checkout">Checkout</button>
+        <div id="cart-closed-msg" class="cart-closed-msg" hidden>
+          <span data-closed-text>Currently closed</span><br>
+          <a href="tel:+19177236262" class="underline" data-i18n="cart.callInstead">Call 917-723-6262 to place a phone order</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 2: checkout form -->
+    <div id="cart-view-checkout" class="cart-body" hidden>
+      <button id="cart-back-btn" type="button" class="cart-back-btn"><span data-i18n="cart.back">← Back to cart</span></button>
+      <form id="cart-checkout-form">
+        <div class="cart-form-group">
+          <label for="ck-name"><span data-i18n="cart.name">Name</span> *</label>
+          <input id="ck-name" name="name" type="text" required maxlength="80" autocomplete="name" />
+        </div>
+        <div class="cart-form-group">
+          <label for="ck-phone"><span data-i18n="cart.phone">Phone</span></label>
+          <input id="ck-phone" name="phone" type="tel" autocomplete="tel" />
+          <span class="hint" data-i18n="cart.phoneHint">Optional — so we can call if there's a question.</span>
+        </div>
+        <div class="cart-form-group">
+          <label for="ck-email"><span data-i18n="cart.email">Email</span></label>
+          <input id="ck-email" name="email" type="email" autocomplete="email" />
+          <span class="hint" data-i18n="cart.emailHint">Optional — we won't send marketing.</span>
+        </div>
+        <div class="cart-form-group">
+          <label for="ck-notes"><span data-i18n="cart.notes">Special instructions</span></label>
+          <textarea id="ck-notes" name="notes" maxlength="500"></textarea>
+        </div>
+        <div id="cart-checkout-error" class="cart-error" hidden></div>
+      </form>
+    </div>
+    <div id="cart-footer-checkout" class="cart-footer" hidden>
+      <div class="cart-totals-row is-total">
+        <span data-i18n="cart.total">Total</span>
+        <span class="price"><span data-cart-total2>$0.00</span></span>
+      </div>
+      <p class="cart-wait"><span data-i18n="cart.readyIn">Ready in</span> ~<span data-cart-wait2>15</span> <span data-i18n="cart.minutes">min</span> · <span data-i18n="cart.payAtPickup">Pay at pickup</span></p>
+      <button id="cart-submit-btn" type="button" class="cart-checkout-btn" disabled data-i18n="cart.submit">Submit order</button>
+    </div>
+
+    <!-- VIEW 3: success -->
+    <div id="cart-view-success" class="cart-body" hidden>
+      <p class="cart-success-label" data-i18n="cart.successLabel">Your pickup code</p>
+      <p class="cart-success-code" data-cart-pickup-code>————</p>
+      <p class="cart-success-msg"><span data-i18n="cart.successMsg">Ready in about</span> <span data-cart-wait3>15</span> <span data-i18n="cart.minutes">min</span><br>
+        <span data-i18n="cart.pickupAt">Pickup at 84 Avenue O · Brooklyn</span></p>
+      <p class="cart-success-msg" style="font-size: 0.85rem; color: var(--muted-foreground); margin-top: 1rem;" data-i18n="cart.successInstr">Show your code at the counter. Pay at pickup.</p>
+      <div class="cart-success-summary">
+        <div class="row"><span data-i18n="cart.subtotal">Subtotal</span><span data-cart-summary-subtotal>$0.00</span></div>
+        <div class="row"><span data-i18n="cart.tax">Tax</span><span data-cart-summary-tax>$0.00</span></div>
+        <div class="row" style="font-weight: 500; color: var(--foreground); padding-top: 0.4rem; margin-top: 0.4rem; border-top: 1px solid var(--border);"><span data-i18n="cart.total">Total</span><span data-cart-summary-total>$0.00</span></div>
+      </div>
+      <button id="cart-done-btn" type="button" class="cart-success-done-btn" data-i18n="cart.done">Done</button>
+    </div>
+  </aside>
+
 </body>
 </html>

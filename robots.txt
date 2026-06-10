@@ -31,4 +31,4 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://asian-street-gourmet.vercel.app/sitemap.xml
+Sitemap: https://www.asianstreetgourmet.com/sitemap.xml

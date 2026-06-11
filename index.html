@@ -487,6 +487,17 @@
       transition: background .2s, color .2s;
     }
     .cart-success-done-btn:hover { background: var(--foreground); color: var(--background); }
+    .cart-review-btn {
+      width: 100%; margin-top: 1.25rem; padding: 0.85rem;
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+      background: var(--destructive); color: white;
+      border: 1.5px solid var(--destructive); border-radius: 2px;
+      text-decoration: none;
+      transition: opacity .2s, transform .2s;
+    }
+    .cart-review-btn:hover { opacity: 0.92; transform: translateY(-1px); }
 
     @media (prefers-reduced-motion: reduce) {
       .cart-backdrop, .cart-drawer { transition: none; }
@@ -1136,10 +1147,16 @@
             <p class="display text-3xl leading-tight">84 Avenue&nbsp;O</p>
             <p class="display text-3xl leading-tight">Brooklyn,</p>
             <p class="display text-3xl leading-tight">NY 11204</p>
-            <a href="https://maps.app.goo.gl/kUNjoa8ocDofKnhK9" target="_blank" rel="noopener" class="mt-6 inline-flex items-center gap-2 mono-code text-xs uppercase tracking-[0.2em] text-[color:var(--destructive)] hover:underline">
-              <span data-i18n="visit.openmaps">Open in Maps</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
-            </a>
+            <div class="mt-6 flex flex-col sm:flex-row sm:flex-wrap gap-x-6 gap-y-2">
+              <a href="https://maps.app.goo.gl/kUNjoa8ocDofKnhK9" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mono-code text-xs uppercase tracking-[0.2em] text-[color:var(--destructive)] hover:underline">
+                <span data-i18n="visit.openmaps">Open in Maps</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+              </a>
+              <a href="https://www.google.com/maps?cid=8705321142465470103" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mono-code text-xs uppercase tracking-[0.2em] text-[color:var(--destructive)] hover:underline">
+                <span data-i18n="visit.leavereview">Leave a Google Review</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.2H22l-6 4.6 2.4 7.2L12 16.6l-6.4 4.4L8 13.8 2 9.2h7.6z"/></svg>
+              </a>
+            </div>
             <div class="mt-7 aspect-[5/3] border border-[color:var(--border)] relative overflow-hidden">
               <iframe
                 src="https://maps.google.com/maps?q=Asian+Street+Gourmet,+84+Avenue+O,+Brooklyn,+NY+11204&t=&z=16&ie=UTF8&iwloc=&output=embed"
@@ -1342,6 +1359,7 @@
         'visit.eyebrow': '03 · Visit',
         'visit.title': 'Come <span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">find us</span>.',
         'visit.openmaps': 'Open in Maps',
+        'visit.leavereview': 'Leave a Google Review',
         'day.mon': 'Mon', 'day.tue': 'Tue', 'day.wed': 'Wed', 'day.thu': 'Thu', 'day.fri': 'Fri', 'day.sat': 'Sat', 'day.sun': 'Sun',
         'hours.closed': 'Closed',
         'hours.lastorder': 'Last orders 30 min before close',
@@ -1402,6 +1420,7 @@
         'cart.successMsg': 'Ready in about',
         'cart.pickupAt': 'Pickup at 84 Avenue O · Brooklyn',
         'cart.successInstr': 'Show your code at the counter. Pay at pickup.',
+        'cart.leaveReview': 'Loved your meal? Leave a Google review',
         'cart.done': 'Done'
       },
       zh: {
@@ -1441,6 +1460,7 @@
         'visit.eyebrow': '03 · 嚟搵我哋',
         'visit.title': '<span class="italic" style="font-variation-settings: \'opsz\' 144, \'SOFT\' 100, \'WONK\' 1;">嚟搵</span>我哋啦。',
         'visit.openmaps': '在地圖中打開',
+        'visit.leavereview': '喺 Google 留低評論',
         'day.mon': '一', 'day.tue': '二', 'day.wed': '三', 'day.thu': '四', 'day.fri': '五', 'day.sat': '六', 'day.sun': '日',
         'hours.closed': '休息',
         'hours.lastorder': '結束前 30 分鐘截單',
@@ -1501,6 +1521,7 @@
         'cart.successMsg': '約',
         'cart.pickupAt': '取餐地點：84 Avenue O · Brooklyn',
         'cart.successInstr': '到櫃枱出示編號，現場付款。',
+        'cart.leaveReview': '鍾意我哋嘅嘢食？喺 Google 留低評論',
         'cart.done': '完成'
       }
     };
@@ -2363,6 +2384,10 @@
       <div class="cart-success-summary">
         <div class="row" style="font-weight: 500; color: var(--foreground);"><span data-i18n="cart.total">Total</span><span data-cart-summary-total>$0.00</span></div>
       </div>
+      <a href="https://www.google.com/maps?cid=8705321142465470103" target="_blank" rel="noopener" class="cart-review-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.2H22l-6 4.6 2.4 7.2L12 16.6l-6.4 4.4L8 13.8 2 9.2h7.6z"/></svg>
+        <span data-i18n="cart.leaveReview">Loved your meal? Leave a Google review</span>
+      </a>
       <button id="cart-done-btn" type="button" class="cart-success-done-btn" data-i18n="cart.done">Done</button>
     </div>
   </aside>

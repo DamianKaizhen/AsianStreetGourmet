@@ -416,6 +416,16 @@
       outline: 2px solid var(--destructive); outline-offset: 1px;
     }
     .cart-form-group textarea { min-height: 4rem; resize: vertical; }
+    .cart-form-group .counter {
+      display: block;
+      text-align: right;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.12em;
+      color: var(--muted-foreground);
+      margin-top: 0.2rem;
+    }
+    .cart-form-group .counter.is-near { color: #b85c00; }
+    .cart-form-group .counter.is-max  { color: var(--destructive); }
 
     .cart-back-btn {
       margin-bottom: 1rem;
@@ -1383,6 +1393,7 @@
         'cart.email': 'Email',
         'cart.emailHint': 'Optional — we won\'t send marketing.',
         'cart.notes': 'Special instructions',
+        'cart.notesHint': 'Optional — allergies, no spice, extra ginger, etc. Max 200 characters.',
         'cart.payAtPickup': 'Pay at pickup',
         'cart.submit': 'Submit order',
         'cart.successLabel': 'Your pickup code',
@@ -1482,6 +1493,7 @@
         'cart.email': '電郵',
         'cart.emailHint': '可選 — 我哋唔會發推廣訊息。',
         'cart.notes': '特別要求',
+        'cart.notesHint': '可選 — 例如食物敏感、唔要辣、多啲薑等等。最多 200 字。',
         'cart.payAtPickup': '到店付款',
         'cart.submit': '確認訂單',
         'cart.successLabel': '你嘅取餐編號',
@@ -2118,6 +2130,9 @@
         renderCheckoutTotals();
         showView('checkout');
         document.getElementById('cart-checkout-error').hidden = true;
+        // Sync the notes counter with whatever's in the textarea (could be
+        // empty on first visit, or carry-over text if the user backed out).
+        document.getElementById('ck-notes').dispatchEvent(new Event('input'));
         setTimeout(function () { document.getElementById('ck-name').focus(); }, 100);
         validateForm();
       }
@@ -2238,6 +2253,16 @@
         document.getElementById('cart-checkout-btn').addEventListener('click', goToCheckout);
         document.getElementById('cart-back-btn').addEventListener('click', function () { showView('list'); renderCartList(); });
         document.getElementById('ck-name').addEventListener('input', validateForm);
+        // Live char counter for the notes field. Color shifts as you near
+        // the 200-char cap. maxlength already enforces the hard ceiling.
+        var notesEl = document.getElementById('ck-notes');
+        var notesCounter = document.getElementById('ck-notes-counter');
+        notesEl.addEventListener('input', function () {
+          var n = notesEl.value.length;
+          notesCounter.textContent = n + ' / 200';
+          notesCounter.classList.toggle('is-max', n >= 200);
+          notesCounter.classList.toggle('is-near', n >= 160 && n < 200);
+        });
         document.getElementById('cart-submit-btn').addEventListener('click', submitOrder);
         document.getElementById('cart-done-btn').addEventListener('click', function () {
           try { sessionStorage.removeItem(SESSION_SUCCESS_KEY); } catch {}
@@ -2322,7 +2347,9 @@
         </div>
         <div class="cart-form-group">
           <label for="ck-notes"><span data-i18n="cart.notes">Special instructions</span></label>
-          <textarea id="ck-notes" name="notes" maxlength="500"></textarea>
+          <textarea id="ck-notes" name="notes" maxlength="200" rows="3"></textarea>
+          <span class="hint" data-i18n="cart.notesHint">Optional — allergies, no spice, extra ginger, etc.</span>
+          <span id="ck-notes-counter" class="counter">0 / 200</span>
         </div>
         <div id="cart-checkout-error" class="cart-error" hidden></div>
       </form>

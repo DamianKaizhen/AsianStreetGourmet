@@ -490,7 +490,11 @@
       left.appendChild(el('span', { class: 'display text-3xl text-[color:var(--destructive)] font-medium', style: 'letter-spacing: 0.06em;' }, o.pickup_code));
       left.appendChild(el('span', { class: 'badge ' + (o.status === 'cancelled' ? 'badge-off' : 'badge-on') }, ORDER_STATUS_LABELS[o.status] || o.status));
       head.appendChild(left);
-      head.appendChild(el('span', { class: 'mono text-xs text-[color:var(--muted-foreground)]' }, relativeTime(o.created_at)));
+      // Right side: relative time on top, absolute NY date+time underneath
+      const timeWrap = el('div', { class: 'text-right' });
+      timeWrap.appendChild(el('div', { class: 'mono text-xs text-[color:var(--muted-foreground)]' }, relativeTime(o.created_at)));
+      timeWrap.appendChild(el('div', { class: 'mono text-[0.65rem] text-[color:var(--muted-foreground)] mt-0.5', style: 'opacity: 0.75;' }, nyDateTime(o.created_at)));
+      head.appendChild(timeWrap);
       card.appendChild(head);
 
       // Customer row
@@ -596,6 +600,23 @@
       if (min < 60) return min + ' min ago';
       const hr = Math.floor(min / 60);
       return hr + 'h ' + (min - hr * 60) + 'm ago';
+    }
+
+    // Format an ISO timestamp as e.g. "Jun 10 · 4:23 PM ET" in New York time.
+    // Always shown as NY-local regardless of the admin's own browser tz —
+    // matches what the kitchen sees on the wall clock.
+    const NY_DATE_FMT = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      month: 'short', day: 'numeric',
+    });
+    const NY_TIME_FMT = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      hour: 'numeric', minute: '2-digit', hour12: true,
+    });
+    function nyDateTime(iso) {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      return NY_DATE_FMT.format(d) + ' · ' + NY_TIME_FMT.format(d) + ' ET';
     }
 
     async function fetchOrders() {

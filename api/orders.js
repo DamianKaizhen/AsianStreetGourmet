@@ -7,7 +7,7 @@
 //     customer_name: string (required, 1..80 chars),
 //     customer_phone: string (optional, US-ish digits/punctuation),
 //     customer_email: string (optional, looks like an email),
-//     notes: string (optional, <= 500 chars)
+//     notes: string (optional, <= 200 chars)
 //   }
 //
 // Returns:
@@ -66,8 +66,8 @@ export default async function handler(req, res) {
     }
 
     if (notes != null && notes !== '') {
-      if (typeof notes !== 'string' || notes.length > 500) {
-        return res.status(400).json({ error: 'notes must be a string up to 500 chars' });
+      if (typeof notes !== 'string' || notes.length > 200) {
+        return res.status(400).json({ error: 'notes must be a string up to 200 chars' });
       }
     }
 

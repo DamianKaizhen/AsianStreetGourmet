@@ -321,8 +321,9 @@
         </div>
       </div>
 
-      <!-- Today's preview -->
-      <div>
+      <!-- Today's preview — hidden; the per-item availability section below
+           already shows which items are on/off, so this was duplicative. -->
+      <div hidden>
         <p class="mono text-[0.7rem] uppercase tracking-[0.22em] text-[color:var(--muted-foreground)] mb-3">Today · <span id="preview-date">—</span></p>
         <h2 class="display text-3xl font-light leading-tight">What visitors see right now</h2>
         <div id="preview-grid" class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3"></div>

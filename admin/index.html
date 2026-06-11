@@ -433,6 +433,9 @@
     let highestSeenOrderId = 0;
     let pollInterval = null;
     let audioCtx = null;
+    // Counts orders that arrived while the admin tab was hidden, so we can
+    // play one more chime when the family returns to the tab.
+    let hiddenUnseenCount = 0;
 
     function renderFilterPills() {
       const c = $('#orders-filter-pills');
@@ -532,9 +535,38 @@
         actions.appendChild(btn);
       }
       if (o.status !== 'cancelled' && o.status !== 'picked_up') {
-        const cancelBtn = el('button', { type: 'button', class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border', style: 'border-radius: 2px; border-color: var(--border); color: var(--muted-foreground);' }, 'Cancel');
+        // Two-click cancel: first click arms the button (label changes to
+        // "Tap again to cancel"); second click within 5s actually cancels.
+        // Avoids window.confirm() — which can be silently dismissed by
+        // Chrome's repeat-dialog blocker and can race with the 15s polling
+        // re-render that detaches the dialog's host DOM node.
+        const cancelBtn = el('button', {
+          type: 'button',
+          class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border',
+          style: 'border-radius: 2px; border-color: var(--border); color: var(--muted-foreground);',
+        }, 'Cancel');
+        let armed = false;
+        let armTimer = null;
+        const disarm = () => {
+          armed = false;
+          cancelBtn.textContent = 'Cancel';
+          cancelBtn.style.borderColor = 'var(--border)';
+          cancelBtn.style.color = 'var(--muted-foreground)';
+          cancelBtn.style.background = 'transparent';
+        };
         cancelBtn.addEventListener('click', () => {
-          if (confirm('Cancel order ' + o.pickup_code + '?')) updateOrderStatus(o.id, 'cancelled');
+          if (!armed) {
+            armed = true;
+            cancelBtn.textContent = 'Tap again to cancel';
+            cancelBtn.style.borderColor = 'var(--destructive)';
+            cancelBtn.style.color = 'white';
+            cancelBtn.style.background = 'var(--destructive)';
+            clearTimeout(armTimer);
+            armTimer = setTimeout(disarm, 5000);
+            return;
+          }
+          clearTimeout(armTimer);
+          updateOrderStatus(o.id, 'cancelled');
         });
         actions.appendChild(cancelBtn);
       }
@@ -571,6 +603,10 @@
           const newCount = orders.filter((o) => o.id > highestSeenOrderId).length;
           playChime();
           flash('New order' + (newCount > 1 ? 's' : '') + ' received');
+          // If the tab is currently hidden, track these so we can re-chime
+          // when the family returns to the tab. Browsers usually allow audio
+          // in background tabs, but if blocked the user still won't miss it.
+          if (document.hidden) hiddenUnseenCount += newCount;
         }
         highestSeenOrderId = Math.max(highestSeenOrderId, newMaxId);
 
@@ -592,26 +628,37 @@
       }
     }
 
+    // Plays a single ding-dong chime starting at `startOffset` seconds.
+    // ~1.1s long total per chime — two sustained sine notes with envelope.
+    function scheduleDingDong(startOffset) {
+      const t0 = audioCtx.currentTime + startOffset;
+      // Note 1: 880 Hz, 0.0 → 0.55 s
+      const o1 = audioCtx.createOscillator(), g1 = audioCtx.createGain();
+      o1.connect(g1); g1.connect(audioCtx.destination);
+      o1.type = 'sine'; o1.frequency.value = 880;
+      g1.gain.setValueAtTime(0, t0);
+      g1.gain.linearRampToValueAtTime(0.25, t0 + 0.02);
+      g1.gain.setValueAtTime(0.25, t0 + 0.45);
+      g1.gain.linearRampToValueAtTime(0, t0 + 0.55);
+      o1.start(t0); o1.stop(t0 + 0.55);
+      // Note 2: 1320 Hz (perfect fifth up), 0.5 → 1.1 s — overlaps slightly
+      const o2 = audioCtx.createOscillator(), g2 = audioCtx.createGain();
+      o2.connect(g2); g2.connect(audioCtx.destination);
+      o2.type = 'sine'; o2.frequency.value = 1320;
+      g2.gain.setValueAtTime(0, t0 + 0.50);
+      g2.gain.linearRampToValueAtTime(0.25, t0 + 0.52);
+      g2.gain.setValueAtTime(0.25, t0 + 1.00);
+      g2.gain.linearRampToValueAtTime(0, t0 + 1.10);
+      o2.start(t0 + 0.50); o2.stop(t0 + 1.10);
+    }
+
     function playChime() {
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const o1 = audioCtx.createOscillator();
-        const g1 = audioCtx.createGain();
-        o1.connect(g1); g1.connect(audioCtx.destination);
-        o1.type = 'sine'; o1.frequency.value = 880;
-        g1.gain.setValueAtTime(0, audioCtx.currentTime);
-        g1.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.01);
-        g1.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.25);
-        o1.start(); o1.stop(audioCtx.currentTime + 0.25);
-        // Second tone for a two-note chime
-        const o2 = audioCtx.createOscillator();
-        const g2 = audioCtx.createGain();
-        o2.connect(g2); g2.connect(audioCtx.destination);
-        o2.type = 'sine'; o2.frequency.value = 1320;
-        g2.gain.setValueAtTime(0, audioCtx.currentTime + 0.18);
-        g2.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.19);
-        g2.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
-        o2.start(audioCtx.currentTime + 0.18); o2.stop(audioCtx.currentTime + 0.5);
+        // Two chimes — second starts after a 0.4s breath so it's clearly
+        // a repeat rather than one long sound. Total ~2.6s.
+        scheduleDingDong(0);
+        scheduleDingDong(1.5);
       } catch {}
     }
 
@@ -627,13 +674,27 @@
         clearInterval(pollInterval);
         pollInterval = null;
         const ind = $('#orders-poll-state');
-        if (ind) ind.textContent = 'Paused (tab hidden)';
+        if (ind) ind.textContent = 'Paused';
       }
     }
 
+    // Polling continues even when the tab is hidden so the chime still fires
+    // for incoming orders. When the family returns to the tab, re-chime once
+    // if any orders arrived while hidden (in case the background-tab chime
+    // was muted by the browser).
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) stopOrdersPolling();
-      else if (!$('#admin-view').hidden) { fetchOrders(); startOrdersPolling(); }
+      if (!document.hidden && !$('#admin-view').hidden) {
+        if (hiddenUnseenCount > 0) {
+          playChime();
+          flash(hiddenUnseenCount === 1
+            ? '1 new order while you were away'
+            : hiddenUnseenCount + ' new orders while you were away');
+          hiddenUnseenCount = 0;
+        }
+        // Always do a fresh fetch on return — catches anything missed if
+        // background polling was throttled by the browser.
+        fetchOrders();
+      }
     });
 
     function renderPreview(today, menuItems) {

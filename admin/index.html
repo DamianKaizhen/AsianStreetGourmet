@@ -166,6 +166,9 @@
         </div>
         <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Active orders show automatically. New ones chime. From the last 24 hours.</p>
 
+        <!-- Desktop notification permission prompt — shows only when needed -->
+        <div id="orders-notif-slot" class="mt-3"></div>
+
         <div id="orders-filter-pills" class="mt-4 flex flex-wrap gap-2"></div>
 
         <div id="orders-list" class="mt-5 space-y-3"></div>
@@ -338,8 +341,10 @@
       renderHours(hours.hours);
       renderMenu(menu.menu_items);
 
-      // Orders inbox: initial fetch (no chime — see highestSeenOrderId guard
-      // inside fetchOrders) then begin 15-second polling.
+      // Orders inbox: render notif-permission prompt, do initial fetch
+      // (no chime — see highestSeenOrderId guard inside fetchOrders), then
+      // begin 15-second polling.
+      renderNotifPrompt();
       await fetchOrders();
       startOrdersPolling();
     }
@@ -436,6 +441,7 @@
     // Counts orders that arrived while the admin tab was hidden, so we can
     // play one more chime when the family returns to the tab.
     let hiddenUnseenCount = 0;
+    const ORIGINAL_TITLE = document.title;
 
     function renderFilterPills() {
       const c = $('#orders-filter-pills');
@@ -601,12 +607,18 @@
         const newMaxId = orders.reduce((m, o) => Math.max(m, o.id), 0);
         if (highestSeenOrderId > 0 && newMaxId > highestSeenOrderId) {
           const newCount = orders.filter((o) => o.id > highestSeenOrderId).length;
-          playChime();
-          flash('New order' + (newCount > 1 ? 's' : '') + ' received');
-          // If the tab is currently hidden, track these so we can re-chime
-          // when the family returns to the tab. Browsers usually allow audio
-          // in background tabs, but if blocked the user still won't miss it.
-          if (document.hidden) hiddenUnseenCount += newCount;
+          if (document.hidden) {
+            // Tab is in the background — chime is unreliable here. Fire an
+            // OS notification (has its own sound) and badge the tab title.
+            hiddenUnseenCount += newCount;
+            fireOrderNotification(hiddenUnseenCount);
+            updateTitleBadge();
+            // Still attempt the chime — some browsers do allow it.
+            playChime();
+          } else {
+            playChime();
+            flash('New order' + (newCount > 1 ? 's' : '') + ' received');
+          }
         }
         highestSeenOrderId = Math.max(highestSeenOrderId, newMaxId);
 
@@ -625,6 +637,78 @@
         await fetchOrders();
       } catch {
         flash('Update failed', 'bad');
+      }
+    }
+
+    // =========================================================
+    // Desktop notifications — the reliable cross-browser way to alert
+    // the family when the admin tab is in the background. Browsers
+    // throttle setInterval and Web Audio in hidden tabs but always
+    // deliver Notifications API calls with an OS-level sound.
+    // =========================================================
+    function renderNotifPrompt() {
+      const slot = $('#orders-notif-slot');
+      if (!slot) return;
+      clear(slot);
+      if (!('Notification' in window)) {
+        slot.appendChild(el('p', { class: 'text-xs text-[color:var(--muted-foreground)] italic' },
+          'This browser does not support desktop notifications — keep this tab focused to hear new orders.'));
+        return;
+      }
+      const p = Notification.permission;
+      if (p === 'granted') {
+        slot.appendChild(el('p', { class: 'text-xs text-[color:var(--muted-foreground)]' },
+          '✓ Desktop notifications enabled. New orders alert you even when this tab is in the background.'));
+        return;
+      }
+      if (p === 'denied') {
+        slot.appendChild(el('p', { class: 'text-xs', style: 'color: var(--destructive);' },
+          '⚠ Desktop notifications are blocked. To re-enable: click the lock icon in the address bar → Notifications → Allow.'));
+        return;
+      }
+      // 'default' — user hasn't decided yet
+      const wrap = el('div', { class: 'card p-3 flex items-center gap-3' });
+      wrap.style.background = '#fff8e6';
+      wrap.style.borderColor = '#e6c84a';
+      wrap.appendChild(el('p', { class: 'text-xs flex-1' },
+        'Turn on desktop notifications so you don’t miss orders when this tab is in the background.'));
+      const btn = el('button', {
+        type: 'button',
+        class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 bg-[color:var(--destructive)] text-white shrink-0',
+        style: 'border-radius: 2px;',
+      }, 'Enable');
+      btn.addEventListener('click', async () => {
+        try {
+          await Notification.requestPermission();
+        } catch {}
+        renderNotifPrompt();
+      });
+      wrap.appendChild(btn);
+      slot.appendChild(wrap);
+    }
+
+    function fireOrderNotification(newCount) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      const title = newCount === 1
+        ? 'New order received'
+        : newCount + ' new orders received';
+      try {
+        const n = new Notification(title, {
+          body: 'Open the admin tab to view and start preparing.',
+          tag: 'asg-new-order',  // collapses multiple into one alert
+          renotify: true,         // re-alerts even when collapsed
+          requireInteraction: false,
+        });
+        n.onclick = () => { window.focus(); n.close(); };
+      } catch {}
+    }
+
+    function updateTitleBadge() {
+      // Show "(N) NEW · …" prefix when hidden with unseen orders.
+      if (document.hidden && hiddenUnseenCount > 0) {
+        document.title = '(' + hiddenUnseenCount + ') NEW · ' + ORIGINAL_TITLE;
+      } else {
+        document.title = ORIGINAL_TITLE;
       }
     }
 
@@ -678,10 +762,10 @@
       }
     }
 
-    // Polling continues even when the tab is hidden so the chime still fires
-    // for incoming orders. When the family returns to the tab, re-chime once
-    // if any orders arrived while hidden (in case the background-tab chime
-    // was muted by the browser).
+    // Polling continues even when the tab is hidden so OS notifications
+    // and tab-title badging still fire for incoming orders. When the family
+    // returns to the tab, re-chime once if anything came in while hidden
+    // (the in-page chime is reliable once the tab is visible).
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && !$('#admin-view').hidden) {
         if (hiddenUnseenCount > 0) {
@@ -691,6 +775,7 @@
             : hiddenUnseenCount + ' new orders while you were away');
           hiddenUnseenCount = 0;
         }
+        updateTitleBadge();  // clears the "(N) NEW" prefix
         // Always do a fresh fetch on return — catches anything missed if
         // background polling was throttled by the browser.
         fetchOrders();

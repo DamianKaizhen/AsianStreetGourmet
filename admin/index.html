@@ -30,6 +30,140 @@
     /* Ensure HTML `hidden` attribute always beats Tailwind display utilities. */
     [hidden] { display: none !important; }
 
+    /* =========================================================
+       Print template — letter-sized order slip
+       ========================================================= */
+    /* On-screen the template is hidden; the print-only block lives in
+       a portal at the bottom of the DOM. */
+    #print-portal { display: none; }
+    @media print {
+      @page { size: letter; margin: 0.5in; }
+      /* Hide everything in the normal page, show only the portal. */
+      body > *:not(#print-portal) { display: none !important; }
+      #print-portal { display: block; }
+      body { background: #fff !important; color: #000 !important; }
+      /* Reset Tailwind utility opacities/colors that don't print well */
+      .no-print { display: none !important; }
+    }
+    .print-slip {
+      font-family: 'Inter Tight', sans-serif;
+      color: #000;
+      max-width: 7.5in;
+      margin: 0 auto;
+    }
+    .print-slip .print-header {
+      border-bottom: 2px solid #000;
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.8rem;
+      display: flex; justify-content: space-between; align-items: flex-end;
+    }
+    .print-slip .print-header .restaurant {
+      font-family: 'Fraunces', serif;
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+    .print-slip .print-header .meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      text-align: right;
+      letter-spacing: 0.05em;
+    }
+    .print-slip .pickup-block {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.6rem 0.8rem;
+      border: 2px solid #000;
+      margin-bottom: 0.8rem;
+    }
+    .print-slip .pickup-code {
+      font-family: 'Fraunces', serif;
+      font-size: 2.5rem; line-height: 1;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+    }
+    .print-slip .pickup-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      margin-bottom: 0.2rem;
+    }
+    .print-slip .pickup-wait {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      text-align: right;
+    }
+    .print-slip .customer-row {
+      margin-bottom: 0.8rem;
+      font-size: 0.95rem;
+    }
+    .print-slip .customer-row .name { font-weight: 600; font-size: 1.05rem; }
+    .print-slip .customer-row .phone { font-family: 'DM Mono', monospace; }
+    .print-slip table.items {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0.8rem;
+      font-size: 0.95rem;
+    }
+    .print-slip table.items th,
+    .print-slip table.items td {
+      text-align: left;
+      padding: 0.25rem 0.4rem;
+      border-bottom: 1px solid #ccc;
+    }
+    .print-slip table.items th {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      border-bottom: 1px solid #000;
+    }
+    .print-slip table.items td.code {
+      font-family: 'DM Mono', monospace; font-size: 0.8rem;
+    }
+    .print-slip table.items td.qty {
+      font-family: 'DM Mono', monospace; text-align: center; width: 3em;
+    }
+    .print-slip table.items td.zh {
+      font-family: 'Noto Serif TC', serif; font-size: 1.05rem;
+    }
+    .print-slip table.items td.price {
+      font-family: 'DM Mono', monospace; text-align: right; width: 4.5em;
+    }
+    .print-slip .notes-block {
+      border: 1px dashed #000;
+      padding: 0.5rem 0.7rem;
+      margin-bottom: 0.8rem;
+      font-size: 0.95rem;
+      font-style: italic;
+    }
+    .print-slip .notes-block .label {
+      font-family: 'DM Mono', monospace; font-size: 0.6rem;
+      text-transform: uppercase; letter-spacing: 0.18em;
+      font-style: normal;
+      margin-bottom: 0.25rem;
+    }
+    .print-slip .total-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding-top: 0.4rem;
+      border-top: 2px solid #000;
+      font-size: 1.15rem;
+      margin-bottom: 0.8rem;
+    }
+    .print-slip .total-row .label {
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 0.18em;
+    }
+    .print-slip .total-row .amount { font-weight: 600; }
+    .print-slip .footer {
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding-top: 0.4rem;
+      border-top: 1px dotted #999;
+    }
+
     :root {
       --background: oklch(0.9821 0 0);
       --foreground: oklch(0.2435 0 0);
@@ -171,6 +305,13 @@
 
         <!-- Desktop notification permission prompt — shows only when needed -->
         <div id="orders-notif-slot" class="mt-3"></div>
+
+        <!-- Auto-print toggle: fires window.print() on every new order. -->
+        <label class="mt-3 inline-flex items-center gap-2 text-xs cursor-pointer select-none">
+          <input id="auto-print-toggle" type="checkbox" class="cursor-pointer" />
+          <span>Auto-print new orders</span>
+          <span class="mono text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">(tab must stay open)</span>
+        </label>
 
         <div id="orders-filter-pills" class="mt-4 flex flex-wrap gap-2"></div>
 
@@ -344,10 +485,11 @@
       renderHours(hours.hours);
       renderMenu(menu.menu_items);
 
-      // Orders inbox: render notif-permission prompt, do initial fetch
-      // (no chime — see highestSeenOrderId guard inside fetchOrders), then
-      // begin 15-second polling.
+      // Orders inbox: render notif-permission prompt, init auto-print toggle
+      // (reads persisted state), do initial fetch (no chime/print — see
+      // highestSeenOrderId guard inside fetchOrders), then begin polling.
       renderNotifPrompt();
+      initAutoPrintToggle();
       await fetchOrders();
       startOrdersPolling();
     }
@@ -547,6 +689,14 @@
         btn.addEventListener('click', () => updateOrderStatus(o.id, next));
         actions.appendChild(btn);
       }
+      // Print button — opens the OS print dialog for this single order.
+      const printBtn = el('button', {
+        type: 'button',
+        class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border',
+        style: 'border-radius: 2px; border-color: var(--border); color: var(--foreground);',
+      }, '🖨 Print');
+      printBtn.addEventListener('click', () => printOrder(o));
+      actions.appendChild(printBtn);
       if (o.status !== 'cancelled' && o.status !== 'picked_up') {
         // Two-click cancel: first click arms the button (label changes to
         // "Tap again to cancel"); second click within 5s actually cancels.
@@ -630,7 +780,8 @@
         // Detect new orders (only chime if we've seen at least one fetch before)
         const newMaxId = orders.reduce((m, o) => Math.max(m, o.id), 0);
         if (highestSeenOrderId > 0 && newMaxId > highestSeenOrderId) {
-          const newCount = orders.filter((o) => o.id > highestSeenOrderId).length;
+          const newOrders = orders.filter((o) => o.id > highestSeenOrderId);
+          const newCount = newOrders.length;
           if (document.hidden) {
             // Tab is in the background — chime is unreliable here. Fire an
             // OS notification (has its own sound) and badge the tab title.
@@ -642,6 +793,16 @@
           } else {
             playChime();
             flash('New order' + (newCount > 1 ? 's' : '') + ' received');
+          }
+          // Auto-print: queue each new order with a small stagger so multiple
+          // arrivals don't collide in the same print() call. Each one fires
+          // window.print() — silenced in Chrome kiosk-printing mode, otherwise
+          // pops the print preview (which the family can confirm with Enter).
+          if (isAutoPrintOn()) {
+            newOrders
+              .slice()
+              .sort((a, b) => a.id - b.id)  // print oldest first
+              .forEach((newOrder, i) => setTimeout(() => printOrder(newOrder), i * 1200));
           }
         }
         highestSeenOrderId = Math.max(highestSeenOrderId, newMaxId);
@@ -768,6 +929,124 @@
         scheduleDingDong(0);
         scheduleDingDong(1.5);
       } catch {}
+    }
+
+    // =========================================================
+    // Print template + printer wiring
+    // =========================================================
+    // Builds an HTML string for the letter-sized order slip. Inserted into
+    // #print-portal right before window.print() is called.
+    function buildPrintSlip(o) {
+      const slip = document.createElement('div');
+      slip.className = 'print-slip';
+
+      const header = document.createElement('div');
+      header.className = 'print-header';
+      header.innerHTML =
+        '<div>' +
+          '<div class="restaurant">Asian Street Gourmet · 亞洲街頭美食</div>' +
+          '<div style="font-size:0.75rem;">84 Avenue O · Brooklyn 11204 · 917-723-6262</div>' +
+        '</div>' +
+        '<div class="meta">' +
+          '<div>' + escapeHtml(nyDateTime(o.created_at)) + '</div>' +
+          '<div>Order #' + o.id + '</div>' +
+        '</div>';
+      slip.appendChild(header);
+
+      const pickup = document.createElement('div');
+      pickup.className = 'pickup-block';
+      pickup.innerHTML =
+        '<div>' +
+          '<div class="pickup-label">Pickup code</div>' +
+          '<div class="pickup-code">' + escapeHtml(o.pickup_code) + '</div>' +
+        '</div>' +
+        '<div class="pickup-wait">' +
+          '<div>Ready in ~' + o.estimated_wait_min + ' min</div>' +
+          '<div style="font-size:0.7rem;margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.15em;">Pay at pickup</div>' +
+        '</div>';
+      slip.appendChild(pickup);
+
+      const cust = document.createElement('div');
+      cust.className = 'customer-row';
+      let custHtml = '<span class="name">' + escapeHtml(o.customer_name) + '</span>';
+      if (o.customer_phone) custHtml += ' · <span class="phone">' + escapeHtml(o.customer_phone) + '</span>';
+      if (o.customer_email) custHtml += ' · ' + escapeHtml(o.customer_email);
+      cust.innerHTML = custHtml;
+      slip.appendChild(cust);
+
+      const table = document.createElement('table');
+      table.className = 'items';
+      let rows = '<thead><tr><th>Code</th><th>Qty</th><th>Item</th><th style="text-align:right;">Price</th></tr></thead><tbody>';
+      (o.items || []).forEach((it) => {
+        rows +=
+          '<tr>' +
+            '<td class="code">' + escapeHtml(it.menu_code) + '</td>' +
+            '<td class="qty">×' + it.quantity + '</td>' +
+            '<td><span class="zh" style="font-family:\'Noto Serif TC\',serif;">' + escapeHtml(it.name_zh) + '</span> · ' + escapeHtml(it.name_en) + '</td>' +
+            '<td class="price">$' + (it.line_total_cents / 100).toFixed(2) + '</td>' +
+          '</tr>';
+      });
+      rows += '</tbody>';
+      table.innerHTML = rows;
+      slip.appendChild(table);
+
+      if (o.notes && o.notes.trim()) {
+        const n = document.createElement('div');
+        n.className = 'notes-block';
+        n.innerHTML = '<div class="label">Customer notes</div>' + escapeHtml(o.notes);
+        slip.appendChild(n);
+      }
+
+      const total = document.createElement('div');
+      total.className = 'total-row';
+      total.innerHTML =
+        '<span class="label">Total</span>' +
+        '<span class="amount">$' + (o.total_cents / 100).toFixed(2) + '</span>';
+      slip.appendChild(total);
+
+      const footer = document.createElement('div');
+      footer.className = 'footer';
+      footer.innerHTML = 'Thank you · 多謝晒 · Show this code at the counter';
+      slip.appendChild(footer);
+
+      return slip;
+    }
+
+    function escapeHtml(s) {
+      if (s == null) return '';
+      return String(s).replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      }[c]));
+    }
+
+    // Renders one order into #print-portal and triggers the OS print dialog.
+    // In Chrome kiosk-printing mode (`chrome --kiosk-printing`), the dialog
+    // is skipped and the page prints directly to the default printer.
+    function printOrder(o) {
+      const portal = $('#print-portal');
+      if (!portal) return;
+      clear(portal);
+      portal.appendChild(buildPrintSlip(o));
+      // Defer slightly so the new DOM is committed before print() snapshots it.
+      setTimeout(() => {
+        try { window.print(); } catch (e) {}
+      }, 50);
+    }
+
+    // Auto-print toggle wiring. State persists in localStorage so the family
+    // doesn't have to re-check it after a tab refresh.
+    const AUTO_PRINT_KEY = 'asg-admin-auto-print';
+    function isAutoPrintOn() {
+      try { return localStorage.getItem(AUTO_PRINT_KEY) === 'true'; } catch { return false; }
+    }
+    function initAutoPrintToggle() {
+      const cb = $('#auto-print-toggle');
+      if (!cb) return;
+      cb.checked = isAutoPrintOn();
+      cb.addEventListener('change', () => {
+        try { localStorage.setItem(AUTO_PRINT_KEY, cb.checked ? 'true' : 'false'); } catch {}
+        flash(cb.checked ? 'Auto-print enabled' : 'Auto-print disabled');
+      });
     }
 
     function startOrdersPolling() {
@@ -1097,5 +1376,8 @@
       );
     }
   </script>
+
+  <!-- Print portal: populated by printOrder() immediately before window.print(). -->
+  <div id="print-portal" aria-hidden="true"></div>
 </body>
 </html>

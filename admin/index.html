@@ -535,7 +535,7 @@
 
       // Totals
       const totals = el('p', { class: 'text-xs text-[color:var(--muted-foreground)] mb-4' },
-        'Total $' + (o.total_cents / 100).toFixed(2) + ' (subtotal $' + (o.subtotal_cents / 100).toFixed(2) + ' + tax $' + (o.tax_cents / 100).toFixed(2) + ') · Ready in ~' + o.estimated_wait_min + ' min'
+        'Total $' + (o.total_cents / 100).toFixed(2) + ' · Ready in ~' + o.estimated_wait_min + ' min'
       );
       card.appendChild(totals);
 

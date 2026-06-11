@@ -758,7 +758,6 @@
   <div aria-hidden="true" class="hidden md:block border-b border-[color:var(--border)] py-2 overflow-hidden text-[0.7rem] tracking-[0.2em] uppercase mono-code text-[color:var(--muted-foreground)]" style="position:relative; z-index:3;">
     <div class="marquee-track gap-12">
       <span>家庭廚房 · Home Kitchen</span><span>·</span>
-      <span>Open Tue–Sun · 11am – 9pm</span><span>·</span>
       <span>Call to Order · 917-723-6262</span><span>·</span>
       <span>84 Avenue O · Brooklyn 11204</span><span>·</span>
       <span>蒸餸飯 $7</span><span>·</span>
@@ -766,7 +765,6 @@
       <span>靚湯 $3</span><span>·</span>
       <span>小食 $3</span><span>·</span>
       <span>家庭廚房 · Home Kitchen</span><span>·</span>
-      <span>Open Tue–Sun · 11am – 9pm</span><span>·</span>
       <span>Call to Order · 917-723-6262</span><span>·</span>
       <span>84 Avenue O · Brooklyn 11204</span><span>·</span>
       <span>蒸餸飯 $7</span><span>·</span>
@@ -2035,12 +2033,11 @@
           linesEl.appendChild(buildLineRow(item.code, info, item.qty, lineCents));
         });
 
-        var taxCents = Math.round(subtotalCents * 0.08875);
-        var totalCents = subtotalCents + taxCents;
+        // No tax on online orders — total equals subtotal.
+        var taxCents = 0;
+        var totalCents = subtotalCents;
         currentTotals = { subtotalCents: subtotalCents, taxCents: taxCents, totalCents: totalCents };
 
-        document.querySelector('[data-cart-subtotal]').textContent = fmtMoney(subtotalCents);
-        document.querySelector('[data-cart-tax]').textContent = fmtMoney(taxCents);
         document.querySelector('[data-cart-total]').textContent = fmtMoney(totalCents);
         document.querySelector('[data-cart-total2]').textContent = fmtMoney(totalCents);
 
@@ -2213,8 +2210,6 @@
       function showSuccess(data) {
         document.querySelector('[data-cart-pickup-code]').textContent = data.pickup_code;
         document.querySelector('[data-cart-wait3]').textContent = data.estimated_wait_min;
-        document.querySelector('[data-cart-summary-subtotal]').textContent = fmtMoney(data.subtotal_cents);
-        document.querySelector('[data-cart-summary-tax]').textContent = fmtMoney(data.tax_cents);
         document.querySelector('[data-cart-summary-total]').textContent = fmtMoney(data.total_cents);
         showView('success');
       }
@@ -2312,14 +2307,6 @@
     </div>
     <div id="cart-footer-list" class="cart-footer">
       <div id="cart-totals" class="cart-totals" hidden>
-        <div class="cart-totals-row">
-          <span data-i18n="cart.subtotal">Subtotal</span>
-          <span class="price"><span data-cart-subtotal>$0.00</span></span>
-        </div>
-        <div class="cart-totals-row">
-          <span data-i18n="cart.tax">Tax (8.875%)</span>
-          <span class="price"><span data-cart-tax>$0.00</span></span>
-        </div>
         <div class="cart-totals-row is-total">
           <span data-i18n="cart.total">Total</span>
           <span class="price"><span data-cart-total>$0.00</span></span>
@@ -2377,9 +2364,7 @@
         <span data-i18n="cart.pickupAt">Pickup at 84 Avenue O · Brooklyn</span></p>
       <p class="cart-success-msg" style="font-size: 0.85rem; color: var(--muted-foreground); margin-top: 1rem;" data-i18n="cart.successInstr">Show your code at the counter. Pay at pickup.</p>
       <div class="cart-success-summary">
-        <div class="row"><span data-i18n="cart.subtotal">Subtotal</span><span data-cart-summary-subtotal>$0.00</span></div>
-        <div class="row"><span data-i18n="cart.tax">Tax</span><span data-cart-summary-tax>$0.00</span></div>
-        <div class="row" style="font-weight: 500; color: var(--foreground); padding-top: 0.4rem; margin-top: 0.4rem; border-top: 1px solid var(--border);"><span data-i18n="cart.total">Total</span><span data-cart-summary-total>$0.00</span></div>
+        <div class="row" style="font-weight: 500; color: var(--foreground);"><span data-i18n="cart.total">Total</span><span data-cart-summary-total>$0.00</span></div>
       </div>
       <button id="cart-done-btn" type="button" class="cart-success-done-btn" data-i18n="cart.done">Done</button>
     </div>

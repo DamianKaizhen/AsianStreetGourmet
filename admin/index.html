@@ -27,6 +27,9 @@
   </script>
 
   <style>
+    /* Ensure HTML `hidden` attribute always beats Tailwind display utilities. */
+    [hidden] { display: none !important; }
+
     :root {
       --background: oklch(0.9821 0 0);
       --foreground: oklch(0.2435 0 0);

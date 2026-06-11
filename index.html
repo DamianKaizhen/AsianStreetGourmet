@@ -87,6 +87,12 @@
   </script>
 
   <style>
+    /* Tailwind's display utilities (flex, grid, block, etc.) tie with the
+       browser's [hidden] selector on specificity and can leak through when
+       both are applied to the same element. Force [hidden] to always win
+       so HTML's `hidden` attribute behaves as authors expect. */
+    [hidden] { display: none !important; }
+
     :root {
       --background: oklch(0.9821 0 0);
       --foreground: oklch(0.2435 0 0);

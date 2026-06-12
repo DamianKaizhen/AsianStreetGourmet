@@ -528,6 +528,15 @@
     .btn-ghost { background: transparent; color: var(--foreground); border: 1.5px solid var(--foreground); }
     .btn-ghost:hover { transform: translateY(-2px); background: var(--foreground); color: var(--background); }
 
+    /* On mobile, the nav's Call CTA collapses to a square icon-only button
+       matching the theme/menu icon buttons (40×40). The text span uses
+       Tailwind's `hidden md:inline` to reappear at the md breakpoint, at
+       which point we restore the full pill padding. */
+    .nav-call-btn { width: 2.5rem; height: 2.5rem; padding: 0; justify-content: center; gap: 0; }
+    @media (min-width: 768px) {
+      .nav-call-btn { width: auto; height: auto; padding: 0.85rem 1.4rem; gap: 0.55rem; }
+    }
+
     body.menu-open { overflow: hidden; }
 
     .rule-mark { display: inline-flex; align-items: center; gap: 0.75rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted-foreground); }
@@ -811,10 +820,10 @@
           <span class="l-sep" aria-hidden="true">·</span>
           <span class="l-zh">中</span>
         </button>
-        <div class="relative hidden md:block">
-          <a href="tel:+19177236262" class="inline-flex btn btn-primary" aria-label="Call 917-723-6262 to order">
+        <div class="relative">
+          <a href="tel:+19177236262" class="inline-flex btn btn-primary nav-call-btn" aria-label="Call 917-723-6262 to order">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            <span data-i18n="nav.calltoorder">Call 917-723-6262</span>
+            <span class="hidden md:inline" data-i18n="nav.calltoorder">Call 917-723-6262</span>
           </a>
           <span id="nav-closed-notice" hidden class="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 px-2 py-0.5 bg-[color:var(--background)] border border-[color:var(--destructive)] rounded-sm mono-code text-[0.55rem] whitespace-nowrap uppercase tracking-[0.18em] text-[color:var(--destructive)] flex items-center gap-1 leading-tight shadow-sm">
             <span class="inline-block w-1 h-1 rounded-full bg-[color:var(--destructive)]"></span>

@@ -1810,21 +1810,13 @@
         return isZhMode() ? '休息中' : 'Closed';
       }
 
-      // Full message — for hero CTA and Order CTA strip, where there's room.
+      // Full message — for hero CTA and Order CTA strip. The phrasing used
+      // to include the next opening time (e.g. "Closed · Opens tomorrow at
+      // 11am") but per request we now show just the closed status with no
+      // opening details. `findNextOpening` is preserved in case we want to
+      // bring that back later.
       function fullClosedText(now, hours) {
-        var next = findNextOpening(hours, now);
-        var zh = isZhMode();
-        if (!next) return zh ? '現已休息' : 'Currently closed';
-        if (zh) {
-          var zhTime = fmtZh(next.opens);
-          if (next.daysAhead === 0) return '休息中 · ' + zhTime + '開門';
-          if (next.daysAhead === 1) return '休息中 · 明天' + zhTime + '開門';
-          return '休息中 · ' + DAY_NAMES_ZH[next.day] + zhTime + '開門';
-        }
-        var t = fmt12(next.opens);
-        if (next.daysAhead === 0) return 'Closed · Opens at ' + t;
-        if (next.daysAhead === 1) return 'Closed · Opens tomorrow at ' + t;
-        return 'Closed · Opens ' + DAY_NAMES_EN[next.day] + ' at ' + t;
+        return isZhMode() ? '現已休息' : 'Currently closed';
       }
 
       function showClosedNotices(short, full) {

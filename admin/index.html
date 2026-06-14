@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Admin · Asian Street Gourmet</title>
+  <title>亞洲街頭美食 — 管理</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -235,6 +235,19 @@
     .flash.is-show { opacity: 1; transform: translate(-50%, 0.5rem); }
     .flash-good { background: var(--good); color: white; }
     .flash-bad { background: var(--destructive); color: white; }
+
+    /* Language pill — same shape as the public site so the family has
+       muscle memory across both. EN/中 dim based on the active language
+       via html[lang] selectors. */
+    .lang-pill { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0 0.6rem; height: 2.25rem; border: 1px solid var(--border); border-radius: 2px; transition: border-color .25s ease; background: transparent; cursor: pointer; }
+    .lang-pill:hover { border-color: var(--destructive); }
+    .lang-pill .l-en { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; transition: color .25s ease, opacity .25s ease; }
+    .lang-pill .l-sep { color: var(--border); }
+    .lang-pill .l-zh { font-family: 'Noto Serif TC', serif; font-size: 0.95rem; line-height: 1; transition: color .25s ease, opacity .25s ease; }
+    html[lang="en"] .lang-pill .l-en { color: var(--destructive); font-weight: 500; }
+    html[lang="en"] .lang-pill .l-zh { opacity: 0.4; }
+    html[lang="zh-Hant"] .lang-pill .l-zh { color: var(--destructive); font-weight: 700; }
+    html[lang="zh-Hant"] .lang-pill .l-en { opacity: 0.4; }
   </style>
 </head>
 
@@ -248,10 +261,17 @@
       <a href="/" class="flex items-baseline gap-2 group">
         <span class="zh font-bold text-[color:var(--destructive)] text-sm">亞洲街頭美食</span>
         <span class="hidden sm:inline-block w-px h-3 bg-[color:var(--border)]"></span>
-        <span class="mono text-xs uppercase tracking-[0.18em] text-[color:var(--muted-foreground)] group-hover:text-[color:var(--foreground)]">← Back to site</span>
+        <span class="mono text-xs uppercase tracking-[0.18em] text-[color:var(--muted-foreground)] group-hover:text-[color:var(--foreground)]" data-i18n="nav.back">← Back to site</span>
       </a>
-      <span class="mono text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)]">Admin</span>
-      <button id="logout-btn" hidden class="mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)]">Log out</button>
+      <div class="flex items-center gap-2">
+        <span class="mono text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)]" data-i18n="nav.admin">Admin</span>
+        <button id="lang-toggle" type="button" aria-label="Switch language" class="lang-pill" data-lang-toggle>
+          <span class="l-en">EN</span>
+          <span class="l-sep" aria-hidden="true">·</span>
+          <span class="l-zh">中</span>
+        </button>
+        <button id="logout-btn" hidden class="mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)]" data-i18n="nav.logout">Log out</button>
+      </div>
     </div>
   </header>
 
@@ -261,19 +281,19 @@
     <section id="login-view" class="max-w-md mx-auto pt-12">
       <div class="text-center mb-8">
         <p class="zh text-[color:var(--destructive)] text-base mb-2">家庭廚房 · 管理</p>
-        <h1 class="display text-4xl font-light">Sign in</h1>
-        <p class="mt-3 text-sm text-[color:var(--muted-foreground)]">Admin access only.</p>
+        <h1 class="display text-4xl font-light" data-i18n="login.title">Sign in</h1>
+        <p class="mt-3 text-sm text-[color:var(--muted-foreground)]" data-i18n="login.subtitle">Admin access only.</p>
       </div>
       <form id="login-form" class="card p-6 space-y-4">
         <label class="block">
-          <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">Username</span>
+          <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="login.username">Username</span>
           <input name="username" type="text" autocomplete="username" required class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)]" />
         </label>
         <label class="block">
-          <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">Password</span>
+          <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="login.password">Password</span>
           <input name="password" type="password" autocomplete="current-password" required class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)]" />
         </label>
-        <button type="submit" class="w-full mono text-xs uppercase tracking-[0.18em] py-2.5 bg-[color:var(--destructive)] text-white hover:opacity-90">Sign in</button>
+        <button type="submit" class="w-full mono text-xs uppercase tracking-[0.18em] py-2.5 bg-[color:var(--destructive)] text-white hover:opacity-90" data-i18n="login.submit">Sign in</button>
         <p id="login-error" class="text-sm text-[color:var(--destructive)] text-center" hidden></p>
       </form>
     </section>
@@ -283,12 +303,12 @@
 
       <!-- Online Ordering toggle -->
       <div>
-        <h2 class="display text-3xl font-light leading-tight">Online Ordering</h2>
-        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">When OFF, the cart and checkout are hidden from the public site. Phone-order CTAs always remain.</p>
+        <h2 class="display text-3xl font-light leading-tight" data-i18n="cart.heading">Online Ordering</h2>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1" data-i18n="cart.subhead">When OFF, the cart and checkout are hidden from the public site. Phone-order CTAs always remain.</p>
         <div id="cart-toggle-container" class="mt-5 card p-5 flex items-center justify-between gap-4">
           <div class="flex items-center gap-3">
             <span id="cart-state-pill" class="badge badge-off">Off</span>
-            <span class="text-sm text-[color:var(--muted-foreground)]">Cart on the public site</span>
+            <span class="text-sm text-[color:var(--muted-foreground)]" data-i18n="cart.label">Cart on the public site</span>
           </div>
           <!-- toggle injected by JS -->
           <div id="cart-toggle-slot"></div>
@@ -298,10 +318,10 @@
       <!-- Orders (online orders inbox) -->
       <div>
         <div class="flex items-baseline justify-between gap-3">
-          <h2 class="display text-3xl font-light leading-tight">Orders</h2>
+          <h2 class="display text-3xl font-light leading-tight" data-i18n="orders.heading">Orders</h2>
           <span id="orders-poll-state" class="mono text-[0.65rem] uppercase tracking-[0.22em] text-[color:var(--muted-foreground)]">Auto-refresh on</span>
         </div>
-        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Active orders show automatically. New ones chime. From the last 24 hours.</p>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1" data-i18n="orders.subhead">Active orders show automatically. New ones chime. From the last 24 hours.</p>
 
         <!-- Desktop notification permission prompt — shows only when needed -->
         <div id="orders-notif-slot" class="mt-3"></div>
@@ -309,14 +329,14 @@
         <!-- Auto-print toggle: fires window.print() on every new order. -->
         <label class="mt-3 inline-flex items-center gap-2 text-xs cursor-pointer select-none">
           <input id="auto-print-toggle" type="checkbox" class="cursor-pointer" />
-          <span>Auto-print new orders</span>
-          <span class="mono text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">(tab must stay open)</span>
+          <span data-i18n="orders.autoPrintLabel">Auto-print new orders</span>
+          <span class="mono text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="orders.autoPrintHint">(tab must stay open)</span>
         </label>
 
         <div id="orders-filter-pills" class="mt-4 flex flex-wrap gap-2"></div>
 
         <div id="orders-list" class="mt-5 space-y-3"></div>
-        <div id="orders-empty" class="mt-5 card p-8 text-center text-sm text-[color:var(--muted-foreground)]" hidden>
+        <div id="orders-empty" class="mt-5 card p-8 text-center text-sm text-[color:var(--muted-foreground)]" hidden data-i18n="orders.empty">
           No orders in this view yet.
         </div>
       </div>
@@ -349,15 +369,15 @@
 
       <!-- Hours -->
       <div>
-        <h2 class="display text-3xl font-light leading-tight">Hours</h2>
-        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Set opening and closing times for each day. Times are in 24-hour format (NY local). Toggle a day off to mark it closed.</p>
+        <h2 class="display text-3xl font-light leading-tight" data-i18n="hours.heading">Hours</h2>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1" data-i18n="hours.subhead">Set opening and closing times for each day. Times are in 24-hour format (NY local). Toggle a day off to mark it closed.</p>
         <div id="hours-container" class="mt-5 card divide-y divide-dotted divide-[color:var(--border)]"></div>
       </div>
 
       <!-- Menu items -->
       <div>
-        <h2 class="display text-3xl font-light leading-tight">Menu items</h2>
-        <p class="text-sm text-[color:var(--muted-foreground)] mt-1">Check the box for items you have today. Unchecked items are hidden from the public menu.</p>
+        <h2 class="display text-3xl font-light leading-tight" data-i18n="menu.heading">Menu items</h2>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1" data-i18n="menu.subhead">Check the box for items you have today. Unchecked items are hidden from the public menu.</p>
         <div id="menu-container" class="mt-5 space-y-8"></div>
       </div>
 
@@ -365,6 +385,280 @@
   </main>
 
   <script>
+    // =========================================================
+    // Module-scope state — hoisted to the top of the script so that
+    // helpers like applyLang() can safely reference them even if they
+    // fire before the original assignment sites are reached at parse
+    // time (e.g. during the initial language toggle wiring below).
+    // =========================================================
+    let allOrders = [];
+    let currentFilter = 'active';
+    let highestSeenOrderId = 0;
+    let pollInterval = null;
+    let audioCtx = null;
+    let hiddenUnseenCount = 0;
+
+    // =========================================================
+    // i18n — bilingual EN/zh-Hant
+    // =========================================================
+    // All admin strings live here. The static markup uses `data-i18n="key"`
+    // attributes; dynamic JS calls `t('key', {params})`. Templates use
+    // `{name}` placeholders that t() replaces from the params object.
+    const LANG_STRINGS = {
+      en: {
+        'nav.back': '← Back to site',
+        'nav.admin': 'Admin',
+        'nav.logout': 'Log out',
+
+        'login.title': 'Sign in',
+        'login.subtitle': 'Admin access only.',
+        'login.username': 'Username',
+        'login.password': 'Password',
+        'login.submit': 'Sign in',
+        'login.error': 'Invalid credentials.',
+
+        'cart.heading': 'Online Ordering',
+        'cart.subhead': 'When OFF, the cart and checkout are hidden from the public site. Phone-order CTAs always remain.',
+        'cart.label': 'Cart on the public site',
+        'cart.stateOn': 'On',
+        'cart.stateOff': 'Off',
+        'cart.flashOn': 'Online ordering: ENABLED',
+        'cart.flashOff': 'Online ordering: DISABLED',
+
+        'orders.heading': 'Orders',
+        'orders.subhead': 'Active orders show automatically. New ones chime. From the last 24 hours.',
+        'orders.autoRefreshOn': 'Auto-refresh on',
+        'orders.autoRefreshPaused': 'Paused',
+        'orders.autoPrintLabel': 'Auto-print new orders',
+        'orders.autoPrintHint': '(tab must stay open)',
+        'orders.empty': 'No orders in this view yet.',
+
+        'filter.active': 'Active',
+        'filter.pickedUp': 'Picked up',
+        'filter.cancelled': 'Cancelled',
+        'filter.all': 'All',
+
+        'status.received': 'Received',
+        'status.preparing': 'Preparing',
+        'status.ready': 'Ready',
+        'status.picked_up': 'Picked up',
+        'status.cancelled': 'Cancelled',
+
+        'card.markPreparing': 'Mark preparing',
+        'card.markReady': 'Mark ready',
+        'card.markPicked_up': 'Mark picked up',
+        'card.print': '🖨 Print',
+        'card.cancel': 'Cancel',
+        'card.cancelArmed': 'Tap again to cancel',
+        'card.revert': '⤺ Revert to received',
+
+        'time.justNow': 'just now',
+        'time.secondsAgo': '{n}s ago',
+        'time.minutesAgo': '{n} min ago',
+        'time.hoursAgo': '{h}h {m}m ago',
+
+        'notif.unsupported': 'This browser does not support desktop notifications — keep this tab focused to hear new orders.',
+        'notif.granted': '✓ Desktop notifications enabled. New orders alert you even when this tab is in the background.',
+        'notif.denied': '⚠ Desktop notifications are blocked. To re-enable: click the lock icon in the address bar → Notifications → Allow.',
+        'notif.prompt': 'Turn on desktop notifications so you don\'t miss orders when this tab is in the background.',
+        'notif.enable': 'Enable',
+        'notif.titleOne': 'New order received',
+        'notif.titleMany': '{n} new orders received',
+        'notif.body': 'Open the admin tab to view and start preparing.',
+
+        'flash.updateFailed': 'Update failed',
+        'flash.orderUpdated': 'Order updated → {status}',
+        'flash.newOrder': 'New order received',
+        'flash.newOrders': '{n} new orders received',
+        'flash.awayOne': '1 new order while you were away',
+        'flash.awayMany': '{n} new orders while you were away',
+        'flash.autoPrintOn': 'Auto-print enabled',
+        'flash.autoPrintOff': 'Auto-print disabled',
+        'flash.menuAvailable': '{code} → available',
+        'flash.menuUnavailable': '{code} → unavailable',
+        'flash.hoursOpen': '{day} → {opens}–{closes}',
+        'flash.hoursClosed': '{day} → closed',
+
+        'titleBadge': '({n}) NEW',
+
+        'hours.heading': 'Hours',
+        'hours.subhead': 'Set opening and closing times for each day. Times are in 24-hour format (NY local). Toggle a day off to mark it closed.',
+        'day.sun': 'Sun', 'day.mon': 'Mon', 'day.tue': 'Tue', 'day.wed': 'Wed', 'day.thu': 'Thu', 'day.fri': 'Fri', 'day.sat': 'Sat',
+
+        'menu.heading': 'Menu items',
+        'menu.subhead': 'Check the box for items you have today. Unchecked items are hidden from the public menu.',
+        'menu.itemsCount': '{n} items',
+        'menu.available': 'available',
+        'menu.unavailable': 'unavailable',
+
+        'cat.rice': '蒸餸飯 · Steamed Rice Plates',
+        'cat.home': '家庭菜 · Home-Style Dishes',
+        'cat.soup': '靚湯 · Slow-Simmered Soups',
+        'cat.snack': '小食 · Snacks & Sides',
+
+        'print.pickupCode': 'Pickup code',
+        'print.readyIn': 'Ready in ~{n} min',
+        'print.payAtPickup': 'Pay at pickup',
+        'print.colCode': 'Code',
+        'print.colQty': 'Qty',
+        'print.colItem': 'Item',
+        'print.colPrice': 'Price',
+        'print.customerNotes': 'Customer notes',
+        'print.total': 'Total',
+        'print.orderNum': 'Order #{id}',
+        'print.footer': 'Thank you · 多謝晒 · Show this code at the counter',
+      },
+      zh: {
+        'nav.back': '← 返回網站',
+        'nav.admin': '管理',
+        'nav.logout': '登出',
+
+        'login.title': '登入',
+        'login.subtitle': '只限管理員。',
+        'login.username': '用戶名',
+        'login.password': '密碼',
+        'login.submit': '登入',
+        'login.error': '帳號或密碼錯誤。',
+
+        'cart.heading': '網上落單',
+        'cart.subhead': '關咗之後，網站唔會顯示購物車同結賬，剩低電話訂餐嘅按鈕。',
+        'cart.label': '網站上嘅購物車',
+        'cart.stateOn': '開',
+        'cart.stateOff': '關',
+        'cart.flashOn': '網上落單：已啟用',
+        'cart.flashOff': '網上落單：已關閉',
+
+        'orders.heading': '訂單',
+        'orders.subhead': '進行中嘅訂單會自動顯示。新嘅嚟到會響鈴。顯示過去 24 小時。',
+        'orders.autoRefreshOn': '自動更新中',
+        'orders.autoRefreshPaused': '已暫停',
+        'orders.autoPrintLabel': '自動列印新訂單',
+        'orders.autoPrintHint': '（要保持頁面開住）',
+        'orders.empty': '暫時無訂單。',
+
+        'filter.active': '進行中',
+        'filter.pickedUp': '已取餐',
+        'filter.cancelled': '已取消',
+        'filter.all': '全部',
+
+        'status.received': '已收單',
+        'status.preparing': '製作中',
+        'status.ready': '可取餐',
+        'status.picked_up': '已取餐',
+        'status.cancelled': '已取消',
+
+        'card.markPreparing': '開始製作',
+        'card.markReady': '已準備好',
+        'card.markPicked_up': '已取餐',
+        'card.print': '🖨 列印',
+        'card.cancel': '取消',
+        'card.cancelArmed': '再撳一次確認',
+        'card.revert': '⤺ 回復「已收單」',
+
+        'time.justNow': '啱啱',
+        'time.secondsAgo': '{n} 秒前',
+        'time.minutesAgo': '{n} 分鐘前',
+        'time.hoursAgo': '{h} 小時 {m} 分鐘前',
+
+        'notif.unsupported': '呢個瀏覽器唔支援桌面通知 — 要保持頁面打開先聽到新訂單嘅鈴聲。',
+        'notif.granted': '✓ 桌面通知已啟用。新訂單會喺後台都通知你。',
+        'notif.denied': '⚠ 桌面通知已封鎖。要重新啟用：撳網址列嘅鎖頭圖示 → 通知 → 允許。',
+        'notif.prompt': '開啟桌面通知，避免切換到其他標籤時錯過新訂單。',
+        'notif.enable': '啟用',
+        'notif.titleOne': '收到新訂單',
+        'notif.titleMany': '收到 {n} 張新訂單',
+        'notif.body': '請打開管理頁查看並開始準備。',
+
+        'flash.updateFailed': '更新失敗',
+        'flash.orderUpdated': '訂單已更新 → {status}',
+        'flash.newOrder': '收到新訂單',
+        'flash.newOrders': '收到 {n} 張新訂單',
+        'flash.awayOne': '你離開期間收到 1 張新訂單',
+        'flash.awayMany': '你離開期間收到 {n} 張新訂單',
+        'flash.autoPrintOn': '已啟用自動列印',
+        'flash.autoPrintOff': '已關閉自動列印',
+        'flash.menuAvailable': '{code} → 有得賣',
+        'flash.menuUnavailable': '{code} → 賣晒',
+        'flash.hoursOpen': '{day} → {opens}–{closes}',
+        'flash.hoursClosed': '{day} → 休息',
+
+        'titleBadge': '（{n}）新',
+
+        'hours.heading': '營業時間',
+        'hours.subhead': '設定每日嘅開門同關門時間。時間用 24 小時制（紐約本地）。如果嗰日唔做生意，將開關制撥到關。',
+        'day.sun': '日', 'day.mon': '一', 'day.tue': '二', 'day.wed': '三', 'day.thu': '四', 'day.fri': '五', 'day.sat': '六',
+
+        'menu.heading': '餐牌',
+        'menu.subhead': '剔選今日有得賣嘅項目。冇剔嘅項目唔會喺餐牌顯示。',
+        'menu.itemsCount': '{n} 項',
+        'menu.available': '有得賣',
+        'menu.unavailable': '賣晒',
+
+        'cat.rice': '蒸餸飯',
+        'cat.home': '家庭菜',
+        'cat.soup': '靚湯',
+        'cat.snack': '小食',
+
+        'print.pickupCode': '取餐編號',
+        'print.readyIn': '約 {n} 分鐘可取',
+        'print.payAtPickup': '取餐時付款',
+        'print.colCode': '編號',
+        'print.colQty': '數量',
+        'print.colItem': '項目',
+        'print.colPrice': '價錢',
+        'print.customerNotes': '顧客備註',
+        'print.total': '總計',
+        'print.orderNum': '單號 #{id}',
+        'print.footer': '多謝晒 · Thank you · 出示編號取餐',
+      },
+    };
+
+    // Current language is mirrored on <html lang> ("en" or "zh-Hant").
+    // Persisted to localStorage under 'asg-lang' (same key as public site
+    // so switching either page propagates after a refresh).
+    function currentLang() {
+      return document.documentElement.lang === 'zh-Hant' ? 'zh' : 'en';
+    }
+    function t(key, params) {
+      const dict = LANG_STRINGS[currentLang()] || LANG_STRINGS.en;
+      let s = dict[key];
+      if (s === undefined) s = LANG_STRINGS.en[key] !== undefined ? LANG_STRINGS.en[key] : key;
+      if (params) for (const k in params) s = s.split('{' + k + '}').join(params[k]);
+      return s;
+    }
+    const ORIGINAL_TITLE_EN = 'Asian Street Gourmet — Admin';
+    const ORIGINAL_TITLE_ZH = '亞洲街頭美食 — 管理';
+    function pageTitle() {
+      return currentLang() === 'zh' ? ORIGINAL_TITLE_ZH : ORIGINAL_TITLE_EN;
+    }
+
+    function applyLang(lang) {
+      document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+      const dict = LANG_STRINGS[lang] || LANG_STRINGS.en;
+      document.querySelectorAll('[data-i18n]').forEach((el) => {
+        const key = el.getAttribute('data-i18n');
+        const val = dict[key];
+        if (val !== undefined) el.textContent = val;
+      });
+      try { localStorage.setItem('asg-lang', lang); } catch {}
+      // Re-render every dynamic section so labels swap immediately. Guarded
+      // by element presence so we don't crash before the admin view loads.
+      if ($('#cart-state-pill')) $('#cart-state-pill').textContent =
+        $('#cart-state-pill').classList.contains('badge-on') ? t('cart.stateOn') : t('cart.stateOff');
+      if (typeof allOrders !== 'undefined' && !$('#admin-view').hidden) {
+        renderFilterPills();
+        renderOrdersList();
+        renderNotifPrompt();
+        if (window.__hoursCache) renderHours(window.__hoursCache);
+        if (window.__menuCache) renderMenu(window.__menuCache);
+      }
+      // Refresh poll-state indicator label
+      const ind = $('#orders-poll-state');
+      if (ind) ind.textContent = pollInterval ? t('orders.autoRefreshOn') : t('orders.autoRefreshPaused');
+      // Refresh page title / badge prefix
+      updateTitleBadge();
+    }
+
     // =========================================================
     // Tiny DOM helpers — safer than innerHTML
     // =========================================================
@@ -431,6 +725,21 @@
       $('#logout-btn').hidden = false;
     }
 
+    // =========================================================
+    // Language: default to Cantonese; respect stored toggle thereafter.
+    // (Same localStorage key as the public site so a visitor who switches
+    // on the public site sees their preference here too, and vice versa.)
+    // =========================================================
+    (function initLang() {
+      let stored = null;
+      try { stored = localStorage.getItem('asg-lang'); } catch {}
+      const initial = stored === 'en' ? 'en' : 'zh';
+      applyLang(initial);
+      $('#lang-toggle').addEventListener('click', () => {
+        applyLang(currentLang() === 'zh' ? 'en' : 'zh');
+      });
+    })();
+
     $('#login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.currentTarget;
@@ -444,7 +753,7 @@
         showAdmin();
         await loadEverything();
       } catch (e) {
-        err.textContent = 'Invalid credentials.';
+        err.textContent = t('login.error');
         err.hidden = false;
       }
     });
@@ -481,6 +790,10 @@
         fetch('/api/hours?_=' + Date.now()).then((r) => r.json()),
         fetch('/api/cart?_=' + Date.now()).then((r) => r.json()),
       ]);
+      // Cache the source data so the lang-toggle handler can re-render
+      // these sections without re-fetching from the server.
+      window.__hoursCache = hours.hours;
+      window.__menuCache = menu.menu_items;
       renderCartToggle(cartStatus.cart_enabled === true);
       renderPreview(today, menu.menu_items);
       renderHours(hours.hours);
@@ -510,12 +823,8 @@
       meat: 'Meat & poultry', seafood: 'Seafood', vegetable: 'Vegetables',
       preserved: 'Preserved & dried', pantry: 'Pantry & frozen',
     };
-    const MENU_CATEGORY_LABELS = {
-      rice: '蒸餸飯 · Steamed Rice Plates',
-      home: '家庭菜 · Home-Style Dishes',
-      soup: '靚湯 · Slow-Simmered Soups',
-      snack: '小食 · Snacks & Sides',
-    };
+    // Resolved at render-time via t() so a lang toggle re-translates them.
+    function menuCategoryLabel(cat) { return t('cat.' + cat); }
 
     // =========================================================
     // Cart-feature toggle (top of admin)
@@ -528,7 +837,7 @@
       // Reflect current state
       function setPill(on) {
         pill.className = 'badge ' + (on ? 'badge-on' : 'badge-off');
-        pill.textContent = on ? 'On' : 'Off';
+        pill.textContent = on ? t('cart.stateOn') : t('cart.stateOff');
       }
       setPill(enabled);
 
@@ -543,10 +852,10 @@
             method: 'PATCH', body: { enabled: next },
           });
           setPill(next);
-          flash('Online ordering: ' + (next ? 'ENABLED' : 'DISABLED'));
+          flash(next ? t('cart.flashOn') : t('cart.flashOff'));
         } catch {
           input.checked = !next;
-          flash('Update failed', 'bad');
+          flash(t('flash.updateFailed'), 'bad');
         } finally {
           toggle.classList.remove('is-busy');
         }
@@ -559,35 +868,29 @@
     // =========================================================
     // Orders inbox (online ordering)
     // =========================================================
-    const ORDER_STATUS_LABELS = {
-      received: 'Received',
-      preparing: 'Preparing',
-      ready: 'Ready',
-      picked_up: 'Picked up',
-      cancelled: 'Cancelled',
-    };
+    // Localized labels resolved at render-time via t(), so a lang toggle
+    // immediately swaps the visible text on re-render.
+    function orderStatusLabel(status) {
+      return t('status.' + status);
+    }
     // Status flow: clicking the "next" pill advances; cancel goes to cancelled.
     const NEXT_STATUS = {
       received: 'preparing',
       preparing: 'ready',
       ready: 'picked_up',
     };
+    // Filter id + label-key + which statuses count toward this filter.
+    // labelKey is resolved through t() in renderFilterPills.
     const ORDER_FILTERS = [
-      { id: 'active',    label: 'Active',     statuses: ['received', 'preparing', 'ready'] },
-      { id: 'picked_up', label: 'Picked up',  statuses: ['picked_up'] },
-      { id: 'cancelled', label: 'Cancelled',  statuses: ['cancelled'] },
-      { id: 'all',       label: 'All',        statuses: ['received', 'preparing', 'ready', 'picked_up', 'cancelled'] },
+      { id: 'active',    labelKey: 'filter.active',    statuses: ['received', 'preparing', 'ready'] },
+      { id: 'picked_up', labelKey: 'filter.pickedUp',  statuses: ['picked_up'] },
+      { id: 'cancelled', labelKey: 'filter.cancelled', statuses: ['cancelled'] },
+      { id: 'all',       labelKey: 'filter.all',       statuses: ['received', 'preparing', 'ready', 'picked_up', 'cancelled'] },
     ];
 
-    let allOrders = [];
-    let currentFilter = 'active';
-    let highestSeenOrderId = 0;
-    let pollInterval = null;
-    let audioCtx = null;
-    // Counts orders that arrived while the admin tab was hidden, so we can
-    // play one more chime when the family returns to the tab.
-    let hiddenUnseenCount = 0;
-    const ORIGINAL_TITLE = document.title;
+    // (Order-inbox module state — allOrders / currentFilter / pollInterval /
+    //  audioCtx / hiddenUnseenCount — is hoisted to the top of the script.
+    //  Page title comes from pageTitle(), which is lang-aware.)
 
     function renderFilterPills() {
       const c = $('#orders-filter-pills');
@@ -599,7 +902,7 @@
           class: 'px-3 py-1.5 mono text-[0.7rem] uppercase tracking-[0.18em] border transition-colors',
           'data-filter': f.id,
           style: 'border-radius: 2px;',
-        }, f.label + ' (' + count + ')');
+        }, t(f.labelKey) + ' (' + count + ')');
         if (f.id === currentFilter) {
           pill.style.background = 'var(--destructive)';
           pill.style.color = 'white';
@@ -634,7 +937,7 @@
       const head = el('div', { class: 'flex items-baseline justify-between gap-3 mb-3' });
       const left = el('div', { class: 'flex items-baseline gap-3' });
       left.appendChild(el('span', { class: 'display text-3xl text-[color:var(--destructive)] font-medium', style: 'letter-spacing: 0.06em;' }, o.pickup_code));
-      left.appendChild(el('span', { class: 'badge ' + (o.status === 'cancelled' ? 'badge-off' : 'badge-on') }, ORDER_STATUS_LABELS[o.status] || o.status));
+      left.appendChild(el('span', { class: 'badge ' + (o.status === 'cancelled' ? 'badge-off' : 'badge-on') }, orderStatusLabel(o.status)));
       head.appendChild(left);
       // Right side: relative time on top, absolute NY date+time underneath
       const timeWrap = el('div', { class: 'text-right' });
@@ -678,7 +981,7 @@
 
       // Totals
       const totals = el('p', { class: 'text-xs text-[color:var(--muted-foreground)] mb-4' },
-        'Total $' + (o.total_cents / 100).toFixed(2) + ' · Ready in ~' + o.estimated_wait_min + ' min'
+        t('print.total') + ' $' + (o.total_cents / 100).toFixed(2) + ' · ' + t('print.readyIn', { n: o.estimated_wait_min })
       );
       card.appendChild(totals);
 
@@ -686,7 +989,9 @@
       const actions = el('div', { class: 'flex flex-wrap gap-2' });
       const next = NEXT_STATUS[o.status];
       if (next) {
-        const btn = el('button', { type: 'button', class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 bg-[color:var(--destructive)] text-white', style: 'border-radius: 2px;' }, 'Mark ' + ORDER_STATUS_LABELS[next].toLowerCase());
+        // Key shape: card.markPreparing / card.markReady / card.markPicked_up
+        const markKey = 'card.mark' + next.charAt(0).toUpperCase() + next.slice(1);
+        const btn = el('button', { type: 'button', class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 bg-[color:var(--destructive)] text-white', style: 'border-radius: 2px;' }, t(markKey));
         btn.addEventListener('click', () => updateOrderStatus(o.id, next));
         actions.appendChild(btn);
       }
@@ -695,7 +1000,7 @@
         type: 'button',
         class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border',
         style: 'border-radius: 2px; border-color: var(--border); color: var(--foreground);',
-      }, '🖨 Print');
+      }, t('card.print'));
       printBtn.addEventListener('click', () => printOrder(o));
       actions.appendChild(printBtn);
       if (o.status !== 'cancelled' && o.status !== 'picked_up') {
@@ -708,12 +1013,12 @@
           type: 'button',
           class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border',
           style: 'border-radius: 2px; border-color: var(--border); color: var(--muted-foreground);',
-        }, 'Cancel');
+        }, t('card.cancel'));
         let armed = false;
         let armTimer = null;
         const disarm = () => {
           armed = false;
-          cancelBtn.textContent = 'Cancel';
+          cancelBtn.textContent = t('card.cancel');
           cancelBtn.style.borderColor = 'var(--border)';
           cancelBtn.style.color = 'var(--muted-foreground)';
           cancelBtn.style.background = 'transparent';
@@ -721,7 +1026,7 @@
         cancelBtn.addEventListener('click', () => {
           if (!armed) {
             armed = true;
-            cancelBtn.textContent = 'Tap again to cancel';
+            cancelBtn.textContent = t('card.cancelArmed');
             cancelBtn.style.borderColor = 'var(--destructive)';
             cancelBtn.style.color = 'white';
             cancelBtn.style.background = 'var(--destructive)';
@@ -735,7 +1040,7 @@
         actions.appendChild(cancelBtn);
       }
       if (o.status === 'cancelled' || o.status === 'picked_up') {
-        const revertBtn = el('button', { type: 'button', class: 'mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]', style: 'background: none; border: none; cursor: pointer;' }, '⤺ Revert to received');
+        const revertBtn = el('button', { type: 'button', class: 'mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]', style: 'background: none; border: none; cursor: pointer;' }, t('card.revert'));
         revertBtn.addEventListener('click', () => updateOrderStatus(o.id, 'received'));
         actions.appendChild(revertBtn);
       }
@@ -745,15 +1050,15 @@
     }
 
     function relativeTime(iso) {
-      const t = new Date(iso).getTime();
-      if (isNaN(t)) return '';
-      const diffSec = Math.round((Date.now() - t) / 1000);
-      if (diffSec < 30) return 'just now';
-      if (diffSec < 60) return diffSec + 's ago';
+      const ts = new Date(iso).getTime();
+      if (isNaN(ts)) return '';
+      const diffSec = Math.round((Date.now() - ts) / 1000);
+      if (diffSec < 30) return t('time.justNow');
+      if (diffSec < 60) return t('time.secondsAgo', { n: diffSec });
       const min = Math.floor(diffSec / 60);
-      if (min < 60) return min + ' min ago';
+      if (min < 60) return t('time.minutesAgo', { n: min });
       const hr = Math.floor(min / 60);
-      return hr + 'h ' + (min - hr * 60) + 'm ago';
+      return t('time.hoursAgo', { h: hr, m: min - hr * 60 });
     }
 
     // Format an ISO timestamp as e.g. "Jun 10 · 4:23 PM ET" in New York time.
@@ -793,7 +1098,7 @@
             playChime();
           } else {
             playChime();
-            flash('New order' + (newCount > 1 ? 's' : '') + ' received');
+            flash(newCount === 1 ? t('flash.newOrder') : t('flash.newOrders', { n: newCount }));
           }
           // Auto-print: queue each new order with a small stagger so multiple
           // arrivals don't collide in the same print() call. Each one fires
@@ -819,10 +1124,10 @@
     async function updateOrderStatus(id, status) {
       try {
         await api('/api/admin/orders', { method: 'PATCH', body: { id: id, status: status } });
-        flash('Order updated → ' + status);
+        flash(t('flash.orderUpdated', { status: orderStatusLabel(status) }));
         await fetchOrders();
       } catch {
-        flash('Update failed', 'bad');
+        flash(t('flash.updateFailed'), 'bad');
       }
     }
 
@@ -838,18 +1143,18 @@
       clear(slot);
       if (!('Notification' in window)) {
         slot.appendChild(el('p', { class: 'text-xs text-[color:var(--muted-foreground)] italic' },
-          'This browser does not support desktop notifications — keep this tab focused to hear new orders.'));
+          t('notif.unsupported')));
         return;
       }
       const p = Notification.permission;
       if (p === 'granted') {
         slot.appendChild(el('p', { class: 'text-xs text-[color:var(--muted-foreground)]' },
-          '✓ Desktop notifications enabled. New orders alert you even when this tab is in the background.'));
+          t('notif.granted')));
         return;
       }
       if (p === 'denied') {
         slot.appendChild(el('p', { class: 'text-xs', style: 'color: var(--destructive);' },
-          '⚠ Desktop notifications are blocked. To re-enable: click the lock icon in the address bar → Notifications → Allow.'));
+          t('notif.denied')));
         return;
       }
       // 'default' — user hasn't decided yet
@@ -857,12 +1162,12 @@
       wrap.style.background = '#fff8e6';
       wrap.style.borderColor = '#e6c84a';
       wrap.appendChild(el('p', { class: 'text-xs flex-1' },
-        'Turn on desktop notifications so you don’t miss orders when this tab is in the background.'));
+        t('notif.prompt')));
       const btn = el('button', {
         type: 'button',
         class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 bg-[color:var(--destructive)] text-white shrink-0',
         style: 'border-radius: 2px;',
-      }, 'Enable');
+      }, t('notif.enable'));
       btn.addEventListener('click', async () => {
         try {
           await Notification.requestPermission();
@@ -876,11 +1181,11 @@
     function fireOrderNotification(newCount) {
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
       const title = newCount === 1
-        ? 'New order received'
-        : newCount + ' new orders received';
+        ? t('notif.titleOne')
+        : t('notif.titleMany', { n: newCount });
       try {
         const n = new Notification(title, {
-          body: 'Open the admin tab to view and start preparing.',
+          body: t('notif.body'),
           tag: 'asg-new-order',  // collapses multiple into one alert
           renotify: true,         // re-alerts even when collapsed
           requireInteraction: false,
@@ -891,10 +1196,11 @@
 
     function updateTitleBadge() {
       // Show "(N) NEW · …" prefix when hidden with unseen orders.
+      const baseTitle = pageTitle();
       if (document.hidden && hiddenUnseenCount > 0) {
-        document.title = '(' + hiddenUnseenCount + ') NEW · ' + ORIGINAL_TITLE;
+        document.title = t('titleBadge', { n: hiddenUnseenCount }) + ' · ' + baseTitle;
       } else {
-        document.title = ORIGINAL_TITLE;
+        document.title = baseTitle;
       }
     }
 
@@ -950,7 +1256,7 @@
         '</div>' +
         '<div class="meta">' +
           '<div>' + escapeHtml(nyDateTime(o.created_at)) + '</div>' +
-          '<div>Order #' + o.id + '</div>' +
+          '<div>' + escapeHtml(t('print.orderNum', { id: o.id })) + '</div>' +
         '</div>';
       slip.appendChild(header);
 
@@ -958,12 +1264,12 @@
       pickup.className = 'pickup-block';
       pickup.innerHTML =
         '<div>' +
-          '<div class="pickup-label">Pickup code</div>' +
+          '<div class="pickup-label">' + escapeHtml(t('print.pickupCode')) + '</div>' +
           '<div class="pickup-code">' + escapeHtml(o.pickup_code) + '</div>' +
         '</div>' +
         '<div class="pickup-wait">' +
-          '<div>Ready in ~' + o.estimated_wait_min + ' min</div>' +
-          '<div style="font-size:0.7rem;margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.15em;">Pay at pickup</div>' +
+          '<div>' + escapeHtml(t('print.readyIn', { n: o.estimated_wait_min })) + '</div>' +
+          '<div style="font-size:0.7rem;margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.15em;">' + escapeHtml(t('print.payAtPickup')) + '</div>' +
         '</div>';
       slip.appendChild(pickup);
 
@@ -977,7 +1283,7 @@
 
       const table = document.createElement('table');
       table.className = 'items';
-      let rows = '<thead><tr><th>Code</th><th>Qty</th><th>Item</th><th style="text-align:right;">Price</th></tr></thead><tbody>';
+      let rows = '<thead><tr><th>' + escapeHtml(t('print.colCode')) + '</th><th>' + escapeHtml(t('print.colQty')) + '</th><th>' + escapeHtml(t('print.colItem')) + '</th><th style="text-align:right;">' + escapeHtml(t('print.colPrice')) + '</th></tr></thead><tbody>';
       (o.items || []).forEach((it) => {
         rows +=
           '<tr>' +
@@ -994,20 +1300,20 @@
       if (o.notes && o.notes.trim()) {
         const n = document.createElement('div');
         n.className = 'notes-block';
-        n.innerHTML = '<div class="label">Customer notes</div>' + escapeHtml(o.notes);
+        n.innerHTML = '<div class="label">' + escapeHtml(t('print.customerNotes')) + '</div>' + escapeHtml(o.notes);
         slip.appendChild(n);
       }
 
       const total = document.createElement('div');
       total.className = 'total-row';
       total.innerHTML =
-        '<span class="label">Total</span>' +
+        '<span class="label">' + escapeHtml(t('print.total')) + '</span>' +
         '<span class="amount">$' + (o.total_cents / 100).toFixed(2) + '</span>';
       slip.appendChild(total);
 
       const footer = document.createElement('div');
       footer.className = 'footer';
-      footer.innerHTML = 'Thank you · 多謝晒 · Show this code at the counter';
+      footer.innerHTML = escapeHtml(t('print.footer'));
       slip.appendChild(footer);
 
       return slip;
@@ -1046,7 +1352,7 @@
       cb.checked = isAutoPrintOn();
       cb.addEventListener('change', () => {
         try { localStorage.setItem(AUTO_PRINT_KEY, cb.checked ? 'true' : 'false'); } catch {}
-        flash(cb.checked ? 'Auto-print enabled' : 'Auto-print disabled');
+        flash(cb.checked ? t('flash.autoPrintOn') : t('flash.autoPrintOff'));
       });
     }
 
@@ -1054,7 +1360,7 @@
       if (pollInterval) return;
       pollInterval = setInterval(fetchOrders, 15000);
       const ind = $('#orders-poll-state');
-      if (ind) ind.textContent = 'Auto-refresh on';
+      if (ind) ind.textContent = t('orders.autoRefreshOn');
     }
 
     function stopOrdersPolling() {
@@ -1062,7 +1368,7 @@
         clearInterval(pollInterval);
         pollInterval = null;
         const ind = $('#orders-poll-state');
-        if (ind) ind.textContent = 'Paused';
+        if (ind) ind.textContent = t('orders.autoRefreshPaused');
       }
     }
 
@@ -1075,8 +1381,8 @@
         if (hiddenUnseenCount > 0) {
           playChime();
           flash(hiddenUnseenCount === 1
-            ? '1 new order while you were away'
-            : hiddenUnseenCount + ' new orders while you were away');
+            ? t('flash.awayOne')
+            : t('flash.awayMany', { n: hiddenUnseenCount }));
           hiddenUnseenCount = 0;
         }
         updateTitleBadge();  // clears the "(N) NEW" prefix
@@ -1212,15 +1518,15 @@
           input.value = v;
           try {
             await api('/api/admin/rotation', { method: 'PATCH', body: { category: cat, pool_size: v } });
-            flash('Rotation: ' + MENU_CATEGORY_LABELS[cat] + ' → ' + v);
+            flash('Rotation: ' + menuCategoryLabel(cat) + ' → ' + v);
             refreshPreview();
-          } catch { flash('Update failed', 'bad'); }
+          } catch { flash(t('flash.updateFailed'), 'bad'); }
         });
 
         container.appendChild(
           el('div', { class: 'flex items-center justify-between gap-3 px-5 py-4' },
             el('div', {},
-              el('p', { class: 'display text-lg' }, MENU_CATEGORY_LABELS[cat]),
+              el('p', { class: 'display text-lg' }, menuCategoryLabel(cat)),
               el('p', { class: 'mono text-[0.65rem] uppercase tracking-[0.15em] text-[color:var(--muted-foreground)] mt-0.5' },
                 (totals[cat] || 0) + ' items total · ' + (rotInMode[cat] || 0) + ' currently in rotation')
             ),
@@ -1237,7 +1543,9 @@
     // =========================================================
     // Hours — 7 day rows with open/closed toggle + two time inputs
     // =========================================================
-    const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    // Day-of-week labels resolved through t() so language toggles re-translate.
+    const DAY_KEYS = ['day.sun', 'day.mon', 'day.tue', 'day.wed', 'day.thu', 'day.fri', 'day.sat'];
+    function dayName(dow) { return t(DAY_KEYS[dow]); }
 
     function renderHours(hoursRows) {
       const container = $('#hours-container');
@@ -1293,11 +1601,13 @@
           closesInput.disabled = !enabled;
           opensInput.style.opacity = enabled ? '1' : '0.4';
           closesInput.style.opacity = enabled ? '1' : '0.4';
-          flash(DAY_NAMES[h.day_of_week] + ' → ' + (enabled ? body.opens + '–' + body.closes : 'closed'));
+          flash(enabled
+            ? t('flash.hoursOpen',   { day: dayName(h.day_of_week), opens: body.opens, closes: body.closes })
+            : t('flash.hoursClosed', { day: dayName(h.day_of_week) }));
         } catch (err) {
           // Revert visual state on failure
           toggleInput.checked = h.is_open;
-          flash('Update failed', 'bad');
+          flash(t('flash.updateFailed'), 'bad');
         } finally {
           toggle.classList.remove('is-busy');
         }
@@ -1308,7 +1618,7 @@
       closesInput.addEventListener('change', () => { if (toggleInput.checked) save(); });
 
       return el('div', { class: 'flex items-center justify-between gap-3 px-5 py-3' },
-        el('p', { class: 'mono text-sm uppercase tracking-[0.18em] w-12' }, DAY_NAMES[h.day_of_week]),
+        el('p', { class: 'mono text-sm uppercase tracking-[0.18em] w-12' }, dayName(h.day_of_week)),
         el('div', { class: 'flex items-center gap-2 flex-1 justify-end' },
           opensInput,
           el('span', { class: 'text-[color:var(--muted-foreground)]' }, '—'),
@@ -1332,8 +1642,8 @@
         container.appendChild(
           el('div', { class: 'card p-5' },
             el('div', { class: 'flex items-baseline justify-between mb-2' },
-              el('h3', { class: 'display text-xl font-light' }, MENU_CATEGORY_LABELS[cat]),
-              el('span', { class: 'mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]' }, items.length + ' items')
+              el('h3', { class: 'display text-xl font-light' }, menuCategoryLabel(cat)),
+              el('span', { class: 'mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]' }, t('menu.itemsCount', { n: items.length }))
             ),
             list
           )
@@ -1343,7 +1653,7 @@
 
     function menuRow(m) {
       const isOn = m.is_available !== false;
-      const badge = el('span', { class: 'badge ' + (isOn ? 'badge-on' : 'badge-off') }, isOn ? 'available' : 'unavailable');
+      const badge = el('span', { class: 'badge ' + (isOn ? 'badge-on' : 'badge-off') }, isOn ? t('menu.available') : t('menu.unavailable'));
       const input = el('input', { type: 'checkbox', checked: isOn || null });
       const toggle = el('label', { class: 'toggle' }, input, el('span', { class: 'slider' }));
 
@@ -1353,12 +1663,14 @@
           await api('/api/admin/menu', { method: 'PATCH', body: { code: m.code, is_available: input.checked } });
           m.is_available = input.checked;
           badge.className = 'badge ' + (input.checked ? 'badge-on' : 'badge-off');
-          badge.textContent = input.checked ? 'available' : 'unavailable';
-          flash(m.code + ' → ' + (input.checked ? 'available' : 'unavailable'));
+          badge.textContent = input.checked ? t('menu.available') : t('menu.unavailable');
+          flash(input.checked
+            ? t('flash.menuAvailable',   { code: m.code })
+            : t('flash.menuUnavailable', { code: m.code }));
           refreshPreview();
         } catch {
           input.checked = !input.checked;
-          flash('Update failed', 'bad');
+          flash(t('flash.updateFailed'), 'bad');
         } finally {
           toggle.classList.remove('is-busy');
         }

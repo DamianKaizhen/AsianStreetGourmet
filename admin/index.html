@@ -236,6 +236,35 @@
     .flash-good { background: var(--good); color: white; }
     .flash-bad { background: var(--destructive); color: white; }
 
+    /* Password field with eye-icon "show password" toggle. The button is
+       absolute-positioned inside the wrap; the input gets right-padding so
+       text never slides under the icon. Click the eye → swap input type to
+       text and show the "eye-off" icon instead. */
+    .pw-input-wrap { position: relative; display: block; }
+    .pw-input-wrap .pw-input {
+      width: 100%;
+      padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      background: var(--background);
+      color: var(--foreground);
+      font-family: inherit;
+    }
+    .pw-input-wrap .pw-input:focus { outline: 2px solid var(--destructive); outline-offset: 1px; }
+    .pw-input-wrap .pw-toggle {
+      position: absolute;
+      right: 0.4rem; top: 50%; transform: translateY(-50%);
+      background: transparent; border: none; cursor: pointer;
+      padding: 0.35rem; border-radius: 2px;
+      color: var(--muted-foreground);
+      display: inline-flex; align-items: center; justify-content: center;
+      line-height: 0;
+    }
+    .pw-input-wrap .pw-toggle:hover { color: var(--foreground); }
+    .pw-input-wrap .pw-toggle:focus-visible { outline: 2px solid var(--destructive); outline-offset: 1px; }
+    .pw-toggle .icon-eye-off { display: none; }
+    .pw-toggle.is-visible .icon-eye { display: none; }
+    .pw-toggle.is-visible .icon-eye-off { display: inline-block; }
+
     /* Language pill — same shape as the public site so the family has
        muscle memory across both. EN/中 dim based on the active language
        via html[lang] selectors. */
@@ -388,15 +417,33 @@
           <p class="text-sm text-[color:var(--muted-foreground)]" data-i18n="password.hint">New password must be at least 8 characters.</p>
           <label class="block">
             <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="password.current">Current password</span>
-            <input name="current_password" type="password" autocomplete="current-password" required class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)]" />
+            <span class="pw-input-wrap mt-1">
+              <input name="current_password" type="password" autocomplete="current-password" required class="pw-input" />
+              <button type="button" class="pw-toggle" data-pw-toggle aria-label="Show password">
+                <svg class="icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </span>
           </label>
           <label class="block">
             <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="password.new">New password</span>
-            <input name="new_password" type="password" minlength="8" autocomplete="new-password" required class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)]" />
+            <span class="pw-input-wrap mt-1">
+              <input name="new_password" type="password" minlength="8" autocomplete="new-password" required class="pw-input" />
+              <button type="button" class="pw-toggle" data-pw-toggle aria-label="Show password">
+                <svg class="icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </span>
           </label>
           <label class="block">
             <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="password.confirm">Confirm new password</span>
-            <input name="confirm_password" type="password" minlength="8" autocomplete="new-password" required class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)]" />
+            <span class="pw-input-wrap mt-1">
+              <input name="confirm_password" type="password" minlength="8" autocomplete="new-password" required class="pw-input" />
+              <button type="button" class="pw-toggle" data-pw-toggle aria-label="Show password">
+                <svg class="icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </span>
           </label>
           <p id="password-error" class="text-sm text-[color:var(--destructive)]" hidden></p>
           <button type="submit" class="w-full mono text-xs uppercase tracking-[0.18em] py-2.5 bg-[color:var(--destructive)] text-white hover:opacity-90" data-i18n="password.submit">Update password</button>
@@ -541,6 +588,8 @@
         'password.wrongCurrent': 'Current password is incorrect.',
         'password.samePassword': 'New password must differ from the current one.',
         'password.flashOk': 'Password updated.',
+        'password.show': 'Show password',
+        'password.hide': 'Hide password',
       },
       zh: {
         'nav.back': '← 返回網站',
@@ -656,6 +705,8 @@
         'password.wrongCurrent': '舊密碼唔啱。',
         'password.samePassword': '新密碼要同舊密碼唔同。',
         'password.flashOk': '密碼已更新。',
+        'password.show': '顯示密碼',
+        'password.hide': '隱藏密碼',
       },
     };
 
@@ -703,6 +754,8 @@
       if (ind) ind.textContent = pollInterval ? t('orders.autoRefreshOn') : t('orders.autoRefreshPaused');
       // Refresh page title / badge prefix
       updateTitleBadge();
+      // Refresh aria-labels on the password show/hide buttons
+      syncPasswordToggleLabels();
     }
 
     // =========================================================
@@ -808,6 +861,29 @@
       stopOrdersPolling();
       try { await api('/api/auth', { method: 'DELETE' }); } catch {}
       showLogin();
+    });
+
+    // =========================================================
+    // Eye-icon "show password" toggles inside the change-password form.
+    // Single delegated listener so we don't wire each button individually.
+    // =========================================================
+    function syncPasswordToggleLabels() {
+      // Called from applyLang so the aria-label stays in the right language.
+      document.querySelectorAll('[data-pw-toggle]').forEach((btn) => {
+        const visible = btn.classList.contains('is-visible');
+        btn.setAttribute('aria-label', t(visible ? 'password.hide' : 'password.show'));
+      });
+    }
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-pw-toggle]');
+      if (!btn) return;
+      e.preventDefault();
+      const input = btn.parentElement.querySelector('input');
+      if (!input) return;
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      btn.classList.toggle('is-visible', !showing);
+      btn.setAttribute('aria-label', t(!showing ? 'password.hide' : 'password.show'));
     });
 
     // =========================================================

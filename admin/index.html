@@ -381,6 +381,28 @@
         <div id="menu-container" class="mt-5 space-y-8"></div>
       </div>
 
+      <!-- Change password (collapsed by default — infrequent action) -->
+      <details id="password-section" class="border-t border-dotted border-[color:var(--border)] pt-6">
+        <summary class="display text-2xl font-light leading-tight cursor-pointer select-none" data-i18n="password.heading">Change password</summary>
+        <form id="password-form" class="card p-5 mt-5 space-y-4 max-w-md">
+          <p class="text-sm text-[color:var(--muted-foreground)]" data-i18n="password.hint">New password must be at least 8 characters.</p>
+          <label class="block">
+            <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="password.current">Current password</span>
+            <input name="current_password" type="password" autocomplete="current-password" required class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)]" />
+          </label>
+          <label class="block">
+            <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="password.new">New password</span>
+            <input name="new_password" type="password" minlength="8" autocomplete="new-password" required class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)]" />
+          </label>
+          <label class="block">
+            <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="password.confirm">Confirm new password</span>
+            <input name="confirm_password" type="password" minlength="8" autocomplete="new-password" required class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)]" />
+          </label>
+          <p id="password-error" class="text-sm text-[color:var(--destructive)]" hidden></p>
+          <button type="submit" class="w-full mono text-xs uppercase tracking-[0.18em] py-2.5 bg-[color:var(--destructive)] text-white hover:opacity-90" data-i18n="password.submit">Update password</button>
+        </form>
+      </details>
+
     </section>
   </main>
 
@@ -507,6 +529,18 @@
         'print.total': 'Total',
         'print.orderNum': 'Order #{id}',
         'print.footer': 'Thank you · 多謝晒 · Show this code at the counter',
+
+        'password.heading': 'Change password',
+        'password.hint': 'New password must be at least 8 characters.',
+        'password.current': 'Current password',
+        'password.new': 'New password',
+        'password.confirm': 'Confirm new password',
+        'password.submit': 'Update password',
+        'password.mismatch': 'New passwords do not match.',
+        'password.tooShort': 'New password must be at least 8 characters.',
+        'password.wrongCurrent': 'Current password is incorrect.',
+        'password.samePassword': 'New password must differ from the current one.',
+        'password.flashOk': 'Password updated.',
       },
       zh: {
         'nav.back': '← 返回網站',
@@ -610,6 +644,18 @@
         'print.total': '總計',
         'print.orderNum': '單號 #{id}',
         'print.footer': '多謝晒 · Thank you · 出示編號取餐',
+
+        'password.heading': '更改密碼',
+        'password.hint': '新密碼最少要 8 個字元。',
+        'password.current': '舊密碼',
+        'password.new': '新密碼',
+        'password.confirm': '確認新密碼',
+        'password.submit': '更新密碼',
+        'password.mismatch': '兩次輸入嘅新密碼唔一樣。',
+        'password.tooShort': '新密碼最少要 8 個字元。',
+        'password.wrongCurrent': '舊密碼唔啱。',
+        'password.samePassword': '新密碼要同舊密碼唔同。',
+        'password.flashOk': '密碼已更新。',
       },
     };
 
@@ -762,6 +808,62 @@
       stopOrdersPolling();
       try { await api('/api/auth', { method: 'DELETE' }); } catch {}
       showLogin();
+    });
+
+    // =========================================================
+    // Change password form
+    // =========================================================
+    // We use raw fetch (not the api() helper) so we can read the server's
+    // error code from the response body. The api() helper treats every 401
+    // as a session expiry and bounces to login — but for PATCH /api/auth a
+    // 401 means "wrong current password", not "session expired".
+    const PASSWORD_ERROR_KEYS = {
+      wrong_current: 'password.wrongCurrent',
+      too_short:     'password.tooShort',
+      same_password: 'password.samePassword',
+      invalid_body:  'flash.updateFailed',
+    };
+    $('#password-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      const errEl = $('#password-error');
+      errEl.hidden = true;
+
+      const current = form.current_password.value;
+      const next    = form.new_password.value;
+      const confirm = form.confirm_password.value;
+
+      // Client-side checks first — no network roundtrip needed.
+      if (next !== confirm) {
+        errEl.textContent = t('password.mismatch');
+        errEl.hidden = false;
+        return;
+      }
+      if (next.length < 8) {
+        errEl.textContent = t('password.tooShort');
+        errEl.hidden = false;
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ current_password: current, new_password: next }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          form.reset();
+          $('#password-section').open = false;
+          flash(t('password.flashOk'), 'good');
+          return;
+        }
+        const key = PASSWORD_ERROR_KEYS[data.error] || 'flash.updateFailed';
+        errEl.textContent = t(key);
+        errEl.hidden = false;
+      } catch {
+        flash(t('flash.updateFailed'), 'bad');
+      }
     });
 
     // =========================================================

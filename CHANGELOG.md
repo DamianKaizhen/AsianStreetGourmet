@@ -76,6 +76,20 @@ parentheses are pointers into `git log` for the exact diffs.
 - Internal "What visitors see right now" preview hidden — the
   per-item availability section below was the single source of
   truth and the duplicate was confusing.
+- **Change-password UI inside the admin page.** New collapsible
+  section at the bottom of the admin view: enter current + new (+
+  confirm) password and submit. Old workflow (regenerate hash via
+  `node lib/auth.js hash`, paste into Vercel env var, redeploy) is
+  gone. The scrypt hash now lives in the existing `settings` Postgres
+  table under key `admin_password_hash`; `ADMIN_PASSWORD_HASH` env var
+  becomes a bootstrap + lockout-recovery fallback (used only when the
+  DB row is missing). `PATCH /api/auth { current_password, new_password }`
+  added to the consolidated auth endpoint — function count unchanged
+  at 11/12. Sessions are intentionally NOT invalidated on change (8-hour
+  TTL continues). Minimum new-password length: 8 characters. Bilingual
+  EN + zh-Hant. Lockout recovery: in Neon SQL editor run
+  `DELETE FROM settings WHERE key='admin_password_hash';` to revert to
+  env-var auth.
 
 ## Bilingual EN ↔ Cantonese (zh-Hant)
 

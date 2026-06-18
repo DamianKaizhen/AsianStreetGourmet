@@ -59,11 +59,15 @@ export default async function handler(req, res) {
       if (typeof username !== 'string' || typeof password !== 'string') {
         return res.status(400).json({ error: 'username and password required' });
       }
-      if (!(await checkAdminCredentials(username, password))) {
+      const result = await checkAdminCredentials(username, password);
+      if (!result.ok) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
       issueSession(res);
-      return res.status(200).json({ ok: true });
+      // Signal to the UI when this login used the ADMIN_RECOVERY_MODE
+      // env var path so it can prompt to set a new password + remind to
+      // remove the recovery flag from Vercel.
+      return res.status(200).json({ ok: true, recovery_used: result.recovery === true });
     } catch (err) {
       console.error('[auth POST] error:', err);
       return res.status(500).json({ error: 'Server error' });

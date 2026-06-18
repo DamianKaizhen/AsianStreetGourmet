@@ -87,9 +87,20 @@ parentheses are pointers into `git log` for the exact diffs.
   added to the consolidated auth endpoint — function count unchanged
   at 11/12. Sessions are intentionally NOT invalidated on change (8-hour
   TTL continues). Minimum new-password length: 8 characters. Bilingual
-  EN + zh-Hant. Lockout recovery: in Neon SQL editor run
-  `DELETE FROM settings WHERE key='admin_password_hash';` to revert to
-  env-var auth.
+  EN + zh-Hant. Each password input has a built-in eye-icon toggle for
+  show/hide.
+- **Recovery via Vercel env var.** If nobody remembers the active
+  password: set `ADMIN_RECOVERY_MODE=true` in Vercel env vars. While
+  the flag is set, the login form accepts the original
+  `ADMIN_PASSWORD_HASH` env-var password instead of the DB row. On a
+  successful recovery login the DB row is wiped automatically — the
+  env-var password becomes the live one again, the password-change
+  section auto-opens, and a flash reminds the family to set a new
+  password and remove `ADMIN_RECOVERY_MODE` from Vercel. A
+  "Forgot password?" expandable panel on the login form walks through
+  these steps. No terminal or Neon SQL access required. Alternative
+  manual path (still works): in Neon SQL editor, run
+  `DELETE FROM settings WHERE key='admin_password_hash';`.
 
 ## Bilingual EN ↔ Cantonese (zh-Hant)
 

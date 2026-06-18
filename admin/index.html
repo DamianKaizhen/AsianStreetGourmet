@@ -325,6 +325,18 @@
         <button type="submit" class="w-full mono text-xs uppercase tracking-[0.18em] py-2.5 bg-[color:var(--destructive)] text-white hover:opacity-90" data-i18n="login.submit">Sign in</button>
         <p id="login-error" class="text-sm text-[color:var(--destructive)] text-center" hidden></p>
       </form>
+
+      <!-- Forgot-password recovery instructions (collapsed by default) -->
+      <details class="mt-6 text-sm text-[color:var(--muted-foreground)]">
+        <summary class="cursor-pointer select-none mono text-xs uppercase tracking-[0.18em] hover:text-[color:var(--destructive)]" data-i18n="recovery.summary">Forgot password?</summary>
+        <div class="mt-3 space-y-2 leading-relaxed">
+          <p data-i18n="recovery.step1">1. Open the Vercel dashboard for this project → Settings → Environment Variables.</p>
+          <p data-i18n="recovery.step2">2. Add a new variable: name <code class="mono text-[color:var(--destructive)]">ADMIN_RECOVERY_MODE</code>, value <code class="mono text-[color:var(--destructive)]">true</code>. Save and redeploy.</p>
+          <p data-i18n="recovery.step3">3. Come back here and sign in with the ORIGINAL password (the one Damian set at first deploy — should be in a password manager).</p>
+          <p data-i18n="recovery.step4">4. Once you're in, set a new password from the "Change password" section, then DELETE the ADMIN_RECOVERY_MODE variable from Vercel.</p>
+          <p class="mt-2 italic" data-i18n="recovery.note">The current password cannot be retrieved — passwords are stored as one-way hashes for security. Recovery resets to the env-var password instead.</p>
+        </div>
+      </details>
     </section>
 
     <!-- ===== Admin view ===== -->
@@ -590,6 +602,14 @@
         'password.flashOk': 'Password updated.',
         'password.show': 'Show password',
         'password.hide': 'Hide password',
+        'password.recoveryFlash': 'Recovery mode used. Please set a new password below, then remove ADMIN_RECOVERY_MODE from Vercel.',
+
+        'recovery.summary': 'Forgot password?',
+        'recovery.step1': '1. Open the Vercel dashboard for this project → Settings → Environment Variables.',
+        'recovery.step2': '2. Add a new variable: name ADMIN_RECOVERY_MODE, value true. Save and redeploy.',
+        'recovery.step3': '3. Come back here and sign in with the ORIGINAL password (the one Damian set at first deploy — should be in a password manager).',
+        'recovery.step4': '4. Once you\'re in, set a new password from the "Change password" section, then DELETE the ADMIN_RECOVERY_MODE variable from Vercel.',
+        'recovery.note': 'The current password cannot be retrieved — passwords are stored as one-way hashes for security. Recovery resets to the env-var password instead.',
       },
       zh: {
         'nav.back': '← 返回網站',
@@ -707,6 +727,14 @@
         'password.flashOk': '密碼已更新。',
         'password.show': '顯示密碼',
         'password.hide': '隱藏密碼',
+        'password.recoveryFlash': '已使用復原模式。請喺下方設定新密碼，然後喺 Vercel 移除 ADMIN_RECOVERY_MODE。',
+
+        'recovery.summary': '唔記得密碼？',
+        'recovery.step1': '1. 喺 Vercel 嘅項目控制台打開 Settings → Environment Variables。',
+        'recovery.step2': '2. 新增一個變數：名 ADMIN_RECOVERY_MODE，值 true。儲存並重新部署。',
+        'recovery.step3': '3. 返嚟呢度，用原本嘅密碼登入（Damian 第一次部署時設定嘅，應該存喺密碼管理工具入面）。',
+        'recovery.step4': '4. 入到管理頁之後，喺「更改密碼」區設定新密碼，然後喺 Vercel 刪除 ADMIN_RECOVERY_MODE。',
+        'recovery.note': '舊密碼無法復原 — 密碼以單向雜湊儲存，係保安設計。復原會回復到 env 嘅密碼。',
       },
     };
 
@@ -845,12 +873,19 @@
       const err = $('#login-error');
       err.hidden = true;
       try {
-        await api('/api/auth', { method: 'POST', body: {
+        const data = await api('/api/auth', { method: 'POST', body: {
           username: form.username.value, password: form.password.value,
         }});
         form.password.value = '';
         showAdmin();
         await loadEverything();
+        // If this was a recovery login (ADMIN_RECOVERY_MODE was set), open
+        // the change-password section and flash the disable-the-flag reminder.
+        if (data && data.recovery_used) {
+          const sec = $('#password-section');
+          if (sec) sec.open = true;
+          flash(t('password.recoveryFlash'), 'good');
+        }
       } catch (e) {
         err.textContent = t('login.error');
         err.hidden = false;

@@ -294,6 +294,7 @@
       </a>
       <div class="flex items-center gap-2">
         <span class="mono text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)]" data-i18n="nav.admin">Admin</span>
+        <span id="current-user" hidden class="mono text-xs uppercase tracking-[0.15em] text-[color:var(--destructive)] px-2 border-l border-[color:var(--border)] pl-3"></span>
         <button id="lang-toggle" type="button" aria-label="Switch language" class="lang-pill" data-lang-toggle>
           <span class="l-en">EN</span>
           <span class="l-sep" aria-hidden="true">·</span>
@@ -845,11 +846,23 @@
       $('#login-view').hidden = false;
       $('#admin-view').hidden = true;
       $('#logout-btn').hidden = true;
+      const u = $('#current-user');
+      if (u) { u.textContent = ''; u.hidden = true; }
     }
-    function showAdmin() {
+    function showAdmin(username) {
       $('#login-view').hidden = true;
       $('#admin-view').hidden = false;
       $('#logout-btn').hidden = false;
+      const u = $('#current-user');
+      if (u) {
+        if (typeof username === 'string' && username.length > 0) {
+          u.textContent = '@ ' + username;
+          u.hidden = false;
+        } else {
+          u.textContent = '';
+          u.hidden = true;
+        }
+      }
     }
 
     // =========================================================
@@ -877,7 +890,11 @@
           username: form.username.value, password: form.password.value,
         }});
         form.password.value = '';
-        showAdmin();
+        const who = (data && data.username) || form.username.value;
+        // Persist the username for redisplay after a page refresh — the
+        // session cookie is HttpOnly so client-side JS can't read it.
+        try { sessionStorage.setItem('asg-admin-user', who); } catch {}
+        showAdmin(who);
         await loadEverything();
         // If this was a recovery login (ADMIN_RECOVERY_MODE was set), open
         // the change-password section and flash the disable-the-flag reminder.
@@ -895,6 +912,7 @@
     $('#logout-btn').addEventListener('click', async () => {
       stopOrdersPolling();
       try { await api('/api/auth', { method: 'DELETE' }); } catch {}
+      try { sessionStorage.removeItem('asg-admin-user'); } catch {}
       showLogin();
     });
 
@@ -983,7 +1001,12 @@
     (async function init() {
       try {
         await api('/api/admin/ingredients');
-        showAdmin();
+        // The session cookie is HttpOnly; we get the username from the
+        // sessionStorage stash we set at login. If absent (cleared tab,
+        // fresh device), the badge just stays hidden — harmless.
+        let cachedUser = null;
+        try { cachedUser = sessionStorage.getItem('asg-admin-user') || null; } catch {}
+        showAdmin(cachedUser);
         await loadEverything();
       } catch {
         showLogin();

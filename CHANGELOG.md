@@ -89,6 +89,18 @@ parentheses are pointers into `git log` for the exact diffs.
   TTL continues). Minimum new-password length: 8 characters. Bilingual
   EN + zh-Hant. Each password input has a built-in eye-icon toggle for
   show/hide.
+- **Multiple admin accounts via `admin_users` table.** The primary
+  admin still lives in env vars (`ADMIN_USERNAME` + `ADMIN_PASSWORD_HASH`
+  with the DB-backed `settings.admin_password_hash` override). Additional
+  admins go into a new `admin_users` Postgres table — `username` (unique),
+  `password_hash` (scrypt). Login checks the env user first, then falls
+  through to the table. Each user's password-change PATCH updates the
+  storage row matching their session (settings row for the primary,
+  `admin_users` row for everyone else). The session cookie now carries
+  `user` so PATCH knows whose hash to update. A small "@ username" badge
+  appears in the admin header. No new Vercel function — same
+  consolidated `/api/auth` endpoint. Schema migration in lib/schema.sql:
+  `CREATE TABLE IF NOT EXISTS admin_users (...)`.
 - **Recovery via Vercel env var.** If nobody remembers the active
   password: set `ADMIN_RECOVERY_MODE=true` in Vercel env vars. While
   the flag is set, the login form accepts the original

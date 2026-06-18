@@ -293,6 +293,23 @@ INSERT INTO settings (key, value) VALUES ('cart_enabled', 'false')
 ON CONFLICT (key) DO NOTHING;
 
 -- ============================================================
+-- admin_users — secondary admin accounts.
+-- ============================================================
+-- The PRIMARY admin lives in env vars (ADMIN_USERNAME +
+-- ADMIN_PASSWORD_HASH) — that account is the bootstrap / recovery
+-- account and doesn't appear in this table. Additional accounts go
+-- here, each with their own scrypt salt:hash. The check order in
+-- lib/auth.js is: env-var user first, then this table.
+
+CREATE TABLE IF NOT EXISTS admin_users (
+  id             SERIAL PRIMARY KEY,
+  username       TEXT UNIQUE NOT NULL,
+  password_hash  TEXT NOT NULL,            -- scrypt salt_b64:hash_b64
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
 -- DONE. Verify with:
 --   SELECT COUNT(*) FROM ingredients;         -- 35
 --   SELECT COUNT(*) FROM menu_items;          -- 28

@@ -768,6 +768,11 @@
     ]
   }
   </script>
+
+  <!-- Vercel Web Analytics — cookieless, no external CDN call (proxied
+       through the same origin at /_vercel/insights/*). Only collects in
+       production; the URL 404s on localhost, so dev is unaffected. -->
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 
 <body class="font-body antialiased">

@@ -1825,6 +1825,14 @@
         _renderSteam(byCategory.steam);
         _renderSoup(soupWeek, byCode);
         _renderSnack(byCategory.snack);
+
+        // Re-attach the cart's "+ Add" buttons to the freshly-built rows. The
+        // cart IIFE installs this hook once /api/cart confirms the cart is
+        // enabled; if the user has the cart disabled, the hook is undefined
+        // and this is a no-op.
+        if (typeof window.__asgInjectCartButtons === 'function') {
+          window.__asgInjectCartButtons();
+        }
       }
 
       fetch('/api/menu-today', { cache: 'no-store' })
@@ -2523,6 +2531,16 @@
         buildMenuLookup();
         injectAddButtons();
         updateNavBadge();
+
+        // Expose the injector globally so the dynamic menu render (which
+        // rebuilds the rows from /api/menu-today data and would clobber the
+        // initial Add buttons) can re-attach them after each rebuild. The
+        // function is idempotent — it skips rows that already have a
+        // .cart-add-btn child, so spurious calls are harmless.
+        window.__asgInjectCartButtons = function () {
+          buildMenuLookup();
+          injectAddButtons();
+        };
 
         document.getElementById('nav-cart-btn').addEventListener('click', function () { openDrawer('list'); });
         document.getElementById('cart-close').addEventListener('click', closeDrawer);

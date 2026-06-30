@@ -421,6 +421,17 @@
         <h2 class="display text-3xl font-light leading-tight" data-i18n="special.heading">Today's specials</h2>
         <p class="text-sm text-[color:var(--muted-foreground)] mt-1" data-i18n="special.subhead">Off-menu dishes surfaced at the top of the public menu. Add a row per dish, fill in all four fields, then Save all. Use × to remove a row, or Clear all to remove every special from the site.</p>
         <form id="specials-form" class="mt-5 card p-5 space-y-4">
+          <!-- Column headers, kept in sync with the column widths defined
+               inside specialRow() below. Hidden on the smallest screens
+               where the inputs already provide enough context via their
+               placeholders. -->
+          <div class="hidden sm:grid grid-cols-12 gap-2 mono text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)] pb-1">
+            <div class="col-span-2" data-i18n="special.code">Item code</div>
+            <div class="col-span-3" data-i18n="special.nameZh">Chinese name</div>
+            <div class="col-span-4" data-i18n="special.nameEn">English name</div>
+            <div class="col-span-2" data-i18n="special.price">Price (USD)</div>
+            <div class="col-span-1"></div>
+          </div>
           <div id="specials-rows" class="space-y-3"></div>
           <button type="button" id="specials-add-btn" class="mono text-xs uppercase tracking-[0.18em] px-3 py-2 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)]" data-i18n="special.addRow">+ Add row</button>
           <p id="specials-error" class="text-sm text-[color:var(--destructive)]" hidden></p>

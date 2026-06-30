@@ -989,6 +989,9 @@
             <p data-i18n="menu.intro" class="mt-4 max-w-md text-[color:var(--muted-foreground)]">Phone, takeout, or in-store. Tell us a code (A1, B4, C3) and a quantity.</p>
           </div>
           <div class="flex flex-wrap gap-2 mono-code text-[0.7rem] uppercase tracking-[0.18em]">
+            <!-- Specials pill is hidden until /api/menu-today returns at
+                 least one special; revealed alongside #todays-special-card. -->
+            <a href="#todays-special-card" id="todays-special-pill" hidden class="cat-jump px-3 py-2 border border-[color:var(--destructive)] text-[color:var(--destructive)] hover:bg-[color:var(--destructive)] hover:text-white transition-colors">今日推荐 Special</a>
             <a href="#cat-steam" class="cat-jump px-3 py-2 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors">蒸餸飯 Steamed</a>
             <a href="#cat-soup" class="cat-jump px-3 py-2 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors">每日靚湯 Daily Soup</a>
             <a href="#cat-snack" class="cat-jump px-3 py-2 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)] transition-colors">小食 Snacks</a>
@@ -1000,7 +1003,7 @@
              admin has added at least one special. Sits ABOVE the steam
              category so it's the first thing visitors see in the menu.
              Items get appended into #todays-specials-list by JS. ====== -->
-        <aside id="todays-special-card" class="mt-12 sm:mt-16 mb-2 p-6 sm:p-8 border-2 border-[color:var(--destructive)]" hidden style="background: color-mix(in oklch, var(--destructive) 6%, var(--background));">
+        <aside id="todays-special-card" class="mt-12 sm:mt-16 mb-2 p-6 sm:p-8 border-2 border-[color:var(--destructive)] scroll-mt-24" hidden style="background: color-mix(in oklch, var(--destructive) 6%, var(--background));">
           <p class="mono-code text-xs uppercase tracking-[0.22em] text-[color:var(--destructive)] mb-4"><span data-i18n="special.eyebrow">Today's special · 今日推荐</span></p>
           <ul id="todays-specials-list" class="space-y-3"></ul>
         </aside>
@@ -1762,6 +1765,8 @@
           if (specials.length > 0) {
             var card = document.getElementById('todays-special-card');
             var list = document.getElementById('todays-specials-list');
+            var pill = document.getElementById('todays-special-pill');
+            if (pill) pill.hidden = false;
             if (card && list) {
               // Clear (defensive — in case this fires twice for any reason).
               while (list.firstChild) list.removeChild(list.firstChild);

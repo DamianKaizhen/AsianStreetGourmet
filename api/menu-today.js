@@ -31,8 +31,12 @@ export default async function handler(req, res) {
     // ----- Query 1: items + per-item flag + which non-pantry ingredients are out -----
     // Archived items (replaced by the new menu) are excluded so they
     // never surface on the public site or in admin lists.
+    // GROUP BY the primary key — Postgres lets us select any of the other
+    // menu_items columns alongside without listing them, since they're
+    // functionally dependent on the PK.
     const itemRows = await sql`
       SELECT
+        m.id,
         m.code,
         m.name_en,
         m.name_zh,
@@ -53,7 +57,7 @@ export default async function handler(req, res) {
       LEFT JOIN menu_item_ingredients mii ON mii.menu_item_id = m.id
       LEFT JOIN ingredients i ON i.id = mii.ingredient_id
       WHERE m.is_archived = FALSE
-      GROUP BY m.code, m.category, m.rotation_mode, m.is_available, m.display_order
+      GROUP BY m.id
       ORDER BY m.display_order
     `;
 

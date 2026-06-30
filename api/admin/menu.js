@@ -3,13 +3,17 @@
 // GET   /api/admin/menu                                                   → list with ingredients (archived hidden)
 // PATCH /api/admin/menu  { code, is_available?, rotation_mode? }          → update one menu item
 // PATCH /api/admin/menu  { schedule_day, soup_code }                      → upsert daily soup assignment
+// PATCH /api/admin/menu  { special: {code,name_zh,name_en,price_cents} }  → set today's special
+// PATCH /api/admin/menu  { special: null }                                → clear today's special
 //
-// PATCH takes a body-shape discriminator (presence of `schedule_day`) so the
-// daily-soup writes can share this endpoint with the per-item updates and
-// keep the Vercel function count at 11/12.
+// PATCH takes a body-shape discriminator (presence of `schedule_day` or
+// `special` key) so the daily-soup + today's-special writes can share this
+// endpoint with the per-item updates and keep the Vercel function count at
+// 11/12.
 
 import { sql } from '../../lib/db.js';
 import { requireAdmin } from '../../lib/auth.js';
+import { setSetting } from '../../lib/settings.js';
 
 const ALLOWED_MODES = ['always', 'rotation'];
 
@@ -46,6 +50,45 @@ async function handler(req, res) {
 
   if (req.method === 'PATCH') {
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
+
+    // ----- Branch S: today's special set/clear -----
+    // Body shape: { special: { code, name_zh, name_en, price_cents } | null }
+    if ('special' in body) {
+      const sp = body.special;
+      if (sp === null) {
+        // Clear by writing empty strings (a simple sentinel; cheaper than
+        // deleting rows, and lets the GET path remain a plain lookup).
+        await setSetting('special_code', '');
+        await setSetting('special_name_zh', '');
+        await setSetting('special_name_en', '');
+        await setSetting('special_price_cents', '');
+        return res.status(200).json({ special: null });
+      }
+      if (typeof sp !== 'object') {
+        return res.status(400).json({ error: 'special must be object or null' });
+      }
+      const code    = typeof sp.code === 'string' ? sp.code.trim().toUpperCase() : '';
+      const name_zh = typeof sp.name_zh === 'string' ? sp.name_zh.trim() : '';
+      const name_en = typeof sp.name_en === 'string' ? sp.name_en.trim() : '';
+      const price_cents = Number(sp.price_cents);
+      if (!code || code.length > 8 || !/^[A-Z0-9]+$/.test(code)) {
+        return res.status(400).json({ error: 'special.code must be 1–8 alphanumeric chars' });
+      }
+      if (!name_zh || name_zh.length > 60) {
+        return res.status(400).json({ error: 'special.name_zh required (≤60 chars)' });
+      }
+      if (!name_en || name_en.length > 80) {
+        return res.status(400).json({ error: 'special.name_en required (≤80 chars)' });
+      }
+      if (!Number.isInteger(price_cents) || price_cents < 0 || price_cents > 100000) {
+        return res.status(400).json({ error: 'special.price_cents must be integer 0..100000' });
+      }
+      await setSetting('special_code', code);
+      await setSetting('special_name_zh', name_zh);
+      await setSetting('special_name_en', name_en);
+      await setSetting('special_price_cents', String(price_cents));
+      return res.status(200).json({ special: { code, name_zh, name_en, price_cents } });
+    }
 
     // ----- Branch A: daily-soup schedule write -----
     // Body shape: { schedule_day: 0..6, soup_code: 'C2' | null }

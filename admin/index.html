@@ -416,6 +416,38 @@
         <div id="rotation-container" class="mt-5 card divide-y divide-dotted divide-[color:var(--border)]"></div>
       </div>
 
+      <!-- Today's Special -->
+      <div>
+        <h2 class="display text-3xl font-light leading-tight" data-i18n="special.heading">Today's special</h2>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1" data-i18n="special.subhead">A one-off dish surfaced at the top of the public menu. Fill in all four fields and Save; use Clear to remove it from the site.</p>
+        <form id="special-form" class="mt-5 card p-5 space-y-4">
+          <div class="grid sm:grid-cols-4 gap-3">
+            <label class="block">
+              <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="special.code">Item code</span>
+              <input name="code" type="text" maxlength="8" placeholder="TS1" class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)] mono uppercase" />
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="special.nameZh">Chinese name</span>
+              <input name="name_zh" type="text" maxlength="60" class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)] zh" lang="zh-Hant" />
+            </label>
+            <label class="block">
+              <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="special.price">Price (USD)</span>
+              <input name="price" type="number" min="0" step="0.01" placeholder="9.50" class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)] mono" />
+            </label>
+            <label class="block sm:col-span-4">
+              <span class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="special.nameEn">English name</span>
+              <input name="name_en" type="text" maxlength="80" class="mt-1 w-full px-3 py-2 border border-[color:var(--border)] bg-[color:var(--background)]" />
+            </label>
+          </div>
+          <p id="special-error" class="text-sm text-[color:var(--destructive)]" hidden></p>
+          <div class="flex flex-wrap gap-3">
+            <button type="submit" class="mono text-xs uppercase tracking-[0.18em] px-4 py-2.5 bg-[color:var(--destructive)] text-white hover:opacity-90" data-i18n="special.save">Save special</button>
+            <button type="button" id="special-clear-btn" class="mono text-xs uppercase tracking-[0.18em] px-4 py-2.5 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)]" data-i18n="special.clear">Clear special</button>
+            <span id="special-state" class="mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)] self-center"></span>
+          </div>
+        </form>
+      </div>
+
       <!-- Hours -->
       <div>
         <h2 class="display text-3xl font-light leading-tight" data-i18n="hours.heading">Hours</h2>
@@ -423,18 +455,18 @@
         <div id="hours-container" class="mt-5 card divide-y divide-dotted divide-[color:var(--border)]"></div>
       </div>
 
-      <!-- Daily soup schedule -->
-      <div>
-        <h2 class="display text-3xl font-light leading-tight" data-i18n="soup.heading">Daily soup</h2>
-        <p class="text-sm text-[color:var(--muted-foreground)] mt-1" data-i18n="soup.subhead">Pick which soup is served on each day of the week. Soup items (C1–C6) are still managed in the Menu items list below — this is just the day-by-day assignment.</p>
-        <div id="soup-schedule-container" class="mt-5 card divide-y divide-dotted divide-[color:var(--border)]"></div>
-      </div>
-
       <!-- Menu items -->
       <div>
         <h2 class="display text-3xl font-light leading-tight" data-i18n="menu.heading">Menu items</h2>
         <p class="text-sm text-[color:var(--muted-foreground)] mt-1" data-i18n="menu.subhead">Check the box for items you have today. Unchecked items are hidden from the public menu.</p>
         <div id="menu-container" class="mt-5 space-y-8"></div>
+      </div>
+
+      <!-- Daily soup schedule (moved to the bottom — it changes less often than the items list) -->
+      <div>
+        <h2 class="display text-3xl font-light leading-tight" data-i18n="soup.heading">Daily soup</h2>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1" data-i18n="soup.subhead">Pick which soup is served on each day of the week. Soup items (C1–C6) are still managed in the Menu items list above — this is just the day-by-day assignment.</p>
+        <div id="soup-schedule-container" class="mt-5 card divide-y divide-dotted divide-[color:var(--border)]"></div>
       </div>
 
       <!-- Change password (collapsed by default — infrequent action) -->
@@ -579,7 +611,20 @@
 
         'hours.heading': 'Hours',
         'soup.heading': 'Daily soup',
-        'soup.subhead': 'Pick which soup is served on each day of the week. Soup items (C1–C6) are still managed in the Menu items list below — this is just the day-by-day assignment.',
+        'soup.subhead': 'Pick which soup is served on each day of the week. Soup items (C1–C6) are still managed in the Menu items list above — this is just the day-by-day assignment.',
+        'special.heading':   "Today's special",
+        'special.subhead':   'A one-off dish surfaced at the top of the public menu. Fill in all four fields and Save; use Clear to remove it from the site.',
+        'special.code':      'Item code',
+        'special.nameZh':    'Chinese name',
+        'special.nameEn':    'English name',
+        'special.price':     'Price (USD)',
+        'special.save':      'Save special',
+        'special.clear':     'Clear special',
+        'special.stateActive':'Showing on the public site',
+        'special.stateNone':  'No special set',
+        'special.flashSaved':   "Today's special saved",
+        'special.flashCleared': "Today's special cleared",
+        'special.errInvalid':   'Fill in all four fields (code, Chinese, English, price ≥ 0).',
         'soup.none': '(no soup)',
         'flash.soupAssigned': '{day} → {soup}',
         'hours.subhead': 'Set opening and closing times for each day. Times are in 24-hour format (NY local). Toggle a day off to mark it closed.',
@@ -707,7 +752,20 @@
 
         'hours.heading': '營業時間',
         'soup.heading': '每日靚湯',
-        'soup.subhead': '揀邊款湯喺邊日供應。靚湯項目（C1–C6）仍然喺下面嘅「餐牌」管理，呢度只係安排每日對應邊款。',
+        'soup.subhead': '揀邊款湯喺邊日供應。靚湯項目（C1–C6）仍然喺上面嘅「餐牌」管理，呢度只係安排每日對應邊款。',
+        'special.heading':   '今日特餐',
+        'special.subhead':   '一款只賣今日嘅特別菜式，會喺網站嘅餐牌頂部顯示。填齊四項然後按「儲存」；按「清除」就會喺網站隱藏。',
+        'special.code':      '編號',
+        'special.nameZh':    '中文名',
+        'special.nameEn':    '英文名',
+        'special.price':     '價錢 (USD)',
+        'special.save':      '儲存特餐',
+        'special.clear':     '清除特餐',
+        'special.stateActive':'已喺網站顯示',
+        'special.stateNone':  '未設定特餐',
+        'special.flashSaved':   '今日特餐已儲存',
+        'special.flashCleared': '今日特餐已清除',
+        'special.errInvalid':   '請填齊四項（編號、中文、英文、價錢 ≥ 0）。',
         'soup.none': '（無湯）',
         'flash.soupAssigned': '{day} → {soup}',
         'hours.subhead': '設定每日嘅開門同關門時間。時間用 24 小時制（紐約本地）。如果嗰日唔做生意，將開關制撥到關。',
@@ -798,6 +856,8 @@
         if (window.__hoursCache) renderHours(window.__hoursCache);
         if (window.__menuCache) renderMenu(window.__menuCache);
         if (window.__soupWeekCache && window.__menuCache) renderSoupSchedule(window.__soupWeekCache, window.__menuCache);
+        // Re-render the "no special / showing" state label
+        renderSpecial(window.__specialCache || null);
       }
       // Refresh poll-state indicator label
       const ind = $('#orders-poll-state');
@@ -1052,8 +1112,11 @@
       window.__hoursCache = hours.hours;
       window.__menuCache  = menu.menu_items;
       window.__soupWeekCache = today.soup_week || [];
+      window.__specialCache  = today.todays_special || null;
       renderCartToggle(cartStatus.cart_enabled === true);
       renderPreview(today, menu.menu_items);
+      renderSpecial(window.__specialCache);
+      initSpecialFormHandlers();
       renderHours(hours.hours);
       renderMenu(menu.menu_items);
       renderSoupSchedule(window.__soupWeekCache, menu.menu_items);
@@ -1963,6 +2026,77 @@
         el('p', { class: 'mono text-sm uppercase tracking-[0.18em] w-12' }, dayName(dow)),
         wrap
       );
+    }
+
+    // =========================================================
+    // Today's special — single freeform card (code, name_zh, name_en, price).
+    // Persisted in four `settings` rows under keys `special_*`; writes go via
+    // PATCH /api/admin/menu { special: {...} | null } (body-shape discriminator).
+    // =========================================================
+    function renderSpecial(special) {
+      const form = $('#special-form');
+      const stateEl = $('#special-state');
+      if (!form || !stateEl) return;
+      if (special && special.code) {
+        form.code.value    = special.code;
+        form.name_zh.value = special.name_zh || '';
+        form.name_en.value = special.name_en || '';
+        // price_cents arrives as an integer; render to a USD string with 2 dp.
+        form.price.value = ((special.price_cents || 0) / 100).toFixed(2);
+        stateEl.textContent = '✓ ' + t('special.stateActive');
+        stateEl.style.color = 'var(--good)';
+      } else {
+        form.reset();
+        stateEl.textContent = t('special.stateNone');
+        stateEl.style.color = 'var(--muted-foreground)';
+      }
+    }
+
+    function initSpecialFormHandlers() {
+      const form = $('#special-form');
+      const errEl = $('#special-error');
+      if (!form || form.__wired) return;
+      form.__wired = true;  // guard against duplicate listener attach on re-renders
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errEl.hidden = true;
+        const code    = form.code.value.trim().toUpperCase();
+        const name_zh = form.name_zh.value.trim();
+        const name_en = form.name_en.value.trim();
+        const priceUsd = parseFloat(form.price.value);
+        const price_cents = Number.isFinite(priceUsd) ? Math.round(priceUsd * 100) : NaN;
+
+        // All four fields required; price must be a non-negative integer.
+        if (!code || !name_zh || !name_en || !Number.isInteger(price_cents) || price_cents < 0) {
+          errEl.textContent = t('special.errInvalid');
+          errEl.hidden = false;
+          return;
+        }
+        try {
+          await api('/api/admin/menu', {
+            method: 'PATCH',
+            body: { special: { code, name_zh, name_en, price_cents } },
+          });
+          window.__specialCache = { code, name_zh, name_en, price_cents };
+          renderSpecial(window.__specialCache);
+          flash(t('special.flashSaved'), 'good');
+        } catch {
+          flash(t('flash.updateFailed'), 'bad');
+        }
+      });
+
+      $('#special-clear-btn').addEventListener('click', async () => {
+        errEl.hidden = true;
+        try {
+          await api('/api/admin/menu', { method: 'PATCH', body: { special: null } });
+          window.__specialCache = null;
+          renderSpecial(null);
+          flash(t('special.flashCleared'), 'good');
+        } catch {
+          flash(t('flash.updateFailed'), 'bad');
+        }
+      });
     }
 
     function renderMenu(menuItems) {

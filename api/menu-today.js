@@ -12,11 +12,13 @@
 //       "A2": { reason: "missing", missing: ["chicken"] }
 //     },
 //     soup_today: { code: "C2", name_en: "...", name_zh: "..." } | null,
-//     soup_week:  [{ day_of_week: 0..6, code, name_en, name_zh } | { day_of_week, code: null }, ...]
+//     soup_week:  [{ day_of_week: 0..6, code, name_en, name_zh } | { day_of_week, code: null }, ...],
+//     todays_special: { code, name_zh, name_en, price_cents } | null
 //   }
 
 import { sql } from '../lib/db.js';
 import { todayDateString, pickRotation } from '../lib/rotation.js';
+import { getSetting } from '../lib/settings.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -136,6 +138,26 @@ export default async function handler(req, res) {
       ? soup_week[day_of_week]
       : null;
 
+    // ----- Today's special — four settings keys, all four required to be present -----
+    // Empty/missing code is the "no special" sentinel. Stored as text; price
+    // parses back to an integer.
+    let todays_special = null;
+    try {
+      const [sCode, sNameZh, sNameEn, sPriceStr] = await Promise.all([
+        getSetting('special_code'),
+        getSetting('special_name_zh'),
+        getSetting('special_name_en'),
+        getSetting('special_price_cents'),
+      ]);
+      const sPrice = Number.parseInt(sPriceStr ?? '', 10);
+      if (sCode && sNameZh && sNameEn && Number.isInteger(sPrice) && sPrice >= 0) {
+        todays_special = { code: sCode, name_zh: sNameZh, name_en: sNameEn, price_cents: sPrice };
+      }
+    } catch (err) {
+      // Soft-fail: a settings-read blip should not 500 the whole menu endpoint.
+      console.warn('[menu-today] todays_special read failed:', err.message);
+    }
+
     return res.status(200).json({
       as_of: new Date().toISOString(),
       date_local: dateStr,
@@ -144,6 +166,7 @@ export default async function handler(req, res) {
       unavailable_with_reason: unavailable,
       soup_today,
       soup_week,
+      todays_special,
     });
   } catch (err) {
     console.error('[menu-today] error:', err);

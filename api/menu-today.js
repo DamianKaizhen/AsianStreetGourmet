@@ -13,7 +13,7 @@
 //     },
 //     soup_today: { code: "C2", name_en: "...", name_zh: "..." } | null,
 //     soup_week:  [{ day_of_week: 0..6, code, name_en, name_zh } | { day_of_week, code: null }, ...],
-//     todays_special: { code, name_zh, name_en, price_cents } | null
+//     todays_specials: [{ code, name_zh, name_en, price_cents }, ...]  // empty array if none
 //   }
 
 import { sql } from '../lib/db.js';
@@ -138,24 +138,26 @@ export default async function handler(req, res) {
       ? soup_week[day_of_week]
       : null;
 
-    // ----- Today's special — four settings keys, all four required to be present -----
-    // Empty/missing code is the "no special" sentinel. Stored as text; price
-    // parses back to an integer.
-    let todays_special = null;
+    // ----- Today's specials — single JSON-encoded array in `specials_json` -----
+    // Read soft-fails to [] so a settings-read blip doesn't 500 the whole
+    // endpoint. Defensive parse + per-row shape check protects the public
+    // site from rendering garbage if the column was hand-edited to bad JSON.
+    let todays_specials = [];
     try {
-      const [sCode, sNameZh, sNameEn, sPriceStr] = await Promise.all([
-        getSetting('special_code'),
-        getSetting('special_name_zh'),
-        getSetting('special_name_en'),
-        getSetting('special_price_cents'),
-      ]);
-      const sPrice = Number.parseInt(sPriceStr ?? '', 10);
-      if (sCode && sNameZh && sNameEn && Number.isInteger(sPrice) && sPrice >= 0) {
-        todays_special = { code: sCode, name_zh: sNameZh, name_en: sNameEn, price_cents: sPrice };
+      const raw = await getSetting('specials_json');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          todays_specials = parsed.filter((s) =>
+            s && typeof s.code === 'string' && s.code.length > 0
+              && typeof s.name_zh === 'string' && s.name_zh.length > 0
+              && typeof s.name_en === 'string' && s.name_en.length > 0
+              && Number.isInteger(s.price_cents) && s.price_cents >= 0
+          );
+        }
       }
     } catch (err) {
-      // Soft-fail: a settings-read blip should not 500 the whole menu endpoint.
-      console.warn('[menu-today] todays_special read failed:', err.message);
+      console.warn('[menu-today] todays_specials read failed:', err.message);
     }
 
     return res.status(200).json({
@@ -166,7 +168,7 @@ export default async function handler(req, res) {
       unavailable_with_reason: unavailable,
       soup_today,
       soup_week,
-      todays_special,
+      todays_specials,
     });
   } catch (err) {
     console.error('[menu-today] error:', err);

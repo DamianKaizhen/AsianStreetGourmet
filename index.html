@@ -995,18 +995,14 @@
           </div>
         </div>
 
-        <!-- ====== Today's Special — populated from /api/menu-today's
-             todays_special field. Hidden by default; revealed only when the
-             admin has set a special. Sits ABOVE the steam category so it's
-             the first thing visitors see in the menu. ====== -->
+        <!-- ====== Today's Specials — populated from /api/menu-today's
+             todays_specials array. Hidden by default; revealed only when the
+             admin has added at least one special. Sits ABOVE the steam
+             category so it's the first thing visitors see in the menu.
+             Items get appended into #todays-specials-list by JS. ====== -->
         <aside id="todays-special-card" class="mt-12 sm:mt-16 mb-2 p-6 sm:p-8 border-2 border-[color:var(--destructive)]" hidden style="background: color-mix(in oklch, var(--destructive) 6%, var(--background));">
-          <p class="mono-code text-xs uppercase tracking-[0.22em] text-[color:var(--destructive)] mb-3"><span data-i18n="special.eyebrow">Today's special · 今日推荐</span></p>
-          <div class="flex items-baseline gap-4 flex-wrap">
-            <span data-special-code class="mono-code text-base text-[color:var(--muted-foreground)]">—</span>
-            <span data-special-zh class="zh text-3xl sm:text-5xl font-medium text-[color:var(--destructive)]" lang="zh-Hant">—</span>
-            <span data-special-en class="display text-xl sm:text-3xl font-light">—</span>
-            <span data-special-price class="ml-auto price text-3xl sm:text-4xl shrink-0">$—</span>
-          </div>
+          <p class="mono-code text-xs uppercase tracking-[0.22em] text-[color:var(--destructive)] mb-4"><span data-i18n="special.eyebrow">Today's special · 今日推荐</span></p>
+          <ul id="todays-specials-list" class="space-y-3"></ul>
         </aside>
 
         <!-- ====== CATEGORY: 蒸餸飯 Steamed Rice Dishes ====== -->
@@ -1759,19 +1755,47 @@
             }
           }
 
-          // ---- Today's Special: reveal the card at the top of #menu when
-          //      the admin has set one. ----
-          if (data.todays_special && data.todays_special.code) {
-            var card    = document.getElementById('todays-special-card');
-            var codeEl  = document.querySelector('[data-special-code]');
-            var zhEl2   = document.querySelector('[data-special-zh]');
-            var enEl2   = document.querySelector('[data-special-en]');
-            var priceEl = document.querySelector('[data-special-price]');
-            if (card && codeEl && zhEl2 && enEl2 && priceEl) {
-              codeEl.textContent  = data.todays_special.code;
-              zhEl2.textContent   = data.todays_special.name_zh;
-              enEl2.textContent   = data.todays_special.name_en;
-              priceEl.textContent = '$' + ((data.todays_special.price_cents || 0) / 100).toFixed(2).replace(/\.00$/, '');
+          // ---- Today's Specials: reveal the card at the top of #menu when
+          //      the admin has added at least one special, and populate one
+          //      row per item. ----
+          var specials = Array.isArray(data.todays_specials) ? data.todays_specials : [];
+          if (specials.length > 0) {
+            var card = document.getElementById('todays-special-card');
+            var list = document.getElementById('todays-specials-list');
+            if (card && list) {
+              // Clear (defensive — in case this fires twice for any reason).
+              while (list.firstChild) list.removeChild(list.firstChild);
+              for (var s = 0; s < specials.length; s++) {
+                var sp = specials[s];
+                var row = document.createElement('li');
+                row.className = 'flex items-baseline gap-4 flex-wrap';
+                if (s < specials.length - 1) {
+                  row.className += ' pb-3 border-b border-dotted border-[color:var(--destructive)]/30';
+                }
+
+                var codeSpan = document.createElement('span');
+                codeSpan.className = 'mono-code text-sm text-[color:var(--muted-foreground)] w-12 shrink-0';
+                codeSpan.textContent = sp.code;
+
+                var zhSpan = document.createElement('span');
+                zhSpan.className = 'zh text-2xl sm:text-3xl font-medium text-[color:var(--destructive)]';
+                zhSpan.setAttribute('lang', 'zh-Hant');
+                zhSpan.textContent = sp.name_zh;
+
+                var enSpan = document.createElement('span');
+                enSpan.className = 'display text-lg sm:text-xl font-light';
+                enSpan.textContent = sp.name_en;
+
+                var priceSpan = document.createElement('span');
+                priceSpan.className = 'ml-auto price text-2xl sm:text-3xl shrink-0';
+                priceSpan.textContent = '$' + ((sp.price_cents || 0) / 100).toFixed(2).replace(/\.00$/, '');
+
+                row.appendChild(codeSpan);
+                row.appendChild(zhSpan);
+                row.appendChild(enSpan);
+                row.appendChild(priceSpan);
+                list.appendChild(row);
+              }
               card.hidden = false;
             }
           }

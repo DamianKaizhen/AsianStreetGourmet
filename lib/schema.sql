@@ -132,46 +132,52 @@ ON CONFLICT (slug) DO NOTHING;
 -- 3. MENU ITEMS (seed) — matches the JULY 2026 printed menu
 -- ============================================================
 
--- 蒸餸飯 Steamed Rice Dishes ($7–$9) — A column (A1–A7)
+-- 蒸餸飯 Steamed Rice Dishes ($7–$9) — A column (A1–A7).
+-- English wording mirrors the printed menu's "X Steam Rice" pattern.
 INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_order) VALUES
-  ('A1', 'Pork Rib over Rice',            '榨菜排骨蒸飯', 'steam', 700, 1),
-  ('A2', 'Chicken over Rice',             '冬菇滑雞蒸飯', 'steam', 800, 2),
-  ('A3', 'Meat Patties over Rice',        '梅菜肉餅蒸飯', 'steam', 700, 3),
-  ('A4', 'Beef Brisket over Rice',        '蘿蔔牛腩蒸飯', 'steam', 900, 4),
-  ('A5', 'Tomato Beef over Rice',         '番茄牛肉蒸飯', 'steam', 900, 5),
-  ('A6', 'Sheep Brisket over Rice',       '支竹羊腩蒸飯', 'steam', 900, 6),
-  ('A7', 'Duck over Rice',                '香芋燒鴨蒸飯', 'steam', 900, 7)
+  ('A1', 'Pork Rib Steam Rice',         '榨菜排骨蒸飯', 'steam', 700, 1),
+  ('A2', 'Chicken Steam Rice',          '冬菇滑雞蒸飯', 'steam', 700, 2),
+  ('A3', 'Meat Patties Steam Rice',     '梅菜肉餅蒸飯', 'steam', 700, 3),
+  ('A4', 'Beef Brisket Steam Rice',     '蘿蔔牛腩蒸飯', 'steam', 900, 4),
+  ('A5', 'Tomato Beef Steam Rice',      '番茄牛肉蒸飯', 'steam', 900, 5),
+  ('A6', 'Sheep Brisket Steam Rice',    '支竹羊腩蒸飯', 'steam', 900, 6),
+  ('A7', 'Duck Steam Rice',             '香芋鴨蒸飯',   'steam', 900, 7)
 ON CONFLICT (code) DO NOTHING;
 
--- 蒸餸飯 Steamed Rice Dishes ($8–$9) — B column (B1–B7)
+-- 蒸餸飯 Steamed Rice Dishes ($8–$9) — B column (B1–B7).
+-- Two menu typos corrected: "Bamfish"→"Pomfret", "Slaem"→"Steam".
 INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_order) VALUES
-  ('B1', 'Shrimp & Silky Egg over Rice',          '滑蛋蝦仁蒸飯', 'steam', 800, 8),
-  ('B2', 'Pomfret over Rice',                     '蒸倉魚蒸飯',   'steam', 800, 9),
-  ('B3', 'Yellow Croaker over Rice',              '蒸黃花魚蒸飯', 'steam', 800, 10),
-  ('B4', 'Squid in Black Bean over Rice',         '豉椒鮮魷蒸飯', 'steam', 800, 11),
-  ('B5', 'Spicy Fish Paste over Rice',            '辣椒魚滑蒸飯', 'steam', 800, 12),
-  ('B6', 'Pickled Vegetable Fish Fillet over Rice','酸菜魚片蒸飯', 'steam', 900, 13),
-  ('B7', 'Vegetarian over Rice',                  '羅漢素菜蒸飯', 'steam', 900, 14)
+  ('B1', 'Shrimp Egg Steam Rice',                  '滑蛋蝦仁蒸飯', 'steam', 800, 8),
+  ('B2', 'Steamed Pomfret Steam Rice',             '蒸倉魚蒸飯',   'steam', 800, 9),
+  ('B3', 'Steamed Yellow Croaker Steam Rice',      '蒸黃花魚蒸飯', 'steam', 800, 10),
+  ('B4', 'Fresh Squid Steam Rice',                 '豉椒鮮魷蒸飯', 'steam', 800, 11),
+  ('B5', 'Fish Paste Steam Rice',                  '辣椒魚滑蒸飯', 'steam', 800, 12),
+  ('B6', 'Fish Fillets Steam Rice',                '酸菜魚片蒸飯', 'steam', 900, 13),
+  ('B7', 'Vegetarian Steam Rice',                  '羅漢素菜',     'steam', 900, 14)
 ON CONFLICT (code) DO NOTHING;
 
--- 每日靚湯 Daily Soup ($3) — C1–C6, rotated by day-of-week (see soup_schedule)
+-- 每日靚湯 Daily Soup ($3) — C1–C6. English wording matches the printed
+-- menu (no trailing "Soup" since the section heading already says it).
+-- C3 in the printed menu had "Lotus root" as the English caption — that
+-- was clearly a duplicate-paste typo of C1; the Chinese 白菜菜乾 means
+-- "dried cabbage", which is what we use here.
 INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_order) VALUES
-  ('C1', 'Lotus Root Soup',              '蓮藕湯',     'soup', 300, 18),
-  ('C2', 'Watercress Soup',              '西洋菜湯',   'soup', 300, 19),
-  ('C3', 'Dried Cabbage Soup',           '白菜菜乾湯', 'soup', 300, 20),
-  ('C4', 'Night-Blooming Cereus Soup',   '霸王花湯',   'soup', 300, 21),
-  ('C5', 'Winter Melon Soup',            '冬瓜湯',     'soup', 300, 22),
-  ('C6', 'Tomato Soup',                  '蕃茄湯',     'soup', 300, 23)
+  ('C1', 'Lotus Root',           '蓮藕湯',     'soup', 300, 18),
+  ('C2', 'Watercress',           '西洋菜湯',   'soup', 300, 19),
+  ('C3', 'Dried Cabbage',        '白菜菜乾',   'soup', 300, 20),
+  ('C4', 'Blooming Cereus',      '霸王花湯',   'soup', 300, 21),
+  ('C5', 'Winter Melon',         '冬瓜湯',     'soup', 300, 22),
+  ('C6', 'Tomato Borscht',       '番茄湯',     'soup', 300, 23)
 ON CONFLICT (code) DO NOTHING;
 
--- 小食 Snacks & Sides ($3) — D1–D6
+-- 小食 Snacks & Sides ($3) — D1–D6. Singular form per the printed menu.
 INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_order) VALUES
-  ('D1', 'Steamed Rice',                 '白飯',     'snack', 300, 24),
-  ('D2', 'Spring Rolls',                 '炸春卷',   'snack', 300, 25),
-  ('D3', 'Fish Balls & Siu Mai',         '魚旦燒賣', 'snack', 300, 26),
-  ('D4', 'Dumplings',                    '水餃',     'snack', 300, 27),
-  ('D5', 'Fried Rice Noodles',           '炒粉',     'snack', 300, 28),
-  ('D6', 'Fried Noodles',                '炒麵',     'snack', 300, 29)
+  ('D1', 'Steam Rice',           '白飯',     'snack', 300, 24),
+  ('D2', 'Spring Rolls',         '炸春卷',   'snack', 300, 25),
+  ('D3', 'Fish Ball',            '魚旦燒賣', 'snack', 300, 26),
+  ('D4', 'Dumpling',             '水餃',     'snack', 300, 27),
+  ('D5', 'Fried Rice Noodle',    '炒粉',     'snack', 300, 28),
+  ('D6', 'Fried Noodle',         '炒麵',     'snack', 300, 29)
 ON CONFLICT (code) DO NOTHING;
 
 -- Default daily-soup assignments (matches the printed menu).

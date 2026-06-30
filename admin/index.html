@@ -622,7 +622,12 @@
         'special.stateNone':  'No specials set',
         'special.flashSaved':   'Specials saved ({n})',
         'special.flashCleared': 'All specials cleared',
-        'special.errInvalid':   'Each row needs a code, Chinese name, English name, and a price (USD ≥ 0).',
+        'special.errInvalid':       'Each row needs a code, Chinese name, English name, and a price (USD ≥ 0).',
+        'special.loadFailed':       "Couldn't load the saved specials. Please reload the page and try again. Saving is disabled until then so existing data isn't overwritten.",
+        'special.loadFailedShort':  'Load failed — reload to edit',
+        'special.errLoadFailed':    "Can't save while existing data couldn't be loaded. Reload the page first.",
+        'special.confirmSaveEmpty': '⚠ All rows are blank, but specials are currently saved. Click Save all again to confirm clearing them.',
+        'special.clearAllConfirm':  'Tap again to clear',
         'soup.none': '(no soup)',
         'flash.soupAssigned': '{day} → {soup}',
         'hours.subhead': 'Set opening and closing times for each day. Times are in 24-hour format (NY local). Toggle a day off to mark it closed.',
@@ -784,7 +789,12 @@
         'special.stateNone':  '未設定特餐',
         'special.flashSaved':   '特餐已儲存（{n}）',
         'special.flashCleared': '所有特餐已清除',
-        'special.errInvalid':   '每一行都要有編號、中文名、英文名同 USD ≥ 0 嘅價錢。',
+        'special.errInvalid':       '每一行都要有編號、中文名、英文名同 USD ≥ 0 嘅價錢。',
+        'special.loadFailed':       '無法載入已儲存嘅特餐。請重新載入頁面再試。為咗避免覆蓋舊資料，儲存功能暫時停用。',
+        'special.loadFailedShort':  '載入失敗 — 重新載入先可以編輯',
+        'special.errLoadFailed':    '舊資料未能載入，唔可以儲存。請先重新載入頁面。',
+        'special.confirmSaveEmpty': '⚠ 所有行都係空，但資料庫仲有特餐。再撳一次「全部儲存」確認清除。',
+        'special.clearAllConfirm':  '再撳一次清除',
         'soup.none': '（無湯）',
         'flash.soupAssigned': '{day} → {soup}',
         'hours.subhead': '設定每日嘅開門同關門時間。時間用 24 小時制（紐約本地）。如果嗰日唔做生意，將開關制撥到關。',
@@ -1151,7 +1161,15 @@
       window.__hoursCache = hours.hours;
       window.__menuCache  = menu.menu_items;
       window.__soupWeekCache = today.soup_week || [];
-      window.__specialsCache = Array.isArray(today.todays_specials) ? today.todays_specials : [];
+      // If /api/menu-today errored (5xx, network blip, etc.), `today` comes
+      // back as `{ error: ... }` and `todays_specials` is undefined. In that
+      // case the specials cache should NOT be defaulted to [] — doing so
+      // would let the form's "Save all" overwrite real DB data with an
+      // empty array. Instead we mark the load as failed so the form blocks
+      // destructive actions until reload.
+      const specialsLoadFailed = !!(today && today.error) || !Array.isArray(today.todays_specials);
+      window.__specialsLoadOk = !specialsLoadFailed;
+      window.__specialsCache  = specialsLoadFailed ? null : today.todays_specials;
       renderCartToggle(cartStatus.cart_enabled === true);
       renderPreview(today, menu.menu_items);
       renderSpecials(window.__specialsCache);
@@ -2128,6 +2146,30 @@
       const container = $('#specials-rows');
       if (!container) return;
       clear(container);
+
+      // Load failed → don't render an editable form (any save here would
+      // overwrite real DB data with whatever the user types). Show a clear
+      // "couldn't load" banner instead and disable the action buttons.
+      const loadOk = window.__specialsLoadOk !== false;
+      const saveBtn  = $('#specials-form button[type="submit"]');
+      const clearBtn = $('#specials-clear-btn');
+      const addBtn   = $('#specials-add-btn');
+      if (!loadOk) {
+        const warn = el('div', {
+          class: 'p-3 mono text-[0.7rem] uppercase tracking-[0.18em]',
+          style: 'background: color-mix(in oklch, var(--destructive) 10%, transparent); color: var(--destructive); border: 1px solid var(--destructive);',
+        }, '⚠ ' + t('special.loadFailed'));
+        container.appendChild(warn);
+        if (saveBtn)  saveBtn.disabled  = true;
+        if (clearBtn) clearBtn.disabled = true;
+        if (addBtn)   addBtn.disabled   = true;
+        updateSpecialsState();
+        return;
+      }
+      if (saveBtn)  saveBtn.disabled  = false;
+      if (clearBtn) { clearBtn.disabled = false; resetClearArm(clearBtn); }
+      if (addBtn)   addBtn.disabled   = false;
+
       const list = Array.isArray(specials) ? specials : [];
       if (list.length === 0) {
         // Always render one empty row so the user has somewhere to start typing.
@@ -2144,6 +2186,11 @@
     function updateSpecialsState() {
       const stateEl = $('#specials-state');
       if (!stateEl) return;
+      if (window.__specialsLoadOk === false) {
+        stateEl.textContent = '⚠ ' + t('special.loadFailedShort');
+        stateEl.style.color = 'var(--destructive)';
+        return;
+      }
       const n = (window.__specialsCache || []).length;
       if (n === 0) {
         stateEl.textContent = t('special.stateNone');
@@ -2157,6 +2204,25 @@
       }
     }
 
+    // ----- Clear-all arming helpers (two-click confirm, mirrors the
+    //       per-item Delete pattern in the Menu items list). -----
+    function resetClearArm(btn) {
+      btn.__armed = false;
+      btn.textContent = t('special.clearAll');
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color = 'var(--foreground)';
+      btn.style.background = 'transparent';
+      if (btn.__armTimer) { clearTimeout(btn.__armTimer); btn.__armTimer = null; }
+    }
+    function armClearButton(btn) {
+      btn.__armed = true;
+      btn.textContent = t('special.clearAllConfirm');
+      btn.style.borderColor = 'var(--destructive)';
+      btn.style.color = 'white';
+      btn.style.background = 'var(--destructive)';
+      btn.__armTimer = setTimeout(() => resetClearArm(btn), 5000);
+    }
+
     function initSpecialsFormHandlers() {
       const form = $('#specials-form');
       const errEl = $('#specials-error');
@@ -2165,6 +2231,7 @@
 
       // + Add row
       $('#specials-add-btn').addEventListener('click', () => {
+        if (window.__specialsLoadOk === false) return;
         $('#specials-rows').appendChild(specialRow(null));
       });
 
@@ -2172,6 +2239,10 @@
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         errEl.hidden = true;
+        if (window.__specialsLoadOk === false) {
+          flash(t('special.errLoadFailed'), 'bad');
+          return;
+        }
 
         // Collect rows, skipping entirely-empty ones so users can leave a
         // blank trailing row without it being a validation error.
@@ -2194,6 +2265,22 @@
           collected.push({ code, name_zh, name_en, price_cents });
         }
 
+        // Refuse to silently clear: if the user is about to save an empty
+        // list AND the DB currently has specials, require a two-click
+        // confirmation rather than overwriting in one click.
+        const previouslyHadItems = (window.__specialsCache || []).length > 0;
+        const aboutToClear = collected.length === 0;
+        if (previouslyHadItems && aboutToClear) {
+          if (!form.__saveEmptyArmed) {
+            form.__saveEmptyArmed = true;
+            errEl.textContent = t('special.confirmSaveEmpty');
+            errEl.hidden = false;
+            setTimeout(() => { form.__saveEmptyArmed = false; }, 5000);
+            return;
+          }
+          form.__saveEmptyArmed = false;
+        }
+
         try {
           const resp = await api('/api/admin/menu', {
             method: 'PATCH',
@@ -2201,14 +2288,24 @@
           });
           window.__specialsCache = resp.specials || collected;
           renderSpecials(window.__specialsCache);
-          flash(t('special.flashSaved', { n: window.__specialsCache.length }), 'good');
+          flash(collected.length === 0
+            ? t('special.flashCleared')
+            : t('special.flashSaved', { n: window.__specialsCache.length }), 'good');
         } catch {
           flash(t('flash.updateFailed'), 'bad');
         }
       });
 
-      // Clear all
+      // Clear all — two-click confirm. First click arms (red, "Tap again
+      // to clear"); second click within 5 s actually clears.
       $('#specials-clear-btn').addEventListener('click', async () => {
+        if (window.__specialsLoadOk === false) return;
+        const btn = $('#specials-clear-btn');
+        if (!btn.__armed) {
+          armClearButton(btn);
+          return;
+        }
+        resetClearArm(btn);
         errEl.hidden = true;
         try {
           await api('/api/admin/menu', { method: 'PATCH', body: { specials: [] } });

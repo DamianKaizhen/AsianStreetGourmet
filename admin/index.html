@@ -423,6 +423,13 @@
         <div id="hours-container" class="mt-5 card divide-y divide-dotted divide-[color:var(--border)]"></div>
       </div>
 
+      <!-- Daily soup schedule -->
+      <div>
+        <h2 class="display text-3xl font-light leading-tight" data-i18n="soup.heading">Daily soup</h2>
+        <p class="text-sm text-[color:var(--muted-foreground)] mt-1" data-i18n="soup.subhead">Pick which soup is served on each day of the week. Soup items (C1–C6) are still managed in the Menu items list below — this is just the day-by-day assignment.</p>
+        <div id="soup-schedule-container" class="mt-5 card divide-y divide-dotted divide-[color:var(--border)]"></div>
+      </div>
+
       <!-- Menu items -->
       <div>
         <h2 class="display text-3xl font-light leading-tight" data-i18n="menu.heading">Menu items</h2>
@@ -571,6 +578,10 @@
         'titleBadge': '({n}) NEW',
 
         'hours.heading': 'Hours',
+        'soup.heading': 'Daily soup',
+        'soup.subhead': 'Pick which soup is served on each day of the week. Soup items (C1–C6) are still managed in the Menu items list below — this is just the day-by-day assignment.',
+        'soup.none': '(no soup)',
+        'flash.soupAssigned': '{day} → {soup}',
         'hours.subhead': 'Set opening and closing times for each day. Times are in 24-hour format (NY local). Toggle a day off to mark it closed.',
         'day.sun': 'Sun', 'day.mon': 'Mon', 'day.tue': 'Tue', 'day.wed': 'Wed', 'day.thu': 'Thu', 'day.fri': 'Fri', 'day.sat': 'Sat',
 
@@ -580,8 +591,7 @@
         'menu.available': 'available',
         'menu.unavailable': 'unavailable',
 
-        'cat.rice': '蒸餸飯 · Steamed Rice Plates',
-        'cat.home': '家庭菜 · Home-Style Dishes',
+        'cat.steam': '蒸餸飯 · Steamed Rice Dishes',
         'cat.soup': '靚湯 · Slow-Simmered Soups',
         'cat.snack': '小食 · Snacks & Sides',
 
@@ -696,6 +706,10 @@
         'titleBadge': '（{n}）新',
 
         'hours.heading': '營業時間',
+        'soup.heading': '每日靚湯',
+        'soup.subhead': '揀邊款湯喺邊日供應。靚湯項目（C1–C6）仍然喺下面嘅「餐牌」管理，呢度只係安排每日對應邊款。',
+        'soup.none': '（無湯）',
+        'flash.soupAssigned': '{day} → {soup}',
         'hours.subhead': '設定每日嘅開門同關門時間。時間用 24 小時制（紐約本地）。如果嗰日唔做生意，將開關制撥到關。',
         'day.sun': '日', 'day.mon': '一', 'day.tue': '二', 'day.wed': '三', 'day.thu': '四', 'day.fri': '五', 'day.sat': '六',
 
@@ -705,8 +719,7 @@
         'menu.available': '有得賣',
         'menu.unavailable': '賣晒',
 
-        'cat.rice': '蒸餸飯',
-        'cat.home': '家庭菜',
+        'cat.steam': '蒸餸飯',
         'cat.soup': '靚湯',
         'cat.snack': '小食',
 
@@ -784,6 +797,7 @@
         renderNotifPrompt();
         if (window.__hoursCache) renderHours(window.__hoursCache);
         if (window.__menuCache) renderMenu(window.__menuCache);
+        if (window.__soupWeekCache && window.__menuCache) renderSoupSchedule(window.__soupWeekCache, window.__menuCache);
       }
       // Refresh poll-state indicator label
       const ind = $('#orders-poll-state');
@@ -1036,11 +1050,13 @@
       // Cache the source data so the lang-toggle handler can re-render
       // these sections without re-fetching from the server.
       window.__hoursCache = hours.hours;
-      window.__menuCache = menu.menu_items;
+      window.__menuCache  = menu.menu_items;
+      window.__soupWeekCache = today.soup_week || [];
       renderCartToggle(cartStatus.cart_enabled === true);
       renderPreview(today, menu.menu_items);
       renderHours(hours.hours);
       renderMenu(menu.menu_items);
+      renderSoupSchedule(window.__soupWeekCache, menu.menu_items);
 
       // Orders inbox: render notif-permission prompt, init auto-print toggle
       // (reads persisted state), do initial fetch (no chime/print — see
@@ -1750,7 +1766,7 @@
         if (m.rotation_mode === 'rotation') rotInMode[m.category] = (rotInMode[m.category] || 0) + 1;
       });
 
-      ['rice', 'home', 'soup', 'snack'].forEach((cat) => {
+      ['steam', 'soup', 'snack'].forEach((cat) => {
         const input = el('input', {
           type: 'number', min: '0', max: '50',
           value: String(rotByCat[cat] ?? 0),
@@ -1871,13 +1887,91 @@
       );
     }
 
+    // =========================================================
+    // Daily soup schedule — 7 rows (Sun..Sat), each a <select> of
+    // currently-available soup codes (C1..C6) plus a "(no soup)" option.
+    // Writes go through PATCH /api/admin/menu with the discriminator
+    // body shape { schedule_day, soup_code } — no new function file.
+    // =========================================================
+    function renderSoupSchedule(soupWeek, menuItems) {
+      const container = $('#soup-schedule-container');
+      if (!container) return;
+      clear(container);
+
+      // Build the list of selectable soup codes from menuItems (category='soup').
+      const soupOptions = menuItems
+        .filter((m) => m.category === 'soup')
+        .sort((a, b) => a.display_order - b.display_order);
+
+      // Index the schedule by day-of-week for quick lookup.
+      const byDay = {};
+      (soupWeek || []).forEach((row) => { byDay[row.day_of_week] = row.code || null; });
+
+      for (let d = 0; d < 7; d++) {
+        container.appendChild(soupScheduleRow(d, byDay[d] || null, soupOptions));
+      }
+    }
+
+    function soupScheduleRow(dow, currentCode, soupOptions) {
+      const select = el('select', {
+        class: 'num-input',
+        style: 'min-width: 16rem;',
+      });
+      const noneOpt = el('option', { value: '' }, t('soup.none'));
+      select.appendChild(noneOpt);
+      soupOptions.forEach((m) => {
+        const opt = el('option', { value: m.code }, m.code + ' · ' + m.name_zh + ' / ' + m.name_en);
+        if (m.code === currentCode) opt.setAttribute('selected', '');
+        select.appendChild(opt);
+      });
+
+      const wrap = el('div', { class: 'inline-flex items-center gap-2' }, select);
+
+      select.addEventListener('change', async () => {
+        wrap.classList.add('is-busy');
+        const nextCode = select.value || null;
+        try {
+          await api('/api/admin/menu', {
+            method: 'PATCH',
+            body: { schedule_day: dow, soup_code: nextCode },
+          });
+          // Mirror into the cache so a language toggle re-renders correctly.
+          if (Array.isArray(window.__soupWeekCache)) {
+            const cached = window.__soupWeekCache.find((r) => r.day_of_week === dow);
+            const picked = soupOptions.find((m) => m.code === nextCode) || null;
+            if (cached) {
+              cached.code    = nextCode;
+              cached.name_en = picked ? picked.name_en : null;
+              cached.name_zh = picked ? picked.name_zh : null;
+            }
+          }
+          const picked = soupOptions.find((m) => m.code === nextCode);
+          flash(t('flash.soupAssigned', {
+            day:  dayName(dow),
+            soup: picked ? (picked.code + ' · ' + picked.name_zh) : t('soup.none'),
+          }));
+        } catch {
+          // Revert the visual selection on failure.
+          select.value = currentCode || '';
+          flash(t('flash.updateFailed'), 'bad');
+        } finally {
+          wrap.classList.remove('is-busy');
+        }
+      });
+
+      return el('div', { class: 'flex items-center justify-between gap-3 px-5 py-3' },
+        el('p', { class: 'mono text-sm uppercase tracking-[0.18em] w-12' }, dayName(dow)),
+        wrap
+      );
+    }
+
     function renderMenu(menuItems) {
       const container = $('#menu-container');
       clear(container);
       const groups = {};
       menuItems.forEach((m) => { (groups[m.category] ||= []).push(m); });
 
-      ['rice', 'home', 'soup', 'snack'].forEach((cat) => {
+      ['steam', 'soup', 'snack'].forEach((cat) => {
         const items = groups[cat] || [];
         if (items.length === 0) return;
         const list = el('div', { class: 'mt-2' });

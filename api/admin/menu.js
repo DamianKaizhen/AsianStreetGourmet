@@ -1,11 +1,12 @@
 // /api/admin/menu — admin-only menu queries and per-item updates.
 //
-// GET   /api/admin/menu                                  → list with ingredients
-// PATCH /api/admin/menu  { code, is_available?, rotation_mode? }  → update one item
+// GET   /api/admin/menu                                                   → list with ingredients (archived hidden)
+// PATCH /api/admin/menu  { code, is_available?, rotation_mode? }          → update one menu item
+// PATCH /api/admin/menu  { schedule_day, soup_code }                      → upsert daily soup assignment
 //
-// PATCH takes the menu code in the body (rather than a URL segment) so this
-// file can be a single Vercel serverless function — keeps us under the
-// Hobby tier's 12-function limit.
+// PATCH takes a body-shape discriminator (presence of `schedule_day`) so the
+// daily-soup writes can share this endpoint with the per-item updates and
+// keep the Vercel function count at 11/12.
 
 import { sql } from '../../lib/db.js';
 import { requireAdmin } from '../../lib/auth.js';
@@ -14,6 +15,7 @@ const ALLOWED_MODES = ['always', 'rotation'];
 
 async function handler(req, res) {
   if (req.method === 'GET') {
+    // Archived rows are excluded so the admin sees only the current menu.
     const rows = await sql`
       SELECT
         m.id, m.code, m.name_en, m.name_zh, m.category, m.price_cents,
@@ -35,6 +37,7 @@ async function handler(req, res) {
       FROM menu_items m
       LEFT JOIN menu_item_ingredients mii ON mii.menu_item_id = m.id
       LEFT JOIN ingredients i ON i.id = mii.ingredient_id
+      WHERE m.is_archived = FALSE
       GROUP BY m.id
       ORDER BY m.display_order
     `;
@@ -44,8 +47,45 @@ async function handler(req, res) {
   if (req.method === 'PATCH') {
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
 
+    // ----- Branch A: daily-soup schedule write -----
+    // Body shape: { schedule_day: 0..6, soup_code: 'C2' | null }
+    if ('schedule_day' in body) {
+      const day = Number(body.schedule_day);
+      if (!Number.isInteger(day) || day < 0 || day > 6) {
+        return res.status(400).json({ error: 'schedule_day must be integer 0..6' });
+      }
+      let soupCode = body.soup_code;
+      if (soupCode === undefined) {
+        return res.status(400).json({ error: 'soup_code is required (use null to clear)' });
+      }
+      if (soupCode !== null) {
+        soupCode = String(soupCode).toUpperCase();
+        if (!/^C[0-9]+$/.test(soupCode)) {
+          return res.status(400).json({ error: 'soup_code must be a C-prefixed menu code or null' });
+        }
+        // Confirm the code exists and is actually a soup (and isn't archived).
+        const check = await sql`
+          SELECT 1 FROM menu_items
+          WHERE code = ${soupCode} AND category = 'soup' AND is_archived = FALSE
+        `;
+        if (check.length === 0) {
+          return res.status(404).json({ error: 'soup_code not found among active soups' });
+        }
+      }
+      const rows = await sql`
+        INSERT INTO soup_schedule (day_of_week, soup_code, updated_at)
+        VALUES (${day}, ${soupCode}, NOW())
+        ON CONFLICT (day_of_week) DO UPDATE
+          SET soup_code = EXCLUDED.soup_code,
+              updated_at = NOW()
+        RETURNING day_of_week, soup_code, updated_at
+      `;
+      return res.status(200).json({ schedule: rows[0] });
+    }
+
+    // ----- Branch B: per-item update (existing behaviour) -----
     const code = String(body.code || '').toUpperCase();
-    if (!/^[SABCD][0-9]+$/.test(code)) {
+    if (!/^[ABCD][0-9]+$/.test(code)) {
       return res.status(400).json({ error: 'invalid or missing menu code' });
     }
 
@@ -74,7 +114,7 @@ async function handler(req, res) {
         is_available  = COALESCE(${u.is_available}::boolean, is_available),
         rotation_mode = COALESCE(${u.rotation_mode},         rotation_mode),
         updated_at    = NOW()
-      WHERE code = ${code}
+      WHERE code = ${code} AND is_archived = FALSE
       RETURNING id, code, is_available, rotation_mode, updated_at
     `;
 

@@ -20,9 +20,49 @@ parentheses are pointers into `git log` for the exact diffs.
 
 ## Menu and content
 
-- 4 menu categories live on the page: **Steamed Rice Plates**,
-  **Home-Style Dishes**, **Slow-Simmered Soups**, **Snacks** —
-  each with menu codes (S1–S4, A1–A6, B1–B6, C1–C6, D1–D6).
+- **Major overhaul — JULY 2026 printed menu.** The lunch/dinner
+  split is gone. Categories are now: **蒸餸飯 Steamed Rice Dishes**
+  (A1–A7 + B1–B7, $7–$9), **每日靚湯 Daily Soup** (C1–C6, $3 each,
+  rotated by day of week — Mon Lotus Root, Tue Watercress, Wed Dried
+  Cabbage, Thu Night-Blooming Cereus, Fri Winter Melon, Sat + Sun
+  Tomato), and **小食 Snacks** (D1–D6, $3 each, including new D1
+  Steamed Rice, D5 Fried Rice Noodles, D6 Fried Noodles).
+- Old `category='rice'` and `category='home'` are collapsed into a
+  single `category='steam'`. Schema gained an `is_archived` column;
+  all old codes (S1–S4, the old A1–A6, B1–B6, the old C/D items)
+  are renamed with a `_archived` suffix and hidden from the public
+  site, the admin, and the cart — but kept in the DB so historical
+  `order_items` rows still resolve cleanly.
+- New `soup_schedule` Postgres table (mirrors the `hours` 7-day
+  pattern). One row per day of week with a nullable FK to a soup
+  code; Sat + Sun both point at C6.
+- **Public site** rebuilt: drop the cat-home article entirely;
+  rebuild the rice article as a two-column grid for the 14 steam
+  dishes; the soup section now leads with a "Today's soup" hero
+  card populated from `/api/menu-today` and shows a Mon→Sun
+  schedule with today's row highlighted; snack items refreshed to
+  match the printed menu. All marketing copy (meta description, OG,
+  Twitter card, JSON-LD `hasMenuSection`, hero, FAQ, footer
+  tagline, the "one A1, one C2, two D6" example phrasing)
+  rewritten to drop "home-style dishes" framing and reflect the
+  $7–$9 price band.
+- **Admin** gains a new "Daily soup" card between Hours and Menu
+  items. 7 rows, one per day, with a `<select>` of soup codes
+  (plus "(no soup)") for each. Writes go through the existing
+  `/api/admin/menu` endpoint with a body-shape discriminator
+  (`{ schedule_day, soup_code }`) — no new Vercel serverless
+  function; count stays at 11/12.
+- A small "Menu published in Wilson's Shopping Directory" credit
+  appears in the public footer (matches the printed menu's
+  publisher attribution; clearly separated from the restaurant's
+  own contact info in the Visit section).
+- The `lib/orders.js` menu-code regex tightened from `[SABCD]` to
+  `[ABCD]` so customers can no longer submit orders for archived
+  S-prefixed items. The cart-validate query also filters
+  `WHERE is_archived = FALSE`.
+- (Prior, retained for history) 4 menu categories were
+  **Steamed Rice Plates**, **Home-Style Dishes**, **Slow-Simmered
+  Soups**, **Snacks** with codes S1–S4, A1–A6, B1–B6, C1–C6, D1–D6.
 - Soup category subtitle simplified for English readers: was
   "Cantonese 老火湯 — bones, herbs, vegetables…", now "Cantonese
   soups — …" (`9aa2522`).

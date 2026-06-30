@@ -1,12 +1,12 @@
 // GET   /api/admin/rotation — list pool sizes per category
 // PATCH /api/admin/rotation — update one category's pool size
 //
-// PATCH body: { category: 'rice'|'home'|'soup'|'snack', pool_size: integer ≥ 0 }
+// PATCH body: { category: 'steam'|'soup'|'snack', pool_size: integer ≥ 0 }
 
 import { sql } from '../../lib/db.js';
 import { requireAdmin } from '../../lib/auth.js';
 
-const ALLOWED_CATEGORIES = ['rice', 'home', 'soup', 'snack'];
+const ALLOWED_CATEGORIES = ['steam', 'soup', 'snack'];
 
 async function handler(req, res) {
   if (req.method === 'GET') {

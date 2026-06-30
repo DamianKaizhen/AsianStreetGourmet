@@ -20,19 +20,21 @@ CREATE TABLE IF NOT EXISTS ingredients (
 
 CREATE TABLE IF NOT EXISTS menu_items (
   id            SERIAL PRIMARY KEY,
-  code          TEXT UNIQUE NOT NULL,                -- 'S1', 'A4', etc.
+  code          TEXT UNIQUE NOT NULL,                -- 'A4', 'C2', 'D3', etc.
   name_en       TEXT NOT NULL,
   name_zh       TEXT NOT NULL,
-  category      TEXT NOT NULL,                       -- 'rice'|'home'|'soup'|'snack'
+  category      TEXT NOT NULL,                       -- 'steam'|'soup'|'snack'
   price_cents   INTEGER NOT NULL,
   rotation_mode TEXT NOT NULL DEFAULT 'always',      -- 'always'|'rotation' (dormant — kept for future use)
   is_available  BOOLEAN NOT NULL DEFAULT TRUE,       -- direct per-item availability (admin toggle)
+  is_archived   BOOLEAN NOT NULL DEFAULT FALSE,      -- soft-delete; archived rows hide from public + admin
   display_order INTEGER NOT NULL,
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Idempotent migration for DBs that already have menu_items without is_available:
+-- Idempotent migrations for DBs that pre-date the columns:
 ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS is_available BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS is_archived  BOOLEAN NOT NULL DEFAULT FALSE;
 
 CREATE TABLE IF NOT EXISTS menu_item_ingredients (
   menu_item_id  INTEGER NOT NULL REFERENCES menu_items(id) ON DELETE CASCADE,
@@ -52,6 +54,17 @@ CREATE TABLE IF NOT EXISTS hours (
   is_open      BOOLEAN NOT NULL DEFAULT TRUE,
   opens        TEXT,
   closes       TEXT,
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CHECK (day_of_week >= 0 AND day_of_week <= 6)
+);
+
+-- Daily soup schedule. The new menu rotates soups by day-of-week —
+-- e.g. Monday is Lotus Root, Friday is Winter Melon, Saturday + Sunday
+-- both get Tomato. One row per day, with a FK to whichever soup is
+-- served that day. Nullable soup_code means "no soup that day".
+CREATE TABLE IF NOT EXISTS soup_schedule (
+  day_of_week  INTEGER PRIMARY KEY,
+  soup_code    TEXT REFERENCES menu_items(code),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CHECK (day_of_week >= 0 AND day_of_week <= 6)
 );
@@ -116,56 +129,63 @@ INSERT INTO ingredients (slug, name_en, name_zh, category, is_pantry) VALUES
 ON CONFLICT (slug) DO NOTHING;
 
 -- ============================================================
--- 3. MENU ITEMS (seed)
+-- 3. MENU ITEMS (seed) — matches the JULY 2026 printed menu
 -- ============================================================
 
--- 蒸餸飯 Steamed Rice Plates ($7) — S1–S4
+-- 蒸餸飯 Steamed Rice Dishes ($7–$9) — A column (A1–A7)
 INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_order) VALUES
-  ('S1', 'Preserved Mustard & Pork Ribs over Rice',           '榨菜排骨蒸飯', 'rice', 700, 1),
-  ('S2', 'Black Mushroom & Silky Chicken over Rice',          '冬菇滑雞蒸飯', 'rice', 700, 2),
-  ('S3', 'Preserved Mustard Greens & Pork Patty over Rice',   '梅菜肉餅蒸飯', 'rice', 700, 3),
-  ('S4', 'Daikon & Beef Brisket over Rice',                   '蘿蔔牛腩蒸飯', 'rice', 700, 4)
+  ('A1', 'Pork Rib over Rice',            '榨菜排骨蒸飯', 'steam', 700, 1),
+  ('A2', 'Chicken over Rice',             '冬菇滑雞蒸飯', 'steam', 800, 2),
+  ('A3', 'Meat Patties over Rice',        '梅菜肉餅蒸飯', 'steam', 700, 3),
+  ('A4', 'Beef Brisket over Rice',        '蘿蔔牛腩蒸飯', 'steam', 900, 4),
+  ('A5', 'Tomato Beef over Rice',         '番茄牛肉蒸飯', 'steam', 900, 5),
+  ('A6', 'Sheep Brisket over Rice',       '支竹羊腩蒸飯', 'steam', 900, 6),
+  ('A7', 'Duck over Rice',                '香芋燒鴨蒸飯', 'steam', 900, 7)
 ON CONFLICT (code) DO NOTHING;
 
--- 家庭菜 Home-Style Dishes ($8) — A1–A6
+-- 蒸餸飯 Steamed Rice Dishes ($8–$9) — B column (B1–B7)
 INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_order) VALUES
-  ('A1', 'Preserved Mustard Pork Ribs',         '榨菜排骨', 'home', 800, 6),
-  ('A2', 'Steamed Chicken with Mushrooms',      '冬菇蒸雞', 'home', 800, 7),
-  ('A3', 'Preserved Mustard Pork Patty',        '梅菜肉餅', 'home', 800, 8),
-  ('A4', 'Daikon Beef Brisket',                 '蘿蔔牛腩', 'home', 800, 9),
-  ('A5', 'Bean Curd Stick Lamb Brisket',        '支竹羊腩', 'home', 800, 10),
-  ('A6', 'Taro & Roast Duck',                   '香芋燒鴨', 'home', 800, 11)
+  ('B1', 'Shrimp & Silky Egg over Rice',          '滑蛋蝦仁蒸飯', 'steam', 800, 8),
+  ('B2', 'Pomfret over Rice',                     '蒸倉魚蒸飯',   'steam', 800, 9),
+  ('B3', 'Yellow Croaker over Rice',              '蒸黃花魚蒸飯', 'steam', 800, 10),
+  ('B4', 'Squid in Black Bean over Rice',         '豉椒鮮魷蒸飯', 'steam', 800, 11),
+  ('B5', 'Spicy Fish Paste over Rice',            '辣椒魚滑蒸飯', 'steam', 800, 12),
+  ('B6', 'Pickled Vegetable Fish Fillet over Rice','酸菜魚片蒸飯', 'steam', 900, 13),
+  ('B7', 'Vegetarian over Rice',                  '羅漢素菜蒸飯', 'steam', 900, 14)
 ON CONFLICT (code) DO NOTHING;
 
--- 家庭菜 Home-Style Dishes ($8) — B1–B6
+-- 每日靚湯 Daily Soup ($3) — C1–C6, rotated by day-of-week (see soup_schedule)
 INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_order) VALUES
-  ('B1', 'Shrimp with Silky Egg',               '蝦仁滑蛋', 'home', 800, 12),
-  ('B2', 'Pomfret in Black Bean Sauce',         '豉汁倉魚', 'home', 800, 13),
-  ('B3', 'Squid with Black Bean & Pepper',      '豉椒鮮魷', 'home', 800, 14),
-  ('B4', 'Steamed Yellow Croaker',              '蒸黃花魚', 'home', 800, 15),
-  ('B5', 'Spicy Fish Paste',                    '辣椒魚滑', 'home', 800, 16),
-  ('B6', 'Pork Skin & Fish Balls',              '豬皮魚旦', 'home', 800, 17)
-ON CONFLICT (code) DO NOTHING;
-
--- 靚湯 Slow-Simmered Soups ($3) — C1–C6
-INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_order) VALUES
-  ('C1', 'Lotus Root Soup',              '蓮藕湯',   'soup', 300, 18),
-  ('C2', 'Watercress Soup',              '西洋菜湯', 'soup', 300, 19),
-  ('C3', 'Night-Blooming Cereus Soup',   '霸王花湯', 'soup', 300, 20),
-  ('C4', 'Dried Vegetable Soup',         '菜乾湯',   'soup', 300, 21),
-  ('C5', 'Tomato Soup',                  '番茄湯',   'soup', 300, 22),
-  ('C6', 'Hairy Gourd Soup',             '節瓜湯',   'soup', 300, 23)
+  ('C1', 'Lotus Root Soup',              '蓮藕湯',     'soup', 300, 18),
+  ('C2', 'Watercress Soup',              '西洋菜湯',   'soup', 300, 19),
+  ('C3', 'Dried Cabbage Soup',           '白菜菜乾湯', 'soup', 300, 20),
+  ('C4', 'Night-Blooming Cereus Soup',   '霸王花湯',   'soup', 300, 21),
+  ('C5', 'Winter Melon Soup',            '冬瓜湯',     'soup', 300, 22),
+  ('C6', 'Tomato Soup',                  '蕃茄湯',     'soup', 300, 23)
 ON CONFLICT (code) DO NOTHING;
 
 -- 小食 Snacks & Sides ($3) — D1–D6
 INSERT INTO menu_items (code, name_en, name_zh, category, price_cents, display_order) VALUES
-  ('D1', 'Fried Spring Rolls',           '炸春卷',   'snack', 300, 24),
-  ('D2', 'Fried Mantou (Sweet Buns)',    '炸饅頭',   'snack', 300, 25),
+  ('D1', 'Steamed Rice',                 '白飯',     'snack', 300, 24),
+  ('D2', 'Spring Rolls',                 '炸春卷',   'snack', 300, 25),
   ('D3', 'Fish Balls & Siu Mai',         '魚旦燒賣', 'snack', 300, 26),
-  ('D4', 'Rice Noodle Soup',             '湯粉',     'snack', 300, 27),
-  ('D5', 'Egg Noodle Soup',              '湯麵',     'snack', 300, 28),
-  ('D6', 'Boiled Dumplings',             '水餃',     'snack', 300, 29)
+  ('D4', 'Dumplings',                    '水餃',     'snack', 300, 27),
+  ('D5', 'Fried Rice Noodles',           '炒粉',     'snack', 300, 28),
+  ('D6', 'Fried Noodles',                '炒麵',     'snack', 300, 29)
 ON CONFLICT (code) DO NOTHING;
+
+-- Default daily-soup assignments (matches the printed menu).
+-- Mon=C1, Tue=C2, Wed=C3, Thu=C4, Fri=C5, Sat+Sun=C6 (one soup covers
+-- both weekend days; FK reuse, no duplicate row needed).
+INSERT INTO soup_schedule (day_of_week, soup_code) VALUES
+  (0, 'C6'),  -- Sun → Tomato (shared with Sat)
+  (1, 'C1'),  -- Mon → Lotus Root
+  (2, 'C2'),  -- Tue → Watercress
+  (3, 'C3'),  -- Wed → Dried Cabbage
+  (4, 'C4'),  -- Thu → Night-Blooming Cereus
+  (5, 'C5'),  -- Fri → Winter Melon
+  (6, 'C6')   -- Sat → Tomato
+ON CONFLICT (day_of_week) DO NOTHING;
 
 -- ============================================================
 -- 4. MENU ITEM → INGREDIENT RELATIONSHIPS
@@ -176,39 +196,36 @@ ON CONFLICT (code) DO NOTHING;
 INSERT INTO menu_item_ingredients (menu_item_id, ingredient_id)
 SELECT m.id, i.id
 FROM (VALUES
-  -- Rice plates (蒸餸飯)
-  ('S1','pork-ribs'),    ('S1','preserved-mustard'),
-  ('S2','chicken'),      ('S2','black-mushroom'),
-  ('S3','pork-ground'),  ('S3','preserved-mustard-greens'),
-  ('S4','beef-brisket'), ('S4','daikon'),
-  -- Home-style A (家庭菜)
+  -- Steam dishes A column (蒸餸飯)
   ('A1','pork-ribs'),    ('A1','preserved-mustard'),
   ('A2','chicken'),      ('A2','black-mushroom'),
   ('A3','pork-ground'),  ('A3','preserved-mustard-greens'),
   ('A4','beef-brisket'), ('A4','daikon'),
-  ('A5','lamb-brisket'), ('A5','bean-curd-stick'),
-  ('A6','roast-duck'),   ('A6','taro'),
-  -- Home-style B
-  ('B1','shrimp'),       ('B1','eggs'),
-  ('B2','pomfret'),      ('B2','fermented-black-bean'),
-  ('B3','squid-fresh'),  ('B3','fermented-black-bean'), ('B3','chili-pepper'),
-  ('B4','yellow-croaker'),
-  ('B5','fish-paste'),   ('B5','chili-pepper'),
-  ('B6','pork-skin'),    ('B6','fish-balls'),
-  -- Soups (靚湯, all share pork bones except C5)
+  ('A5','beef-brisket'), ('A5','tomato'),
+  ('A6','lamb-brisket'), ('A6','bean-curd-stick'),
+  ('A7','roast-duck'),   ('A7','taro'),
+  -- Steam dishes B column
+  ('B1','shrimp'),         ('B1','eggs'),
+  ('B2','pomfret'),
+  ('B3','yellow-croaker'),
+  ('B4','squid-fresh'),    ('B4','fermented-black-bean'),
+  ('B5','fish-paste'),     ('B5','chili-pepper'),
+  ('B6','fish-paste'),     ('B6','dried-mustard-greens'),
+  -- B7 vegetarian uses pantry items only
+  -- Soups (靚湯, most share pork bones)
   ('C1','lotus-root'),            ('C1','pork-bones'),
   ('C2','watercress'),            ('C2','pork-bones'),
-  ('C3','night-blooming-cereus'), ('C3','pork-bones'),
-  ('C4','dried-mustard-greens'),  ('C4','pork-bones'),
-  ('C5','tomato'),                ('C5','eggs'),
-  ('C6','hairy-gourd'),           ('C6','pork-bones'),
+  ('C3','dried-mustard-greens'),  ('C3','pork-bones'),
+  ('C4','night-blooming-cereus'), ('C4','pork-bones'),
+  -- C5 winter melon: ingredient slug not yet seeded; skip linkage
+  ('C6','tomato'),                ('C6','eggs'),
   -- Snacks (小食; pantry=true ingredients won't block availability)
-  ('D1','spring-rolls'),
-  ('D2','mantou'),
+  -- D1 plain steamed rice uses pantry only
+  ('D2','spring-rolls'),
   ('D3','fish-balls'),   ('D3','siu-mai'),
-  ('D4','rice-noodles'), ('D4','pork-bones'),
-  ('D5','egg-noodles'),  ('D5','pork-bones'),
-  ('D6','dumplings')
+  ('D4','dumplings'),
+  ('D5','rice-noodles'),
+  ('D6','egg-noodles')
 ) AS pairs(code, slug)
 JOIN menu_items  m ON m.code = pairs.code
 JOIN ingredients i ON i.slug = pairs.slug
@@ -219,8 +236,7 @@ ON CONFLICT (menu_item_id, ingredient_id) DO NOTHING;
 -- ============================================================
 
 INSERT INTO rotation_settings (category, pool_size) VALUES
-  ('rice',  0),
-  ('home',  0),
+  ('steam', 0),
   ('soup',  0),
   ('snack', 0)
 ON CONFLICT (category) DO NOTHING;
@@ -311,12 +327,13 @@ CREATE TABLE IF NOT EXISTS admin_users (
 
 -- ============================================================
 -- DONE. Verify with:
---   SELECT COUNT(*) FROM ingredients;         -- 35
---   SELECT COUNT(*) FROM menu_items;          -- 28
---   SELECT COUNT(*) FROM menu_item_ingredients; -- 53
---   SELECT COUNT(*) FROM rotation_settings;   -- 4
---   SELECT COUNT(*) FROM hours;               -- 7
---   SELECT COUNT(*) FROM orders;              -- 0 initially
---   SELECT COUNT(*) FROM order_items;         -- 0 initially
---   SELECT COUNT(*) FROM settings;            -- 1 (cart_enabled)
+--   SELECT COUNT(*) FROM ingredients;            -- 35
+--   SELECT COUNT(*) FROM menu_items WHERE NOT is_archived;  -- 26 (14 steam + 6 soup + 6 snack)
+--   SELECT COUNT(*) FROM menu_item_ingredients;  -- ~33 (new pairings)
+--   SELECT COUNT(*) FROM rotation_settings;      -- 3 (steam, soup, snack)
+--   SELECT COUNT(*) FROM hours;                  -- 7
+--   SELECT COUNT(*) FROM soup_schedule;          -- 7 (Sat+Sun both C6)
+--   SELECT COUNT(*) FROM orders;                 -- 0 initially
+--   SELECT COUNT(*) FROM order_items;            -- 0 initially
+--   SELECT COUNT(*) FROM settings;               -- 1 (cart_enabled)
 -- ============================================================

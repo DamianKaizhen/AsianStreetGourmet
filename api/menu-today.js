@@ -1,16 +1,18 @@
 // GET /api/menu-today
 // Public endpoint. Returns today's available menu codes + (for admin debugging)
-// a map of unavailable items with their reasons.
+// a map of unavailable items with their reasons + the daily soup schedule.
 //
 // Response:
 //   {
 //     as_of: "2026-05-13T19:42:00Z",            // server time
 //     date_local: "2026-05-13",                  // YYYY-MM-DD in NY tz
-//     available_codes: ["S1","S3","C1",...],
+//     day_of_week: 2,                            // 0=Sun..6=Sat in NY tz
+//     available_codes: ["A1","A3","C2",...],
 //     unavailable_with_reason: {
-//       "S2": { reason: "missing", missing: ["chicken"] },
-//       "C6": { reason: "rotation_off" }
-//     }
+//       "A2": { reason: "missing", missing: ["chicken"] }
+//     },
+//     soup_today: { code: "C2", name_en: "...", name_zh: "..." } | null,
+//     soup_week:  [{ day_of_week: 0..6, code, name_en, name_zh } | { day_of_week, code: null }, ...]
 //   }
 
 import { sql } from '../lib/db.js';
@@ -24,6 +26,8 @@ export default async function handler(req, res) {
 
   try {
     // ----- Query 1: items + per-item flag + which non-pantry ingredients are out -----
+    // Archived items (replaced by the new menu) are excluded so they
+    // never surface on the public site or in admin lists.
     const itemRows = await sql`
       SELECT
         m.code,
@@ -42,6 +46,7 @@ export default async function handler(req, res) {
       FROM menu_items m
       LEFT JOIN menu_item_ingredients mii ON mii.menu_item_id = m.id
       LEFT JOIN ingredients i ON i.id = mii.ingredient_id
+      WHERE m.is_archived = FALSE
       GROUP BY m.code, m.category, m.rotation_mode, m.is_available, m.display_order
       ORDER BY m.display_order
     `;
@@ -95,11 +100,50 @@ export default async function handler(req, res) {
       .map((r) => r.code)
       .filter((code) => availableSet.has(code));
 
+    // ----- Query 3: full week's soup schedule, joined to soup item names -----
+    // Empty days (no row in soup_schedule) come back as { day_of_week, code: null }
+    // so the public "this week" strip can show all 7 days consistently.
+    const scheduleRows = await sql`
+      SELECT
+        s.day_of_week,
+        s.soup_code AS code,
+        m.name_en,
+        m.name_zh
+      FROM soup_schedule s
+      LEFT JOIN menu_items m ON m.code = s.soup_code
+      ORDER BY s.day_of_week
+    `;
+    const soupByDow = {};
+    for (const r of scheduleRows) {
+      soupByDow[r.day_of_week] = (r.code && availableSet.has(r.code))
+        ? { code: r.code, name_en: r.name_en, name_zh: r.name_zh }
+        : null;
+    }
+    const soup_week = [];
+    for (let d = 0; d < 7; d++) {
+      soup_week.push({ day_of_week: d, ...(soupByDow[d] || { code: null }) });
+    }
+
+    // "Today" in NY time — compute via Intl so it matches what the kitchen
+    // (and the public hero "today's soup" card) actually means.
+    const dowFmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      weekday: 'short',
+    });
+    const dowMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    const day_of_week = dowMap[dowFmt.format(new Date())] ?? 0;
+    const soup_today = soup_week[day_of_week]?.code
+      ? soup_week[day_of_week]
+      : null;
+
     return res.status(200).json({
       as_of: new Date().toISOString(),
       date_local: dateStr,
+      day_of_week,
       available_codes,
       unavailable_with_reason: unavailable,
+      soup_today,
+      soup_week,
     });
   } catch (err) {
     console.error('[menu-today] error:', err);

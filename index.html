@@ -1682,6 +1682,142 @@
     // full normal menu and understand what's just off today. If the fetch
     // fails for any reason, every item stays fully visible (no regression).
     (function () {
+      // ----- Render helpers for the dynamic menu. Each function targets one
+      //       category article and replaces its row contents with fresh DOM
+      //       built from API data, keeping every existing className /
+      //       data-attribute so the availability pass below and the static
+      //       CSS styles continue to apply. -----
+      function _priceLabel(cents) {
+        return '$' + ((cents || 0) / 100).toFixed(2).replace(/\.00$/, '');
+      }
+      function _menuRowEl(item, isLast) {
+        var li = document.createElement('li');
+        li.className = 'menu-row flex items-baseline gap-1 py-3' + (isLast ? '' : ' border-b border-dotted border-[color:var(--border)]');
+        li.setAttribute('data-menu-code', item.code);
+        var codeSpan = document.createElement('span');
+        codeSpan.className = 'mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0';
+        codeSpan.textContent = item.code;
+        var wrap = document.createElement('div');
+        wrap.className = 'flex-1 min-w-0';
+        var zh = document.createElement('span');
+        zh.className = 'zh row-zh text-base font-medium transition-colors';
+        zh.setAttribute('lang', 'zh-Hant');
+        zh.textContent = item.name_zh;
+        var en = document.createElement('span');
+        en.className = 'block text-sm text-[color:var(--muted-foreground)]';
+        en.textContent = '· ' + item.name_en;
+        wrap.appendChild(zh);
+        wrap.appendChild(en);
+        var price = document.createElement('span');
+        price.className = 'price text-xl shrink-0';
+        price.textContent = _priceLabel(item.price_cents);
+        li.appendChild(codeSpan);
+        li.appendChild(wrap);
+        li.appendChild(price);
+        return li;
+      }
+      function _renderSteam(items) {
+        var article = document.getElementById('cat-steam');
+        if (!article) return;
+        var lists = article.querySelectorAll('ul');
+        if (lists.length < 2) return;
+        var sorted = items.slice().sort(function (a, b) { return a.display_order - b.display_order; });
+        // Split into A column (first half) and B column (second half). Works
+        // for any item count, including new codes added by the admin.
+        var mid = Math.ceil(sorted.length / 2);
+        var leftItems  = sorted.slice(0, mid);
+        var rightItems = sorted.slice(mid);
+        while (lists[0].firstChild) lists[0].removeChild(lists[0].firstChild);
+        while (lists[1].firstChild) lists[1].removeChild(lists[1].firstChild);
+        leftItems.forEach(function (m, i) { lists[0].appendChild(_menuRowEl(m, i === leftItems.length - 1)); });
+        rightItems.forEach(function (m, i) { lists[1].appendChild(_menuRowEl(m, i === rightItems.length - 1)); });
+      }
+      function _renderSnack(items) {
+        var article = document.getElementById('cat-snack');
+        if (!article) return;
+        var list = article.querySelector('ul');
+        if (!list) return;
+        var sorted = items.slice().sort(function (a, b) { return a.display_order - b.display_order; });
+        while (list.firstChild) list.removeChild(list.firstChild);
+        sorted.forEach(function (m, i) {
+          var li = _menuRowEl(m, i === sorted.length - 1);
+          // The snack grid is 2-col on sm+; the row-bottom border is removed
+          // on the first row of each grid line via the existing CSS rule.
+          list.appendChild(li);
+        });
+      }
+      function _renderSoup(soupWeek, itemsByCode) {
+        var article = document.getElementById('cat-soup');
+        if (!article) return;
+        // The day-rows ul is the last ul inside the soup article (after the
+        // optional "Today's soup" callout div + "This week" eyebrow p).
+        var lists = article.querySelectorAll('ul');
+        if (lists.length === 0) return;
+        var list = lists[lists.length - 1];
+        while (list.firstChild) list.removeChild(list.firstChild);
+
+        // Display order: Mon → Sun (matching the printed menu's column).
+        var displayOrder = [1, 2, 3, 4, 5, 6, 0];
+        var dayKeys = ['day.sun','day.mon','day.tue','day.wed','day.thu','day.fri','day.sat'];
+        var dayDefaults = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        var dict = (window.LANG_STRINGS && window.LANG_STRINGS[document.documentElement.lang === 'zh-Hant' ? 'zh' : 'en']) || {};
+
+        displayOrder.forEach(function (dow, idx) {
+          var entry = soupWeek.find(function (e) { return e.day_of_week === dow; }) || { day_of_week: dow };
+          var item  = entry.code ? itemsByCode[entry.code] : null;
+          var isLast = idx === displayOrder.length - 1;
+          var li = document.createElement('li');
+          li.className = 'menu-row flex items-baseline gap-3 py-3' + (isLast ? '' : ' border-b border-dotted border-[color:var(--border)]');
+          if (entry.code) li.setAttribute('data-menu-code', entry.code);
+          li.setAttribute('data-soup-day', String(dow));
+
+          var dayLabel = document.createElement('span');
+          dayLabel.className = 'mono-code text-sm w-12 shrink-0';
+          dayLabel.setAttribute('data-i18n', dayKeys[dow]);
+          dayLabel.textContent = (dict && dict[dayKeys[dow]]) || dayDefaults[dow];
+
+          var codeSpan = document.createElement('span');
+          codeSpan.className = 'mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0';
+          codeSpan.textContent = entry.code || '—';
+
+          var wrap = document.createElement('div');
+          wrap.className = 'flex-1 min-w-0';
+          if (item) {
+            var zh = document.createElement('span');
+            zh.className = 'zh row-zh text-base font-medium';
+            zh.setAttribute('lang', 'zh-Hant');
+            zh.textContent = item.name_zh;
+            var en = document.createElement('span');
+            en.className = 'block text-sm text-[color:var(--muted-foreground)]';
+            en.textContent = item.name_en;
+            wrap.appendChild(zh);
+            wrap.appendChild(en);
+          }
+
+          var price = document.createElement('span');
+          price.className = 'price text-xl shrink-0';
+          price.textContent = item ? _priceLabel(item.price_cents) : '';
+
+          li.appendChild(dayLabel);
+          li.appendChild(codeSpan);
+          li.appendChild(wrap);
+          li.appendChild(price);
+          list.appendChild(li);
+        });
+      }
+      function renderMenuFromApi(menuItems, soupWeek) {
+        var byCategory = { steam: [], soup: [], snack: [] };
+        var byCode = {};
+        for (var i = 0; i < menuItems.length; i++) {
+          var m = menuItems[i];
+          if (byCategory[m.category]) byCategory[m.category].push(m);
+          byCode[m.code] = m;
+        }
+        _renderSteam(byCategory.steam);
+        _renderSoup(soupWeek, byCode);
+        _renderSnack(byCategory.snack);
+      }
+
       fetch('/api/menu-today', { cache: 'no-store' })
         .then(function (r) {
           if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -1689,6 +1825,16 @@
         })
         .then(function (data) {
           if (!data || !Array.isArray(data.available_codes)) return;
+
+          // ====== Dynamic menu render — replaces the static HTML rows
+          //        inside each category article based on the live DB items.
+          //        Runs BEFORE the availability pass below, so the
+          //        [data-menu-code] elements that pass scans are the
+          //        freshly-rendered ones. ======
+          if (Array.isArray(data.menu_items)) {
+            renderMenuFromApi(data.menu_items, data.soup_week || []);
+          }
+
           var available = new Set(data.available_codes);
           var items = document.querySelectorAll('[data-menu-code]');
 

@@ -13,7 +13,8 @@
 //     },
 //     soup_today: { code: "C2", name_en: "...", name_zh: "..." } | null,
 //     soup_week:  [{ day_of_week: 0..6, code, name_en, name_zh } | { day_of_week, code: null }, ...],
-//     todays_specials: [{ code, name_zh, name_en, price_cents }, ...]  // empty array if none
+//     todays_specials: [{ code, name_zh, name_en, price_cents }, ...],  // empty array if none
+//     menu_items: [{ code, name_en, name_zh, category, price_cents, display_order }, ...]  // non-archived
 //   }
 
 import { sql } from '../lib/db.js';
@@ -33,7 +34,10 @@ export default async function handler(req, res) {
     const itemRows = await sql`
       SELECT
         m.code,
+        m.name_en,
+        m.name_zh,
         m.category,
+        m.price_cents,
         m.rotation_mode,
         m.is_available AS item_is_available,
         m.display_order,
@@ -160,6 +164,18 @@ export default async function handler(req, res) {
       console.warn('[menu-today] todays_specials read failed:', err.message);
     }
 
+    // ----- Flatten the full item list for the public dynamic render -----
+    // Includes archived = false rows only (the SQL filter above). Sorted by
+    // display_order so the client doesn't need its own sort.
+    const menu_items = itemRows.map((r) => ({
+      code: r.code,
+      name_en: r.name_en,
+      name_zh: r.name_zh,
+      category: r.category,
+      price_cents: r.price_cents,
+      display_order: r.display_order,
+    }));
+
     return res.status(200).json({
       as_of: new Date().toISOString(),
       date_local: dateStr,
@@ -169,6 +185,7 @@ export default async function handler(req, res) {
       soup_today,
       soup_week,
       todays_specials,
+      menu_items,
     });
   } catch (err) {
     console.error('[menu-today] error:', err);

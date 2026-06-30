@@ -629,10 +629,28 @@
         'day.sun': 'Sun', 'day.mon': 'Mon', 'day.tue': 'Tue', 'day.wed': 'Wed', 'day.thu': 'Thu', 'day.fri': 'Fri', 'day.sat': 'Sat',
 
         'menu.heading': 'Menu items',
-        'menu.subhead': 'Check the box for items you have today. Unchecked items are hidden from the public menu.',
+        'menu.subhead': 'Check the toggle to show items on the public menu, or click Edit to change code/name/price. Use + Add item to create a new dish, and Delete to archive one.',
         'menu.itemsCount': '{n} items',
         'menu.available': 'available',
         'menu.unavailable': 'unavailable',
+        'menu.edit':         'Edit',
+        'menu.save':         'Save',
+        'menu.cancel':       'Cancel',
+        'menu.delete':       'Delete',
+        'menu.deleteArmed':  'Tap again to delete',
+        'menu.addItem':      '+ Add item',
+        'menu.priceLabel':   'Price (USD)',
+        'menu.codeLabel':    'Code',
+        'menu.nameZhLabel':  'Chinese',
+        'menu.nameEnLabel':  'English',
+        'menu.flashUpdated': '{code} updated',
+        'menu.flashCreated': '{code} created',
+        'menu.flashDeleted': '{code} deleted',
+        'menu.errInvalidCode': 'Code must be a letter + digits (e.g. A8).',
+        'menu.errCodeTaken':   'Code already in use by another active item.',
+        'menu.errNameZh':      'Chinese name is required.',
+        'menu.errNameEn':      'English name is required.',
+        'menu.errPrice':       'Price must be a non-negative number.',
 
         'cat.steam': '蒸餸飯 · Steamed Rice Dishes',
         'cat.soup': '靚湯 · Slow-Simmered Soups',
@@ -773,10 +791,28 @@
         'day.sun': '日', 'day.mon': '一', 'day.tue': '二', 'day.wed': '三', 'day.thu': '四', 'day.fri': '五', 'day.sat': '六',
 
         'menu.heading': '餐牌',
-        'menu.subhead': '剔選今日有得賣嘅項目。冇剔嘅項目唔會喺餐牌顯示。',
+        'menu.subhead': '撥動開關決定邊啲餸喺網站顯示。按「編輯」可以改編號、名稱、價錢。「+ 新增餸菜」可以加新項目，「刪除」會將餸菜歸檔。',
         'menu.itemsCount': '{n} 項',
         'menu.available': '有得賣',
         'menu.unavailable': '賣晒',
+        'menu.edit':         '編輯',
+        'menu.save':         '儲存',
+        'menu.cancel':       '取消',
+        'menu.delete':       '刪除',
+        'menu.deleteArmed':  '再撳一次刪除',
+        'menu.addItem':      '+ 新增餸菜',
+        'menu.priceLabel':   '價錢 (USD)',
+        'menu.codeLabel':    '編號',
+        'menu.nameZhLabel':  '中文',
+        'menu.nameEnLabel':  '英文',
+        'menu.flashUpdated': '{code} 已更新',
+        'menu.flashCreated': '{code} 已新增',
+        'menu.flashDeleted': '{code} 已刪除',
+        'menu.errInvalidCode': '編號要係英文字母加數字（例如 A8）。',
+        'menu.errCodeTaken':   '呢個編號已經被另一項用緊。',
+        'menu.errNameZh':      '中文名係必須。',
+        'menu.errNameEn':      '英文名係必須。',
+        'menu.errPrice':       '價錢要係 0 或正數。',
 
         'cat.steam': '蒸餸飯',
         'cat.soup': '靚湯',
@@ -2193,22 +2229,65 @@
 
       ['steam', 'soup', 'snack'].forEach((cat) => {
         const items = groups[cat] || [];
-        if (items.length === 0) return;
+        // Always render the category card, even when empty, so the family
+        // can still create the first item via "+ Add item" if they ever
+        // remove every dish in a category.
         const list = el('div', { class: 'mt-2' });
         items.forEach((m) => list.appendChild(menuRow(m)));
+
+        const addBtn = el('button', {
+          type: 'button',
+          class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-2 mt-3 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)]',
+        }, t('menu.addItem'));
+        addBtn.addEventListener('click', () => {
+          // Insert a placeholder row in edit mode just above the Add button.
+          const blank = el('div', { class: 'row flex items-center justify-between gap-3' });
+          blank._item = {
+            id: null,             // null id signals "this is a new item"
+            code: '',
+            name_en: '',
+            name_zh: '',
+            category: cat,
+            price_cents: 0,
+            is_available: true,
+          };
+          list.appendChild(blank);
+          renderMenuRowEdit(blank);
+          // Scroll the input row into view so the user can start typing.
+          blank.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
         container.appendChild(
           el('div', { class: 'card p-5' },
             el('div', { class: 'flex items-baseline justify-between mb-2' },
               el('h3', { class: 'display text-xl font-light' }, menuCategoryLabel(cat)),
               el('span', { class: 'mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]' }, t('menu.itemsCount', { n: items.length }))
             ),
-            list
+            list,
+            addBtn
           )
         );
       });
     }
 
+    // ---------------------------------------------------------
+    // Each row of the menu list is a stable container element
+    // (`row`) whose contents flip between a view mode (the static
+    // display + the availability toggle + an Edit button) and an
+    // edit mode (input fields + Save/Cancel/Delete). The item data
+    // hangs off `row._item` so either renderer can reach it.
+    // ---------------------------------------------------------
     function menuRow(m) {
+      const row = el('div', { class: 'row flex items-center justify-between gap-3' });
+      row._item = { ...m };
+      renderMenuRowView(row);
+      return row;
+    }
+
+    function renderMenuRowView(row) {
+      const m = row._item;
+      clear(row);
+
       const isOn = m.is_available !== false;
       const badge = el('span', { class: 'badge ' + (isOn ? 'badge-on' : 'badge-off') }, isOn ? t('menu.available') : t('menu.unavailable'));
       const input = el('input', { type: 'checkbox', checked: isOn || null });
@@ -2217,7 +2296,7 @@
       input.addEventListener('change', async () => {
         toggle.classList.add('is-busy');
         try {
-          await api('/api/admin/menu', { method: 'PATCH', body: { code: m.code, is_available: input.checked } });
+          await api('/api/admin/menu', { method: 'PATCH', body: { id: m.id, is_available: input.checked } });
           m.is_available = input.checked;
           badge.className = 'badge ' + (input.checked ? 'badge-on' : 'badge-off');
           badge.textContent = input.checked ? t('menu.available') : t('menu.unavailable');
@@ -2233,17 +2312,194 @@
         }
       });
 
-      return el('div', { class: 'row flex items-center justify-between gap-3' },
+      const editBtn = el('button', {
+        type: 'button',
+        class: 'mono text-[0.65rem] uppercase tracking-[0.18em] px-2 py-1 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)]',
+      }, t('menu.edit'));
+      editBtn.addEventListener('click', () => renderMenuRowEdit(row));
+
+      const priceTag = el('span', { class: 'mono text-xs text-[color:var(--muted-foreground)] shrink-0' },
+        '$' + (m.price_cents / 100).toFixed(2));
+
+      row.appendChild(
         el('div', { class: 'min-w-0 flex-1' },
-          el('div', { class: 'flex items-baseline gap-2' },
+          el('div', { class: 'flex items-baseline gap-2 flex-wrap' },
             el('span', { class: 'mono text-xs text-[color:var(--muted-foreground)] w-9 shrink-0' }, m.code),
             el('span', { class: 'zh text-base text-[color:var(--destructive)]' }, m.name_zh),
-            el('span', { class: 'text-sm' }, '· ' + m.name_en)
+            el('span', { class: 'text-sm' }, '· ' + m.name_en),
+            priceTag
           )
-        ),
-        badge,
-        toggle
+        )
       );
+      row.appendChild(badge);
+      row.appendChild(toggle);
+      row.appendChild(editBtn);
+    }
+
+    function renderMenuRowEdit(row) {
+      const m = row._item;
+      const isNew = !m.id;
+      clear(row);
+
+      const codeIn = el('input', {
+        type: 'text', maxlength: '8',
+        value: m.code || '',
+        placeholder: t('menu.codeLabel'),
+        title: t('menu.codeLabel'),
+        class: 'w-20 px-2 py-1 border border-[color:var(--border)] bg-[color:var(--background)] mono text-sm uppercase',
+      });
+      const zhIn = el('input', {
+        type: 'text', maxlength: '60', lang: 'zh-Hant',
+        value: m.name_zh || '',
+        placeholder: t('menu.nameZhLabel'),
+        title: t('menu.nameZhLabel'),
+        class: 'flex-1 min-w-0 px-2 py-1 border border-[color:var(--border)] bg-[color:var(--background)] zh text-sm',
+      });
+      const enIn = el('input', {
+        type: 'text', maxlength: '120',
+        value: m.name_en || '',
+        placeholder: t('menu.nameEnLabel'),
+        title: t('menu.nameEnLabel'),
+        class: 'flex-1 min-w-0 px-2 py-1 border border-[color:var(--border)] bg-[color:var(--background)] text-sm',
+      });
+      const priceIn = el('input', {
+        type: 'number', min: '0', step: '0.01',
+        value: isNew ? '' : (m.price_cents / 100).toFixed(2),
+        placeholder: '0.00',
+        title: t('menu.priceLabel'),
+        class: 'w-20 px-2 py-1 border border-[color:var(--border)] bg-[color:var(--background)] mono text-sm',
+      });
+
+      const saveBtn = el('button', {
+        type: 'button',
+        class: 'mono text-[0.65rem] uppercase tracking-[0.18em] px-2 py-1 bg-[color:var(--destructive)] text-white hover:opacity-90',
+      }, t('menu.save'));
+      const cancelBtn = el('button', {
+        type: 'button',
+        class: 'mono text-[0.65rem] uppercase tracking-[0.18em] px-2 py-1 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)]',
+      }, t('menu.cancel'));
+
+      let deleteBtn = null;
+      if (!isNew) {
+        // Two-click delete (mirrors the orders-inbox cancel button):
+        // first click arms; second click within 5s actually archives.
+        deleteBtn = el('button', {
+          type: 'button',
+          class: 'mono text-[0.65rem] uppercase tracking-[0.18em] px-2 py-1 border',
+          style: 'border-color: var(--border); color: var(--muted-foreground);',
+        }, t('menu.delete'));
+        let armed = false;
+        let armTimer = null;
+        const disarm = () => {
+          armed = false;
+          deleteBtn.textContent = t('menu.delete');
+          deleteBtn.style.borderColor = 'var(--border)';
+          deleteBtn.style.color = 'var(--muted-foreground)';
+          deleteBtn.style.background = 'transparent';
+        };
+        deleteBtn.addEventListener('click', async () => {
+          if (!armed) {
+            armed = true;
+            deleteBtn.textContent = t('menu.deleteArmed');
+            deleteBtn.style.borderColor = 'var(--destructive)';
+            deleteBtn.style.color = 'white';
+            deleteBtn.style.background = 'var(--destructive)';
+            clearTimeout(armTimer);
+            armTimer = setTimeout(disarm, 5000);
+            return;
+          }
+          clearTimeout(armTimer);
+          try {
+            await api('/api/admin/menu', { method: 'DELETE', body: { id: m.id } });
+            flash(t('menu.flashDeleted', { code: m.code }), 'good');
+            row.remove();
+            if (Array.isArray(window.__menuCache)) {
+              const idx = window.__menuCache.findIndex((x) => x.id === m.id);
+              if (idx >= 0) window.__menuCache.splice(idx, 1);
+            }
+            refreshPreview();
+          } catch (err) {
+            flash((err && err.message) || t('flash.updateFailed'), 'bad');
+          }
+        });
+      }
+
+      saveBtn.addEventListener('click', async () => {
+        const code = codeIn.value.trim().toUpperCase();
+        const name_zh = zhIn.value.trim();
+        const name_en = enIn.value.trim();
+        const priceUsd = parseFloat(priceIn.value);
+        const price_cents = Number.isFinite(priceUsd) ? Math.round(priceUsd * 100) : NaN;
+
+        if (!/^[A-Z][0-9]+$/.test(code)) { flash(t('menu.errInvalidCode'), 'bad'); return; }
+        if (!name_zh) { flash(t('menu.errNameZh'), 'bad'); return; }
+        if (!name_en) { flash(t('menu.errNameEn'), 'bad'); return; }
+        if (!Number.isInteger(price_cents) || price_cents < 0) { flash(t('menu.errPrice'), 'bad'); return; }
+
+        saveBtn.disabled = true;
+        try {
+          let saved;
+          if (isNew) {
+            const resp = await api('/api/admin/menu', {
+              method: 'POST',
+              body: { code, name_zh, name_en, category: m.category, price_cents },
+            });
+            saved = resp.menu_item;
+            flash(t('menu.flashCreated', { code: saved.code }), 'good');
+          } else {
+            // Only send fields that actually changed — keeps the wire small
+            // and the server's UPDATE less write-prone.
+            const body = { id: m.id };
+            if (code !== m.code)              body.code        = code;
+            if (name_zh !== m.name_zh)        body.name_zh     = name_zh;
+            if (name_en !== m.name_en)        body.name_en     = name_en;
+            if (price_cents !== m.price_cents) body.price_cents = price_cents;
+            // Nothing changed → just exit edit mode without an API call.
+            if (Object.keys(body).length === 1) {
+              renderMenuRowView(row);
+              return;
+            }
+            const resp = await api('/api/admin/menu', { method: 'PATCH', body });
+            saved = resp.menu_item;
+            flash(t('menu.flashUpdated', { code: saved.code }), 'good');
+          }
+          // Merge fresh fields back into the row's item state + the cache so
+          // a language toggle / re-render won't lose the edit.
+          row._item = { ...row._item, ...saved };
+          if (Array.isArray(window.__menuCache)) {
+            const idx = window.__menuCache.findIndex((x) => x.id === row._item.id);
+            if (idx >= 0) window.__menuCache[idx] = { ...row._item };
+            else window.__menuCache.push({ ...row._item });
+          }
+          renderMenuRowView(row);
+          refreshPreview();
+        } catch (err) {
+          flash((err && err.message) || t('flash.updateFailed'), 'bad');
+        } finally {
+          saveBtn.disabled = false;
+        }
+      });
+
+      cancelBtn.addEventListener('click', () => {
+        if (isNew) {
+          row.remove();  // Discard the placeholder.
+        } else {
+          renderMenuRowView(row);
+        }
+      });
+
+      const inputsWrap = el('div', { class: 'flex flex-wrap items-center gap-2 flex-1 min-w-0' },
+        codeIn, zhIn, enIn, priceIn
+      );
+      const actionsWrap = el('div', { class: 'flex items-center gap-2 flex-wrap shrink-0' }, saveBtn, cancelBtn);
+      if (deleteBtn) actionsWrap.appendChild(deleteBtn);
+
+      row.appendChild(inputsWrap);
+      row.appendChild(actionsWrap);
+
+      // Focus the code field first when creating a new item, name_zh when
+      // editing an existing one (most likely to be edited).
+      (isNew ? codeIn : zhIn).focus();
     }
   </script>
 

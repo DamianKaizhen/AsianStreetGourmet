@@ -1012,7 +1012,6 @@
         <article id="cat-steam" class="grid lg:grid-cols-12 gap-10 lg:gap-16 py-12 sm:py-16 border-t border-[color:var(--border)] scroll-mt-24" data-reveal>
           <header class="lg:col-span-4">
             <div class="flex items-baseline gap-3 mb-4">
-              <span class="mono-code text-[color:var(--destructive)] text-sm">A·B · $7–$9</span>
               <span class="h-px flex-1 bg-[color:var(--border)]"></span>
             </div>
             <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" lang="zh-Hant" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">蒸餸飯</h3>
@@ -1048,7 +1047,6 @@
         <article id="cat-soup" class="grid lg:grid-cols-12 gap-10 lg:gap-16 py-12 sm:py-16 border-t border-[color:var(--border)] scroll-mt-24" data-reveal>
           <header class="lg:col-span-4">
             <div class="flex items-baseline gap-3 mb-4">
-              <span class="mono-code text-[color:var(--destructive)] text-sm">C · $3</span>
               <span class="h-px flex-1 bg-[color:var(--border)]"></span>
             </div>
             <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" lang="zh-Hant" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">每日靚湯</h3>
@@ -1088,7 +1086,6 @@
         <article id="cat-snack" class="grid lg:grid-cols-12 gap-10 lg:gap-16 py-12 sm:py-16 border-t border-[color:var(--border)] scroll-mt-24" data-reveal>
           <header class="lg:col-span-4">
             <div class="flex items-baseline gap-3 mb-4">
-              <span class="mono-code text-[color:var(--destructive)] text-sm">D · $3</span>
               <span class="h-px flex-1 bg-[color:var(--border)]"></span>
             </div>
             <h3 class="zh text-[color:var(--destructive)] font-bold leading-none mb-3" lang="zh-Hant" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">小食</h3>
@@ -1716,17 +1713,31 @@
         li.appendChild(price);
         return li;
       }
+      // Compare two items by their CODE (letter prefix first, then the
+      // numeric suffix as a number — so A2 < A10, and A* < B*). Used both
+      // here and in the admin renderer so the menu order is predictable
+      // regardless of insertion timing (display_order from the DB just
+      // reflects when items were created, not their visual rank).
+      function _codeCmp(a, b) {
+        var ac = String(a.code || ''), bc = String(b.code || '');
+        var aL = ac.charAt(0), bL = bc.charAt(0);
+        if (aL !== bL) return aL < bL ? -1 : 1;
+        var aN = parseInt(ac.slice(1), 10); if (isNaN(aN)) aN = 0;
+        var bN = parseInt(bc.slice(1), 10); if (isNaN(bN)) bN = 0;
+        return aN - bN;
+      }
       function _renderSteam(items) {
         var article = document.getElementById('cat-steam');
         if (!article) return;
         var lists = article.querySelectorAll('ul');
         if (lists.length < 2) return;
-        var sorted = items.slice().sort(function (a, b) { return a.display_order - b.display_order; });
-        // Split into A column (first half) and B column (second half). Works
-        // for any item count, including new codes added by the admin.
-        var mid = Math.ceil(sorted.length / 2);
-        var leftItems  = sorted.slice(0, mid);
-        var rightItems = sorted.slice(mid);
+        // A* go in the left column; everything else (B*, plus any future
+        // letter family the admin invents) goes in the right column. Sorted
+        // by code within each column so A8 lands after A7, not at the very
+        // bottom of the list.
+        var sorted = items.slice().sort(_codeCmp);
+        var leftItems  = sorted.filter(function (m) { return String(m.code || '').charAt(0) === 'A'; });
+        var rightItems = sorted.filter(function (m) { return String(m.code || '').charAt(0) !== 'A'; });
         while (lists[0].firstChild) lists[0].removeChild(lists[0].firstChild);
         while (lists[1].firstChild) lists[1].removeChild(lists[1].firstChild);
         leftItems.forEach(function (m, i) { lists[0].appendChild(_menuRowEl(m, i === leftItems.length - 1)); });
@@ -1737,12 +1748,10 @@
         if (!article) return;
         var list = article.querySelector('ul');
         if (!list) return;
-        var sorted = items.slice().sort(function (a, b) { return a.display_order - b.display_order; });
+        var sorted = items.slice().sort(_codeCmp);
         while (list.firstChild) list.removeChild(list.firstChild);
         sorted.forEach(function (m, i) {
           var li = _menuRowEl(m, i === sorted.length - 1);
-          // The snack grid is 2-col on sm+; the row-bottom border is removed
-          // on the first row of each grid line via the existing CSS rule.
           list.appendChild(li);
         });
       }

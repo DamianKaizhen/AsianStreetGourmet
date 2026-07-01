@@ -197,18 +197,25 @@
     .cat-tab:hover { color: var(--foreground); }
     .cat-tab.is-active { color: var(--destructive); border-bottom-color: var(--destructive); }
 
-    /* Menu grid */
+    /* Menu grid — fixed row size so tiles don't stretch to fill vertical
+       space in sparse categories (soup / snack / specials). When more
+       items than fit are added, `overflow-y: auto` on the grid handles
+       scrolling; the tile size stays consistent across all categories. */
     .menu-grid {
       flex: 1 1 auto; overflow-y: auto;
-      display: grid; grid-template-columns: repeat(3, 1fr);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: 96px;
+      align-content: start;   /* pack rows at top; don't stretch to fill  */
       gap: 0.5rem; padding: 0.75rem;
     }
     .menu-tile {
-      min-height: 68px; padding: 0.55rem 0.7rem;
+      height: 96px; padding: 0.55rem 0.7rem;
       border: 1px solid var(--border); background: var(--card);
       text-align: left; cursor: pointer;
-      display: flex; flex-direction: column; justify-content: space-between;
+      display: flex; flex-direction: column;
       border-radius: 2px;
+      overflow: hidden;  /* long names truncate rather than balloon the tile */
     }
     .menu-tile:hover { border-color: var(--destructive); }
     .menu-tile.is-unavailable { opacity: 0.35; }
@@ -216,6 +223,7 @@
       content: attr(data-off-label);
       font-family: 'DM Mono', monospace; font-size: 0.55rem;
       color: var(--destructive); letter-spacing: 0.1em; text-transform: uppercase;
+      margin-top: auto;   /* stick "Unavailable today" to the bottom */
     }
     .menu-tile .tile-top {
       display: flex; align-items: baseline; justify-content: space-between; gap: 0.4rem;
@@ -228,11 +236,15 @@
       font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500;
     }
     .menu-tile .tile-zh {
-      font-family: 'Noto Serif TC', serif; font-size: 1rem;
-      color: var(--foreground); margin-top: 0.2rem;
+      font-family: 'Noto Serif TC', serif; font-size: 1.05rem;
+      color: var(--foreground); margin-top: 0.25rem; line-height: 1.15;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .menu-tile .tile-en {
-      font-size: 0.75rem; color: var(--muted-foreground);
+      /* Bumped from 0.75rem/muted to a darker, slightly larger label so
+         non-zh-readers can scan the English name at register-speed. */
+      font-size: 0.8rem; color: var(--foreground); opacity: 0.75;
+      margin-top: 0.15rem;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
@@ -264,28 +276,42 @@
       font-family: 'DM Mono', monospace; font-size: 0.7rem;
       text-transform: uppercase; letter-spacing: 0.15em;
     }
+    /* Fixed-width grid columns so the qty controls and line total stay
+       visually locked in place regardless of price / quantity digit count.
+       "$999.99" and "×99" both fit; wider prices will start truncating
+       before pushing the layout. */
     .cart-row {
-      display: grid; grid-template-columns: 3rem 1fr auto auto;
-      align-items: center; gap: 0.5rem;
+      display: grid;
+      grid-template-columns: 2.5rem 1fr 5.75rem 4.5rem;
+      align-items: center; gap: 0.4rem;
       padding: 0.4rem 0; border-bottom: 1px dotted var(--border);
     }
     .cart-row:last-child { border-bottom: 0; }
     .cart-row .c-code { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted-foreground); }
-    .cart-row .c-name { font-size: 0.85rem; line-height: 1.2; overflow: hidden; }
+    .cart-row .c-name {
+      font-size: 0.85rem; line-height: 1.2;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
     .cart-row .c-name .zh { font-size: 0.95rem; }
-    .cart-row .c-qty { display: inline-flex; align-items: center; gap: 0.2rem; }
+    .cart-row .c-qty {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 0.25rem; width: 100%;
+    }
     .cart-row .c-qty button {
-      width: 24px; height: 24px; border: 1px solid var(--border);
-      background: var(--background);
+      width: 24px; height: 24px; flex-shrink: 0;
+      border: 1px solid var(--border); background: var(--background);
       font-weight: 600;
     }
     .cart-row .c-qty button:hover { border-color: var(--destructive); color: var(--destructive); }
     .cart-row .c-qty .n {
-      display: inline-block; min-width: 1.2rem; text-align: center;
+      /* 2rem is enough for a 3-digit qty in DM Mono at 0.85rem —
+         future-proofs the layout past two-digit counts. */
+      display: inline-block; min-width: 2rem; text-align: center;
       font-family: 'DM Mono', monospace; font-size: 0.85rem;
     }
     .cart-row .c-line {
-      font-family: 'DM Mono', monospace; font-size: 0.85rem; text-align: right;
+      font-family: 'DM Mono', monospace; font-size: 0.85rem;
+      text-align: right; white-space: nowrap;
     }
 
     .field-label {

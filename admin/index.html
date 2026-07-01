@@ -1984,17 +1984,23 @@
     }
 
     function hoursRow(h) {
+      // Time inputs need more room than the plain .num-input default —
+      // most browsers stack a clock icon + AM/PM segment + spinner arrows
+      // inside the box, which crowds the "11:00 PM" text at 6rem. 9rem +
+      // slightly larger text + more padding gives the digits room to
+      // breathe without changing any of the interactive behavior.
+      const timeInputStyle = 'width: 9rem; padding: 0.4rem 0.6rem; font-size: 0.95rem; text-align: left;';
       const opensInput = el('input', {
         type: 'time',
         value: h.opens || '11:00',
         class: 'num-input',
-        style: 'width: 6rem;',
+        style: timeInputStyle,
       });
       const closesInput = el('input', {
         type: 'time',
         value: h.closes || '21:00',
         class: 'num-input',
-        style: 'width: 6rem;',
+        style: timeInputStyle,
       });
       if (!h.is_open) {
         opensInput.disabled = true;

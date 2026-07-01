@@ -976,7 +976,14 @@
         tile.appendChild(top);
         tile.appendChild(zh);
         tile.appendChild(en);
-        tile.addEventListener('click', function () { addToCart(m, 1); });
+        // Unavailable tiles (rotation-off, ingredient-out, wrong-day soup,
+        // etc.) stay visible but non-tappable — server would 409 the ring
+        // anyway, so no reason to let the cashier build a doomed cart.
+        if (isAvail) {
+          tile.addEventListener('click', function () { addToCart(m, 1); });
+        } else {
+          tile.setAttribute('disabled', '');
+        }
         grid.appendChild(tile);
       });
     }

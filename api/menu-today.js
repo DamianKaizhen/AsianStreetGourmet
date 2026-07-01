@@ -105,14 +105,11 @@ export default async function handler(req, res) {
       }
     }
 
-    // Preserve display_order in the available_codes array
-    const available_codes = itemRows
-      .map((r) => r.code)
-      .filter((code) => availableSet.has(code));
-
     // ----- Query 3: full week's soup schedule, joined to soup item names -----
     // Empty days (no row in soup_schedule) come back as { day_of_week, code: null }
     // so the public "this week" strip can show all 7 days consistently.
+    // Built BEFORE the soup-of-the-day filter below so the week strip still
+    // shows every scheduled soup regardless of what day it is today.
     const scheduleRows = await sql`
       SELECT
         s.day_of_week,
@@ -145,6 +142,29 @@ export default async function handler(req, res) {
     const soup_today = soup_week[day_of_week]?.code
       ? soup_week[day_of_week]
       : null;
+
+    // ----- Pass 3: soup-of-the-day gate -----
+    // The family cooks one soup per day, so anything category=soup that
+    // isn't the currently-scheduled soup is treated as unavailable for
+    // ordering. The public site's + POS's existing "not available today"
+    // logic (grayed tile, hidden + Add button) then handles the UI for
+    // free. Server-side, resolveCartItems() re-checks this so the gate
+    // holds even if the client bypasses it.
+    const todaysSoupCode = soup_today ? soup_today.code : null;
+    for (const row of itemRows) {
+      if (row.category !== 'soup') continue;
+      if (row.code === todaysSoupCode) continue;
+      if (availableSet.has(row.code)) {
+        availableSet.delete(row.code);
+        unavailable[row.code] = { reason: 'not_todays_soup' };
+      }
+    }
+
+    // Preserve display_order in the available_codes array. Built after
+    // pass 3 so non-today soups don't leak through as orderable.
+    const available_codes = itemRows
+      .map((r) => r.code)
+      .filter((code) => availableSet.has(code));
 
     // ----- Today's specials — single JSON-encoded array in `specials_json` -----
     // Read soft-fails to [] so a settings-read blip doesn't 500 the whole

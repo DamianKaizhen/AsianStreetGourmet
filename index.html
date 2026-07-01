@@ -1936,7 +1936,13 @@
               for (var s = 0; s < specials.length; s++) {
                 var sp = specials[s];
                 var row = document.createElement('li');
-                row.className = 'flex items-baseline gap-4 flex-wrap';
+                // menu-row + data-menu-code are what the cart system scans
+                // for; tagging the special rows the same way means
+                // buildMenuLookup picks up name/price, and injectAddButtons
+                // appends an "+ Add" button automatically when cart is
+                // enabled. No special-case code in the cart needed.
+                row.className = 'menu-row flex items-baseline gap-4 flex-wrap';
+                row.setAttribute('data-menu-code', sp.code);
                 if (s < specials.length - 1) {
                   row.className += ' pb-3 border-b border-dotted border-[color:var(--destructive)]/30';
                 }
@@ -1946,7 +1952,10 @@
                 codeSpan.textContent = sp.code;
 
                 var zhSpan = document.createElement('span');
-                zhSpan.className = 'zh text-2xl sm:text-3xl font-medium text-[color:var(--destructive)]';
+                // row-zh class is what buildMenuLookup keys off to find the
+                // zh name; without it the cart drawer would render the
+                // special without a Chinese name.
+                zhSpan.className = 'zh row-zh text-2xl sm:text-3xl font-medium text-[color:var(--destructive)]';
                 zhSpan.setAttribute('lang', 'zh-Hant');
                 zhSpan.textContent = sp.name_zh;
 
@@ -1965,6 +1974,12 @@
                 list.appendChild(row);
               }
               card.hidden = false;
+              // Re-attach cart "+ Add" buttons now that the special rows are
+              // in the DOM. The hook is idempotent — won't double-add buttons
+              // on existing menu rows.
+              if (typeof window.__asgInjectCartButtons === 'function') {
+                window.__asgInjectCartButtons();
+              }
             }
           }
         })
@@ -2170,10 +2185,12 @@
           if (!code) return;
           var zh = li.querySelector('.row-zh');
           var en = li.querySelector('.row-zh + span');
-          // Price text is "$7" or "$8" → cents
+          // Price text is "$7", "$8.50", "$10", etc. — parse as a float so
+          // decimal prices on admin-created items or specials don't get
+          // misread as whole hundreds-of-dollars.
           var priceEl = li.querySelector('.price');
-          var priceText = priceEl ? priceEl.textContent.replace(/[^\d]/g, '') : '0';
-          var price_cents = parseInt(priceText, 10) * 100;
+          var priceMatch = priceEl ? priceEl.textContent.match(/[\d.]+/) : null;
+          var price_cents = priceMatch ? Math.round(parseFloat(priceMatch[0]) * 100) : 0;
           menuLookup[code] = {
             zh: zh ? zh.textContent.trim() : '',
             en: en ? en.textContent.trim() : '',

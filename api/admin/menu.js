@@ -96,6 +96,31 @@ async function handler(req, res) {
         }
         cleaned.push({ code, name_zh, name_en, price_cents });
       }
+      // Reject duplicate codes within the same batch (would confuse the
+      // cart's per-code lookup at order time).
+      const dupInBatch = cleaned.map((s) => s.code).filter((c, i, a) => a.indexOf(c) !== i);
+      if (dupInBatch.length > 0) {
+        return res.status(400).json({ error: 'duplicate code within specials', duplicate_codes: dupInBatch });
+      }
+      // Reject codes that also exist as active menu items. Same code in
+      // both places makes cart resolution ambiguous — the customer would
+      // see one price on the menu row and a different one on the special
+      // card, but the order would silently pick whichever the server
+      // resolves first. Force the admin to use unique codes for specials
+      // (e.g. `T1`, `TS1`) so the two lists never overlap.
+      if (cleaned.length > 0) {
+        const codes = cleaned.map((s) => s.code);
+        const conflicts = await sql`
+          SELECT code FROM menu_items
+          WHERE code = ANY(${codes}) AND is_archived = FALSE
+        `;
+        if (conflicts.length > 0) {
+          return res.status(409).json({
+            error: 'special code already used by an active menu item',
+            conflict_codes: conflicts.map((c) => c.code),
+          });
+        }
+      }
       // Stored as a JSON string in the single key-value settings row. Empty
       // array still gets written ('[]') as the explicit "no specials" state.
       await setSetting('specials_json', JSON.stringify(cleaned));

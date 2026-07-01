@@ -2291,8 +2291,11 @@
           flash(collected.length === 0
             ? t('special.flashCleared')
             : t('special.flashSaved', { n: window.__specialsCache.length }), 'good');
-        } catch {
-          flash(t('flash.updateFailed'), 'bad');
+        } catch (err) {
+          // Surface server-side validation errors (e.g., "code already
+          // used by an active menu item") instead of a generic toast.
+          errEl.textContent = (err && err.message) || t('flash.updateFailed');
+          errEl.hidden = false;
         }
       });
 

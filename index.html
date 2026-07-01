@@ -1935,41 +1935,45 @@
               while (list.firstChild) list.removeChild(list.firstChild);
               for (var s = 0; s < specials.length; s++) {
                 var sp = specials[s];
+                var isLast = s === specials.length - 1;
+                // Mirror _menuRowEl exactly so the special rows sit on the
+                // same grid the rest of the menu does — code column, wrap
+                // div with stacked zh + en, price on the right. On narrow
+                // phones the old inline layout (zh + en + price side by
+                // side with `flex-wrap`) wrapped raggedly; matching the
+                // menu row keeps everything single-line no matter the
+                // viewport width. The only visual difference kept is the
+                // terracotta color on the zh name — that's the reader's
+                // cue that a row is a special rather than a regular menu
+                // item. menu-row + data-menu-code + row-zh are all the
+                // markers the cart system needs.
                 var row = document.createElement('li');
-                // menu-row + data-menu-code are what the cart system scans
-                // for; tagging the special rows the same way means
-                // buildMenuLookup picks up name/price, and injectAddButtons
-                // appends an "+ Add" button automatically when cart is
-                // enabled. No special-case code in the cart needed.
-                row.className = 'menu-row flex items-baseline gap-4 flex-wrap';
+                row.className = 'menu-row flex items-baseline gap-1 py-3'
+                  + (isLast ? '' : ' border-b border-dotted border-[color:var(--destructive)]/30');
                 row.setAttribute('data-menu-code', sp.code);
-                if (s < specials.length - 1) {
-                  row.className += ' pb-3 border-b border-dotted border-[color:var(--destructive)]/30';
-                }
 
                 var codeSpan = document.createElement('span');
-                codeSpan.className = 'mono-code text-sm text-[color:var(--muted-foreground)] w-12 shrink-0';
+                codeSpan.className = 'mono-code text-sm text-[color:var(--muted-foreground)] w-9 shrink-0';
                 codeSpan.textContent = sp.code;
 
+                var wrap = document.createElement('div');
+                wrap.className = 'flex-1 min-w-0';
                 var zhSpan = document.createElement('span');
-                // row-zh class is what buildMenuLookup keys off to find the
-                // zh name; without it the cart drawer would render the
-                // special without a Chinese name.
-                zhSpan.className = 'zh row-zh text-2xl sm:text-3xl font-medium text-[color:var(--destructive)]';
+                zhSpan.className = 'zh row-zh text-base font-medium text-[color:var(--destructive)]';
                 zhSpan.setAttribute('lang', 'zh-Hant');
                 zhSpan.textContent = sp.name_zh;
-
                 var enSpan = document.createElement('span');
-                enSpan.className = 'display text-lg sm:text-xl font-light';
-                enSpan.textContent = sp.name_en;
+                enSpan.className = 'block text-sm text-[color:var(--muted-foreground)]';
+                enSpan.textContent = '· ' + sp.name_en;
+                wrap.appendChild(zhSpan);
+                wrap.appendChild(enSpan);
 
                 var priceSpan = document.createElement('span');
-                priceSpan.className = 'ml-auto price text-2xl sm:text-3xl shrink-0';
+                priceSpan.className = 'price text-xl shrink-0';
                 priceSpan.textContent = '$' + ((sp.price_cents || 0) / 100).toFixed(2).replace(/\.00$/, '');
 
                 row.appendChild(codeSpan);
-                row.appendChild(zhSpan);
-                row.appendChild(enSpan);
+                row.appendChild(wrap);
                 row.appendChild(priceSpan);
                 list.appendChild(row);
               }

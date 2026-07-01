@@ -564,6 +564,26 @@
        don't render with `display: none` active. */
     .menu-row.is-unavailable { display: none; }
 
+    /* Exception: the "This Week" soup schedule shows every day even when
+       only today's soup is orderable. The customer wants to see what's
+       coming up on Thursday, Friday, Saturday, etc. — so the six
+       non-today rows keep rendering, muted, without the strikethrough
+       (which would feel harsh on a rotating menu). The + Add button
+       stays hidden via the existing `.menu-row.is-unavailable
+       .cart-add-btn { display: none }` rule up above. */
+    #cat-soup .menu-row.is-unavailable {
+      display: flex;
+      opacity: 0.55;
+    }
+    #cat-soup .menu-row.is-unavailable .row-zh,
+    #cat-soup .menu-row.is-unavailable > div > span:not(.unavail-badge):not(.mono-code) {
+      text-decoration: none;
+      color: var(--muted-foreground);
+    }
+    #cat-soup .menu-row.is-unavailable .price {
+      opacity: 1;
+    }
+
     /* When an originally-last item (A7, B7, C6, D6) is the one hidden,
        the new visually-last row would otherwise have a hanging dotted
        border-b. Strip it: target "an available row with no available
@@ -1885,7 +1905,13 @@
           // querySelectorAll returns elements in document order, so calling
           // appendChild() on them in sequence preserves their relative order
           // at the bottom.
+          //
+          // Exception: the soup week strip stays in Mon→Sun order regardless
+          // of which day is today, so the customer can read the schedule
+          // top-to-bottom. Today's soup gets a red highlight (is-soup-today)
+          // instead of jumping to the top.
           listsToReorder.forEach(function (ul) {
+            if (ul.closest('#cat-soup')) return;
             var unavailables = ul.querySelectorAll(':scope > li.is-unavailable');
             for (var j = 0; j < unavailables.length; j++) {
               ul.appendChild(unavailables[j]);

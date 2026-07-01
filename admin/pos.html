@@ -1,0 +1,1529 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
+
+  <title>亞洲街頭美食 — POS</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Inter+Tight:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Fraunces', 'serif'],
+            body: ['"Inter Tight"', 'sans-serif'],
+            mono: ['"DM Mono"', 'monospace'],
+            zh: ['"Noto Serif TC"', 'serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    [hidden] { display: none !important; }
+
+    /* Print template — same rules as admin/index.html so the shared
+       print-slip.js output prints identically from either page. */
+    #print-portal { display: none; }
+    @media print {
+      @page { size: letter; margin: 0.5in; }
+      body > *:not(#print-portal) { display: none !important; }
+      #print-portal { display: block; }
+      body { background: #fff !important; color: #000 !important; }
+      .no-print { display: none !important; }
+    }
+    .print-slip {
+      font-family: 'Inter Tight', sans-serif;
+      color: #000;
+      max-width: 7.5in;
+      margin: 0 auto;
+    }
+    .print-slip .print-header {
+      border-bottom: 2px solid #000;
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.8rem;
+      display: flex; justify-content: space-between; align-items: flex-end;
+    }
+    .print-slip .print-header .restaurant {
+      font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 600;
+    }
+    .print-slip .print-header .meta {
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      text-align: right; letter-spacing: 0.05em;
+    }
+    .print-slip .voided-banner {
+      font-family: 'DM Mono', monospace;
+      color: #b91c1c; font-weight: 700; font-size: 1.6rem;
+      letter-spacing: 0.3em; text-align: center;
+      border: 3px solid #b91c1c; padding: 0.4rem; margin: 0.5rem 0 1rem;
+      transform: rotate(-2deg);
+    }
+    .print-slip .pickup-block {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.6rem 0.8rem; border: 1px solid #000; margin-bottom: 0.8rem;
+    }
+    .print-slip .pickup-block.dine-in { background: #f5f1ea; }
+    .print-slip .pickup-label {
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 0.15em;
+    }
+    .print-slip .pickup-code {
+      font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .print-slip .pickup-wait { text-align: right; font-size: 0.85rem; }
+    .print-slip .customer-row {
+      padding: 0.4rem 0; font-size: 0.9rem;
+      border-bottom: 1px dotted #000; margin-bottom: 0.6rem;
+    }
+    .print-slip .customer-row .name { font-weight: 600; }
+    .print-slip table.items {
+      width: 100%; border-collapse: collapse; margin-bottom: 0.8rem;
+    }
+    .print-slip table.items th {
+      font-family: 'DM Mono', monospace; font-size: 0.65rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      text-align: left; padding: 0.3rem 0.4rem;
+      border-bottom: 1px solid #000;
+    }
+    .print-slip table.items td {
+      padding: 0.35rem 0.4rem; font-size: 0.9rem;
+      border-bottom: 1px dotted #ccc; vertical-align: top;
+    }
+    .print-slip table.items td.code { font-family: 'DM Mono', monospace; }
+    .print-slip table.items td.qty { font-family: 'DM Mono', monospace; text-align: center; width: 3rem; }
+    .print-slip table.items td.price { font-family: 'DM Mono', monospace; text-align: right; width: 4rem; }
+    .print-slip .notes-block {
+      border: 1px dashed #000; padding: 0.4rem; margin: 0.6rem 0;
+      font-size: 0.85rem;
+    }
+    .print-slip .notes-block .label {
+      font-family: 'DM Mono', monospace; font-size: 0.65rem;
+      text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.2rem;
+    }
+    .print-slip .totals-wrap { margin-top: 0.4rem; }
+    .print-slip .total-row {
+      display: flex; justify-content: space-between; padding: 0.3rem 0;
+      border-top: 1px solid #000;
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 0.18em;
+    }
+    .print-slip .total-row .amount { font-weight: 600; }
+    .print-slip .footer {
+      text-align: center;
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      padding-top: 0.4rem; border-top: 1px dotted #999;
+    }
+
+    :root {
+      --background: oklch(0.9821 0 0);
+      --foreground: oklch(0.2435 0 0);
+      --card: oklch(0.9911 0 0);
+      --muted: oklch(0.9521 0 0);
+      --muted-foreground: oklch(0.5032 0 0);
+      --border: oklch(0.8822 0 0);
+      --destructive: oklch(0.6271 0.1936 33.339);
+      --good: oklch(0.55 0.13 145);
+    }
+    html, body { background: var(--background); color: var(--foreground); }
+    body { font-family: 'Inter Tight', sans-serif; }
+    .display { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
+    .mono { font-family: 'DM Mono', monospace; }
+    .zh { font-family: 'Noto Serif TC', serif; }
+
+    button, a { transition: color .15s, background .15s, border-color .15s, opacity .15s; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--destructive); outline-offset: 2px;
+    }
+
+    /* -----------------------------------------------------------
+       POS layout — hard min-viewport lockout
+       -----------------------------------------------------------
+       Below 1200×720 landscape we show a splash instead of trying
+       to reflow. A half-broken POS at the register is worse than
+       a locked-out one — the cashier has time to swap laptops. */
+    #pos-view { display: none; }
+    #splash   { display: flex; }
+    @media (min-width: 1200px) and (min-height: 720px) {
+      #splash   { display: none; }
+      #pos-view { display: flex; }
+    }
+    #splash {
+      min-height: 100vh;
+      align-items: center; justify-content: center;
+      padding: 3rem; text-align: center;
+    }
+
+    /* Top bar — smaller than main admin, keeps vertical budget */
+    .pos-top {
+      height: 48px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1rem; flex-shrink: 0;
+    }
+
+    /* Main split: menu 2/3 left, cart 1/3 right, void strip below */
+    #pos-view { flex-direction: column; height: 100vh; }
+    #pos-main { display: grid; grid-template-columns: 2fr 1fr; flex: 1 1 auto; min-height: 0; }
+    #pos-menu { border-right: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
+    #pos-cart { display: flex; flex-direction: column; min-height: 0; }
+
+    /* Category tabs */
+    .cat-tabs {
+      display: flex; gap: 0; border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .cat-tab {
+      padding: 0.75rem 1rem;
+      font-family: 'DM Mono', monospace; font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--muted-foreground);
+      border-bottom: 2px solid transparent;
+      cursor: pointer; background: transparent;
+    }
+    .cat-tab .zh-lbl { font-family: 'Noto Serif TC', serif; font-size: 0.95rem; }
+    .cat-tab:hover { color: var(--foreground); }
+    .cat-tab.is-active { color: var(--destructive); border-bottom-color: var(--destructive); }
+
+    /* Menu grid */
+    .menu-grid {
+      flex: 1 1 auto; overflow-y: auto;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem; padding: 0.75rem;
+    }
+    .menu-tile {
+      min-height: 68px; padding: 0.55rem 0.7rem;
+      border: 1px solid var(--border); background: var(--card);
+      text-align: left; cursor: pointer;
+      display: flex; flex-direction: column; justify-content: space-between;
+      border-radius: 2px;
+    }
+    .menu-tile:hover { border-color: var(--destructive); }
+    .menu-tile.is-unavailable { opacity: 0.35; }
+    .menu-tile.is-unavailable::after {
+      content: attr(data-off-label);
+      font-family: 'DM Mono', monospace; font-size: 0.55rem;
+      color: var(--destructive); letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .menu-tile .tile-top {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 0.4rem;
+    }
+    .menu-tile .tile-code {
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      color: var(--destructive); letter-spacing: 0.08em;
+    }
+    .menu-tile .tile-price {
+      font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500;
+    }
+    .menu-tile .tile-zh {
+      font-family: 'Noto Serif TC', serif; font-size: 1rem;
+      color: var(--foreground); margin-top: 0.2rem;
+    }
+    .menu-tile .tile-en {
+      font-size: 0.75rem; color: var(--muted-foreground);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* Cart column pieces */
+    .cart-section { padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border); }
+    .cart-section:last-child { border-bottom: 0; }
+
+    .seg {
+      display: inline-flex; border: 1px solid var(--border); border-radius: 2px;
+      overflow: hidden; width: 100%;
+    }
+    .seg button {
+      flex: 1; padding: 0.5rem 0.7rem;
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      background: var(--background); color: var(--foreground);
+      border-right: 1px solid var(--border);
+    }
+    .seg button:last-child { border-right: 0; }
+    .seg button.is-active { background: var(--destructive); color: white; }
+
+    .cart-list {
+      flex: 1 1 auto; overflow-y: auto; padding: 0.25rem 0.85rem;
+      min-height: 0;
+    }
+    .cart-empty {
+      display: flex; align-items: center; justify-content: center;
+      height: 100%; color: var(--muted-foreground);
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 0.15em;
+    }
+    .cart-row {
+      display: grid; grid-template-columns: 3rem 1fr auto auto;
+      align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0; border-bottom: 1px dotted var(--border);
+    }
+    .cart-row:last-child { border-bottom: 0; }
+    .cart-row .c-code { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted-foreground); }
+    .cart-row .c-name { font-size: 0.85rem; line-height: 1.2; overflow: hidden; }
+    .cart-row .c-name .zh { font-size: 0.95rem; }
+    .cart-row .c-qty { display: inline-flex; align-items: center; gap: 0.2rem; }
+    .cart-row .c-qty button {
+      width: 24px; height: 24px; border: 1px solid var(--border);
+      background: var(--background);
+      font-weight: 600;
+    }
+    .cart-row .c-qty button:hover { border-color: var(--destructive); color: var(--destructive); }
+    .cart-row .c-qty .n {
+      display: inline-block; min-width: 1.2rem; text-align: center;
+      font-family: 'DM Mono', monospace; font-size: 0.85rem;
+    }
+    .cart-row .c-line {
+      font-family: 'DM Mono', monospace; font-size: 0.85rem; text-align: right;
+    }
+
+    .field-label {
+      display: block; font-family: 'DM Mono', monospace; font-size: 0.6rem;
+      text-transform: uppercase; letter-spacing: 0.15em;
+      color: var(--muted-foreground); margin-bottom: 0.2rem;
+    }
+    .field-input {
+      width: 100%; padding: 0.35rem 0.5rem;
+      border: 1px solid var(--border); background: var(--background);
+      color: var(--foreground); border-radius: 2px;
+      font-family: inherit; font-size: 0.85rem;
+    }
+
+    /* Discount presets */
+    .preset-row { display: flex; gap: 0.3rem; margin-bottom: 0.4rem; }
+    .preset-row button {
+      flex: 1; padding: 0.4rem 0;
+      font-family: 'DM Mono', monospace; font-size: 0.7rem; font-weight: 500;
+      border: 1px solid var(--border); background: var(--background);
+      letter-spacing: 0.08em;
+    }
+    .preset-row button:hover { border-color: var(--destructive); color: var(--destructive); }
+    .preset-row button.is-active { background: var(--destructive); color: white; border-color: var(--destructive); }
+    .discount-mode {
+      display: inline-flex; border: 1px solid var(--border);
+      overflow: hidden; margin-right: 0.4rem;
+    }
+    .discount-mode button {
+      padding: 0.35rem 0.55rem; font-family: 'DM Mono', monospace; font-size: 0.75rem;
+      background: var(--background); border-right: 1px solid var(--border);
+    }
+    .discount-mode button:last-child { border-right: 0; }
+    .discount-mode button.is-active { background: var(--destructive); color: white; }
+    .discount-input-row { display: flex; align-items: center; gap: 0.3rem; }
+    .discount-input-row input {
+      flex: 1; padding: 0.35rem 0.5rem;
+      border: 1px solid var(--border); background: var(--background);
+      font-family: 'DM Mono', monospace; text-align: right; border-radius: 2px;
+    }
+
+    /* Totals block */
+    .totals-block { padding-top: 0.4rem; }
+    .totals-row {
+      display: flex; justify-content: space-between;
+      font-family: 'DM Mono', monospace; font-size: 0.8rem;
+      padding: 0.15rem 0;
+    }
+    .totals-row.grand {
+      font-size: 1.35rem; font-weight: 700; letter-spacing: 0.02em;
+      padding-top: 0.4rem; border-top: 2px solid var(--foreground); margin-top: 0.3rem;
+    }
+    .totals-row .amt { text-align: right; }
+
+    .pay-row {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 0.5rem; align-items: end; margin-top: 0.5rem;
+    }
+    .change-display {
+      font-family: 'DM Mono', monospace; font-weight: 600;
+      color: var(--good); text-align: right; padding: 0.35rem 0;
+    }
+    .change-display.is-short { color: var(--destructive); }
+
+    .action-row {
+      display: grid; grid-template-columns: 1fr 2fr; gap: 0.5rem;
+      padding: 0.5rem 0.85rem;
+      border-top: 1px solid var(--border);
+      background: var(--muted);
+    }
+    .btn-clear, .btn-print {
+      padding: 0.85rem 0;
+      font-family: 'DM Mono', monospace; font-size: 0.9rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      border-radius: 2px;
+    }
+    .btn-clear {
+      border: 1px solid var(--border); background: var(--background);
+    }
+    .btn-clear:hover { border-color: var(--destructive); color: var(--destructive); }
+    .btn-clear.is-armed { background: var(--destructive); color: white; border-color: var(--destructive); }
+    .btn-print {
+      background: var(--destructive); color: white; border: 1px solid var(--destructive);
+    }
+    .btn-print:hover { filter: brightness(1.08); }
+    .btn-print:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Void-last strip (post-print only) */
+    #void-last {
+      display: none;
+      padding: 0.55rem 1rem;
+      border-top: 1px solid var(--border);
+      background: color-mix(in oklab, var(--destructive) 8%, var(--background));
+      align-items: center; gap: 0.75rem; flex-shrink: 0;
+      font-family: 'DM Mono', monospace; font-size: 0.75rem;
+    }
+    #void-last.is-open { display: flex; }
+    #void-last .info { flex: 1; letter-spacing: 0.08em; text-transform: uppercase; }
+    #void-last button {
+      padding: 0.4rem 0.85rem; font-family: 'DM Mono', monospace;
+      text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.7rem;
+      border: 1px solid var(--border); background: var(--background);
+    }
+    #void-last button.void { border-color: var(--destructive); color: var(--destructive); }
+    #void-last button.void:hover { background: var(--destructive); color: white; }
+    #void-last button.void.is-armed { background: var(--destructive); color: white; }
+
+    /* Toast */
+    .toast {
+      position: fixed; top: 1rem; left: 50%; transform: translate(-50%, -1rem);
+      padding: 0.55rem 1.1rem; border-radius: 2px;
+      font-family: 'DM Mono', monospace; font-size: 0.75rem;
+      letter-spacing: 0.1em; text-transform: uppercase; z-index: 60;
+      opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none;
+    }
+    .toast.is-show { opacity: 1; transform: translate(-50%, 0.4rem); }
+    .toast-good { background: var(--good); color: white; }
+    .toast-bad  { background: var(--destructive); color: white; }
+
+    /* Language pill (same as admin) */
+    .lang-pill {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0 0.6rem; height: 2rem;
+      border: 1px solid var(--border); background: transparent;
+    }
+    .lang-pill:hover { border-color: var(--destructive); }
+    .lang-pill .l-en { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; }
+    .lang-pill .l-sep { color: var(--border); }
+    .lang-pill .l-zh { font-family: 'Noto Serif TC', serif; font-size: 0.95rem; line-height: 1; }
+    html[lang="en"] .lang-pill .l-en { color: var(--destructive); font-weight: 500; }
+    html[lang="en"] .lang-pill .l-zh { opacity: 0.4; }
+    html[lang="zh-Hant"] .lang-pill .l-zh { color: var(--destructive); font-weight: 700; }
+    html[lang="zh-Hant"] .lang-pill .l-en { opacity: 0.4; }
+
+    /* Modal (for "ring anyway" and confirms) */
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 70;
+      background: color-mix(in oklab, black 40%, transparent);
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal-backdrop.is-open { display: flex; }
+    .modal-panel {
+      background: var(--card); border: 1px solid var(--border);
+      max-width: 420px; padding: 1.25rem; border-radius: 2px;
+    }
+    .modal-panel .m-title {
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 0.15em;
+      color: var(--destructive); margin-bottom: 0.5rem;
+    }
+    .modal-panel .m-body { font-size: 0.9rem; margin-bottom: 1rem; }
+    .modal-panel .m-actions {
+      display: flex; gap: 0.5rem; justify-content: flex-end;
+    }
+    .modal-panel .m-actions button {
+      padding: 0.55rem 1rem; font-family: 'DM Mono', monospace;
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em;
+      border: 1px solid var(--border); background: var(--background);
+    }
+    .modal-panel .m-actions button.primary {
+      background: var(--destructive); color: white; border-color: var(--destructive);
+    }
+  </style>
+</head>
+<body class="font-body antialiased">
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Below 1200×720: lockout splash. Not a graceful reflow — a bad POS at
+       the register is worse than a locked-out one. -->
+  <section id="splash">
+    <div>
+      <h1 class="display text-3xl mb-3" data-i18n="pos.splashTitle">POS requires a wider screen</h1>
+      <p class="text-sm text-[color:var(--muted-foreground)]" data-i18n="pos.splashBody">Please open this page on a 1200×720 (or larger) landscape display.</p>
+    </div>
+  </section>
+
+  <!-- Main POS view. Displayed only above the viewport threshold. -->
+  <section id="pos-view">
+
+    <div class="pos-top no-print">
+      <div class="flex items-center gap-3">
+        <span class="zh font-bold text-[color:var(--destructive)] text-sm">亞洲街頭美食</span>
+        <span class="mono text-xs uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">POS</span>
+        <span id="cashier-tag" class="mono text-xs uppercase tracking-[0.15em] text-[color:var(--destructive)] pl-3 border-l border-[color:var(--border)]"></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="lang-toggle" class="lang-pill" aria-label="Switch language">
+          <span class="l-en">EN</span>
+          <span class="l-sep" aria-hidden="true">·</span>
+          <span class="l-zh">中</span>
+        </button>
+        <a href="/admin/" class="mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)]" data-i18n="pos.backToAdmin">← Admin</a>
+      </div>
+    </div>
+
+    <div id="pos-main">
+
+      <!-- LEFT 2/3: menu -->
+      <div id="pos-menu" class="no-print">
+        <div id="cat-tabs" class="cat-tabs" role="tablist"></div>
+        <div id="menu-grid" class="menu-grid"></div>
+      </div>
+
+      <!-- RIGHT 1/3: cart & totals -->
+      <div id="pos-cart" class="no-print">
+
+        <!-- Dine-in / take-out toggle + customer info -->
+        <div class="cart-section">
+          <div class="seg" role="tablist" aria-label="Dining option">
+            <button id="opt-dine"    class="is-active" data-i18n="pos.dineIn">Dine-in</button>
+            <button id="opt-takeout" data-i18n="pos.takeout">Take-out</button>
+          </div>
+          <div class="mt-2 grid grid-cols-2 gap-2">
+            <label>
+              <span class="field-label" data-i18n="pos.nameOptional">Name (optional)</span>
+              <input id="cust-name" type="text" maxlength="80" class="field-input" autocomplete="off" />
+            </label>
+            <label>
+              <span class="field-label" data-i18n="pos.phoneOptional">Phone (optional)</span>
+              <input id="cust-phone" type="tel" maxlength="30" inputmode="tel" class="field-input" autocomplete="off" />
+            </label>
+          </div>
+        </div>
+
+        <!-- Cart list -->
+        <div class="cart-section" style="padding-bottom: 0.2rem;">
+          <div class="field-label" data-i18n="pos.cart">Cart</div>
+        </div>
+        <div id="cart-list" class="cart-list">
+          <div class="cart-empty" data-i18n="pos.cartEmpty">Tap a menu item to start</div>
+        </div>
+
+        <!-- Notes -->
+        <div class="cart-section">
+          <label class="block">
+            <span class="field-label" data-i18n="pos.notesOptional">Notes (optional)</span>
+            <input id="order-notes" type="text" maxlength="200" class="field-input" autocomplete="off" />
+          </label>
+        </div>
+
+        <!-- Discount -->
+        <div class="cart-section">
+          <div class="field-label" data-i18n="pos.discount">Discount</div>
+          <div class="preset-row">
+            <button data-preset="10" data-i18n="pos.preset10">10%</button>
+            <button data-preset="20" data-i18n="pos.preset20">20%</button>
+            <button data-preset="50" data-i18n="pos.preset50">50%</button>
+            <button data-preset="100" data-i18n="pos.presetComp">Comp</button>
+          </div>
+          <div class="discount-input-row">
+            <div class="discount-mode">
+              <button id="mode-pct"    class="is-active" data-i18n="pos.pct">%</button>
+              <button id="mode-dollar" data-i18n="pos.dollar">$</button>
+            </div>
+            <input id="discount-input" type="number" min="0" step="0.01" class="field-input" style="text-align:right;" />
+            <button id="discount-clear" class="mono text-xs px-2 py-1 border border-[color:var(--border)] hover:border-[color:var(--destructive)]" data-i18n="pos.clear">Clear</button>
+          </div>
+          <label class="block mt-2">
+            <span class="field-label" data-i18n="pos.reasonOptional">Reason (optional)</span>
+            <input id="discount-reason" type="text" maxlength="80" class="field-input" autocomplete="off" />
+          </label>
+        </div>
+
+        <!-- Totals -->
+        <div class="cart-section totals-block">
+          <div class="totals-row">
+            <span data-i18n="pos.subtotal">Subtotal</span>
+            <span id="t-subtotal" class="amt">$0.00</span>
+          </div>
+          <div id="t-discount-row" class="totals-row" hidden>
+            <span><span data-i18n="pos.discount">Discount</span> <span id="t-discount-tag" class="text-[color:var(--muted-foreground)]"></span></span>
+            <span id="t-discount" class="amt">−$0.00</span>
+          </div>
+          <div id="t-tax-row" class="totals-row" hidden>
+            <span data-i18n="pos.tax">Tax</span>
+            <span id="t-tax" class="amt">$0.00</span>
+          </div>
+          <div class="totals-row grand">
+            <span data-i18n="pos.total">Total</span>
+            <span id="t-total" class="amt">$0.00</span>
+          </div>
+          <div class="pay-row">
+            <label>
+              <span class="field-label" data-i18n="pos.cashTendered">Cash tendered</span>
+              <input id="cash-tendered" type="number" min="0" step="0.01" class="field-input" style="text-align:right;" />
+            </label>
+            <div>
+              <span class="field-label" data-i18n="pos.change">Change</span>
+              <div id="change-display" class="change-display">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-row">
+          <button id="btn-clear" class="btn-clear" data-i18n="pos.clearCart">Clear</button>
+          <button id="btn-print" class="btn-print" disabled data-i18n="pos.print">Print ticket</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Post-print "Void last" strip -->
+    <div id="void-last" class="no-print" role="status">
+      <span class="info" id="void-last-info">—</span>
+      <button id="void-dismiss" data-i18n="pos.dismiss">Dismiss</button>
+      <button id="void-btn" class="void" data-i18n="pos.voidLast">Void last</button>
+    </div>
+  </section>
+
+  <!-- Confirm / ring-anyway modal -->
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-panel">
+      <div id="modal-title" class="m-title"></div>
+      <div id="modal-body" class="m-body"></div>
+      <div class="m-actions">
+        <button id="modal-cancel" data-i18n="pos.cancel">Cancel</button>
+        <button id="modal-ok" class="primary" data-i18n="pos.confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick-entry: hidden text input that captures global keystrokes for
+       cashiers who prefer typing codes over tapping tiles. See handlers below. -->
+  <input id="quick-entry" type="text" style="position:absolute; left:-9999px;" autocomplete="off" tabindex="-1" />
+
+  <!-- Shared print-slip renderer -->
+  <script src="/admin/print-slip.js"></script>
+
+  <script>
+    // =========================================================
+    // POS state
+    // =========================================================
+    const state = {
+      dining:       'dine_in',       // 'dine_in' | 'takeout'
+      cart:         [],              // [{ code, name_en, name_zh, price_cents, quantity }]
+      discountMode: 'pct',           // 'pct' | 'dollar'
+      discountVal:  '',              // string (raw input)
+      cashText:     '',              // string (raw input)
+      submitting:   false,
+      currentTab:   'steam',
+      lastTicket:   null,            // populated after a successful Print
+      lastVoided:   false,           // once voided, hide the Void button in the strip
+      menuIndex:    {},              // code → item data (from /api/menu-today)
+      availableSet: new Set(),       // codes currently available
+      clearArmed:   false,
+      voidArmed:    false,
+    };
+    let __clearArmTimer = null;
+    let __voidArmTimer = null;
+
+    // =========================================================
+    // i18n
+    // =========================================================
+    const LANG_STRINGS = {
+      en: {
+        'pos.splashTitle':     'POS requires a wider screen',
+        'pos.splashBody':      'Please open this page on a 1200×720 (or larger) landscape display.',
+        'pos.backToAdmin':     '← Admin',
+        'pos.dineIn':          'Dine-in',
+        'pos.takeout':         'Take-out',
+        'pos.nameOptional':    'Name (optional)',
+        'pos.phoneOptional':   'Phone (optional)',
+        'pos.cart':            'Cart',
+        'pos.cartEmpty':       'Tap a menu item to start',
+        'pos.notesOptional':   'Notes (optional)',
+        'pos.discount':        'Discount',
+        'pos.preset10':        '10%',
+        'pos.preset20':        '20%',
+        'pos.preset50':        '50%',
+        'pos.presetComp':      'Comp',
+        'pos.pct':             '%',
+        'pos.dollar':          '$',
+        'pos.clear':           'Clear',
+        'pos.reasonOptional':  'Reason (optional)',
+        'pos.subtotal':        'Subtotal',
+        'pos.tax':             'Tax',
+        'pos.total':           'Total',
+        'pos.cashTendered':    'Cash tendered',
+        'pos.change':          'Change',
+        'pos.clearCart':       'Clear',
+        'pos.clearAgain':      'Tap again',
+        'pos.print':           'Print ticket',
+        'pos.printing':        'Printing…',
+        'pos.dismiss':         'Dismiss',
+        'pos.voidLast':        'Void last',
+        'pos.voidAgain':       'Tap again',
+        'pos.voidedInfo':      'Ticket #{n} voided.',
+        'pos.lastTicketInfo':  'Last: #{id} · {dining} · {total}',
+        'pos.cancel':          'Cancel',
+        'pos.confirm':         'Confirm',
+        'pos.confirmClear':    'Cart has {n} items. Really clear?',
+        'pos.confirmClearTitle': 'Clear cart',
+        'pos.ringAnywayTitle': 'Item unavailable',
+        'pos.ringAnyway':      'One or more items ({codes}) are currently marked unavailable. Ring anyway?',
+        'pos.errUnknown':      'Something went wrong. Please try again.',
+        'pos.errShort':        'Cash tendered is less than total.',
+        'pos.errEmpty':        'Add at least one item.',
+        'pos.tabSteam':        'Steamed',
+        'pos.tabSoup':         'Soup',
+        'pos.tabSnack':        'Snacks',
+        'pos.tabSpecial':      'Specials',
+        'pos.categoryEmpty':   'No items in this category yet.',
+        'pos.unavail':         'Unavailable today',
+        'pos.printed':         'Printed ticket #{id}',
+        'pos.voided':          'Voided ticket #{id}',
+        // Print-slip strings (also used by admin/index.html)
+        'print.orderNum':      '#{id}',
+        'print.pickupCode':    'Pickup code',
+        'print.readyIn':       'Ready in ~{n} min',
+        'print.payAtPickup':   'Pay at pickup',
+        'print.ticketNumber':  'Ticket #{code}',
+        'print.cashier':       'Cashier: {name}',
+        'print.colCode':       'Code',
+        'print.colQty':        'Qty',
+        'print.colItem':       'Item',
+        'print.colPrice':      'Total',
+        'print.customerNotes': 'Notes',
+        'print.subtotal':      'Subtotal',
+        'print.discount':      'Discount',
+        'print.tax':           'Tax',
+        'print.total':         'Total',
+        'print.cashTendered':  'Cash tendered',
+        'print.change':        'Change',
+        'print.voided':        'VOIDED',
+        'print.voidTotal':     '— VOID —',
+        'print.footer':        'Thank you · 多謝晒 · Show this code at the counter',
+      },
+      zh: {
+        'pos.splashTitle':     'POS 需要更大嘅螢幕',
+        'pos.splashBody':      '請喺 1200×720（或以上）嘅橫向螢幕開呢個頁面。',
+        'pos.backToAdmin':     '← 管理',
+        'pos.dineIn':          '堂食',
+        'pos.takeout':         '外賣',
+        'pos.nameOptional':    '姓名（可留空）',
+        'pos.phoneOptional':   '電話（可留空）',
+        'pos.cart':            '單',
+        'pos.cartEmpty':       '撳菜單開始落單',
+        'pos.notesOptional':   '備註（可留空）',
+        'pos.discount':        '折扣',
+        'pos.preset10':        '九折',
+        'pos.preset20':        '八折',
+        'pos.preset50':        '半價',
+        'pos.presetComp':      '免費',
+        'pos.pct':             '%',
+        'pos.dollar':          '$',
+        'pos.clear':           '清除',
+        'pos.reasonOptional':  '原因（可留空）',
+        'pos.subtotal':        '小計',
+        'pos.tax':             '稅',
+        'pos.total':           '合共',
+        'pos.cashTendered':    '收現金',
+        'pos.change':          '找續',
+        'pos.clearCart':       '清單',
+        'pos.clearAgain':      '再撳一次',
+        'pos.print':           '印單',
+        'pos.printing':        '印緊…',
+        'pos.dismiss':         '關閉',
+        'pos.voidLast':        '取消上單',
+        'pos.voidAgain':       '再撳一次',
+        'pos.voidedInfo':      '第 {n} 號單已取消。',
+        'pos.lastTicketInfo':  '上單：#{id} · {dining} · {total}',
+        'pos.cancel':          '取消',
+        'pos.confirm':         '確認',
+        'pos.confirmClear':    '單裡面有 {n} 樣，真係要清？',
+        'pos.confirmClearTitle': '清單',
+        'pos.ringAnywayTitle': '無貨',
+        'pos.ringAnyway':      '呢單有嘢（{codes}）而家標咗無貨。照落？',
+        'pos.errUnknown':      '出咗問題，唔該再試。',
+        'pos.errShort':        '收嘅現金唔夠總數。',
+        'pos.errEmpty':        '起碼要落一樣嘢。',
+        'pos.tabSteam':        '蒸餸飯',
+        'pos.tabSoup':         '靚湯',
+        'pos.tabSnack':        '小食',
+        'pos.tabSpecial':      '推薦',
+        'pos.categoryEmpty':   '呢類暫時未有嘢。',
+        'pos.unavail':         '今日無',
+        'pos.printed':         '已印第 {id} 號單',
+        'pos.voided':          '第 {id} 號單已取消',
+        'print.orderNum':      '第 {id} 號',
+        'print.pickupCode':    '取餐編號',
+        'print.readyIn':       '約 {n} 分鐘',
+        'print.payAtPickup':   '取餐時付款',
+        'print.ticketNumber':  '第 {code} 號',
+        'print.cashier':       '收銀：{name}',
+        'print.colCode':       '編號',
+        'print.colQty':        '份數',
+        'print.colItem':       '餐品',
+        'print.colPrice':      '合計',
+        'print.customerNotes': '備註',
+        'print.subtotal':      '小計',
+        'print.discount':      '折扣',
+        'print.tax':           '稅',
+        'print.total':         '合共',
+        'print.cashTendered':  '收現金',
+        'print.change':        '找續',
+        'print.voided':        '已取消',
+        'print.voidTotal':     '— 取消 —',
+        'print.footer':        '多謝惠顧 · Thank you · 憑編號取餐',
+      },
+    };
+    function currentLang() {
+      return document.documentElement.lang === 'zh-Hant' ? 'zh' : 'en';
+    }
+    function t(key, params) {
+      const dict = LANG_STRINGS[currentLang()] || LANG_STRINGS.en;
+      let s = dict[key];
+      if (s === undefined) s = LANG_STRINGS.en[key] !== undefined ? LANG_STRINGS.en[key] : key;
+      if (params) for (const k in params) s = s.split('{' + k + '}').join(params[k]);
+      return s;
+    }
+    function applyLang(lang) {
+      document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+      const dict = LANG_STRINGS[lang] || LANG_STRINGS.en;
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key] !== undefined) el.textContent = dict[key];
+      });
+      try { localStorage.setItem('asg-lang', lang); } catch (e) {}
+      renderCategoryTabs();  // tab labels are dynamic (LANG_STRINGS keys)
+      renderMenuGrid();      // "Unavailable today" label
+      renderCart();
+      renderTotals();
+      updateLastTicketStrip();
+    }
+
+    // =========================================================
+    // Tiny DOM helpers
+    // =========================================================
+    const $ = function (sel) { return document.querySelector(sel); };
+    function el(tag, attrs, ...kids) {
+      const e = document.createElement(tag);
+      for (const k in (attrs || {})) {
+        const v = attrs[k];
+        if (v == null) continue;
+        if (k === 'class') e.className = v;
+        else if (k === 'on' && typeof v === 'object') {
+          for (const ev in v) e.addEventListener(ev, v[ev]);
+        } else if (k === 'disabled' || k === 'hidden') {
+          if (v) e.setAttribute(k, '');
+        } else e.setAttribute(k, v);
+      }
+      for (const k of kids.flat(Infinity)) {
+        if (k == null || k === false) continue;
+        e.appendChild(typeof k === 'string' ? document.createTextNode(k) : k);
+      }
+      return e;
+    }
+    function clear(node) { while (node && node.firstChild) node.removeChild(node.firstChild); }
+    function money(cents) { return '$' + ((Number(cents) || 0) / 100).toFixed(2); }
+    function priceLabel(cents) { return '$' + ((Number(cents) || 0) / 100).toFixed(2).replace(/\.00$/, ''); }
+
+    // Toast helper (short-lived flash message)
+    let __toastTimer = null;
+    function toast(msg, kind) {
+      const t = $('#toast');
+      t.textContent = msg;
+      t.className = 'toast is-show ' + (kind === 'bad' ? 'toast-bad' : 'toast-good');
+      clearTimeout(__toastTimer);
+      __toastTimer = setTimeout(function () { t.className = 'toast'; }, 2400);
+    }
+
+    // Modal helper (returns a promise; resolves true on confirm, false on cancel)
+    function askConfirm(title, body) {
+      return new Promise(function (resolve) {
+        $('#modal-title').textContent = title;
+        $('#modal-body').textContent = body;
+        $('#modal').classList.add('is-open');
+        function close(v) {
+          $('#modal').classList.remove('is-open');
+          $('#modal-ok').removeEventListener('click', onOk);
+          $('#modal-cancel').removeEventListener('click', onCancel);
+          resolve(v);
+        }
+        function onOk() { close(true); }
+        function onCancel() { close(false); }
+        $('#modal-ok').addEventListener('click', onOk);
+        $('#modal-cancel').addEventListener('click', onCancel);
+      });
+    }
+
+    // =========================================================
+    // Sort helper — same as public/admin: letter prefix, then int
+    // =========================================================
+    function codeCompare(a, b) {
+      const ac = String(a.code || ''), bc = String(b.code || '');
+      const aL = ac.charAt(0), bL = bc.charAt(0);
+      if (aL !== bL) return aL < bL ? -1 : 1;
+      const aN = parseInt(ac.slice(1), 10) || 0;
+      const bN = parseInt(bc.slice(1), 10) || 0;
+      return aN - bN;
+    }
+
+    // =========================================================
+    // Category tabs
+    // =========================================================
+    function tabsForData() {
+      // Rebuilds dynamically because specials are only shown if there are any
+      const tabs = [
+        { key: 'steam',   labelKey: 'pos.tabSteam' },
+        { key: 'soup',    labelKey: 'pos.tabSoup' },
+        { key: 'snack',   labelKey: 'pos.tabSnack' },
+      ];
+      if (state.specials && state.specials.length > 0) {
+        tabs.push({ key: 'special', labelKey: 'pos.tabSpecial' });
+      }
+      return tabs;
+    }
+    function renderCategoryTabs() {
+      const container = $('#cat-tabs');
+      clear(container);
+      tabsForData().forEach(function (tab) {
+        const btn = el('button', {
+          class: 'cat-tab' + (state.currentTab === tab.key ? ' is-active' : ''),
+          type: 'button',
+          role: 'tab',
+        }, t(tab.labelKey));
+        btn.addEventListener('click', function () {
+          state.currentTab = tab.key;
+          renderCategoryTabs();
+          renderMenuGrid();
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    // =========================================================
+    // Menu grid
+    // =========================================================
+    function renderMenuGrid() {
+      const grid = $('#menu-grid');
+      clear(grid);
+      let items;
+      if (state.currentTab === 'special') {
+        items = (state.specials || []).slice();
+      } else {
+        items = (state.menuItems || []).filter(function (m) { return m.category === state.currentTab; });
+      }
+      items.sort(codeCompare);
+      if (items.length === 0) {
+        grid.appendChild(el('div', {
+          class: 'col-span-3 text-sm text-[color:var(--muted-foreground)] text-center py-8',
+        }, t('pos.categoryEmpty')));
+        return;
+      }
+      items.forEach(function (m) {
+        const isSpecial = state.currentTab === 'special';
+        // Specials are always considered available (they're the admin's
+        // explicit for-today list). Menu items respect available_codes.
+        const isAvail = isSpecial ? true : state.availableSet.has(m.code);
+        const tile = el('button', {
+          class: 'menu-tile' + (isAvail ? '' : ' is-unavailable'),
+          type: 'button',
+          'data-off-label': t('pos.unavail'),
+        });
+        const top = el('div', { class: 'tile-top' },
+          el('span', { class: 'tile-code' }, m.code),
+          el('span', { class: 'tile-price' }, priceLabel(m.price_cents)),
+        );
+        const zh = el('div', { class: 'tile-zh' }, m.name_zh);
+        const en = el('div', { class: 'tile-en' }, m.name_en);
+        tile.appendChild(top);
+        tile.appendChild(zh);
+        tile.appendChild(en);
+        tile.addEventListener('click', function () { addToCart(m, 1); });
+        grid.appendChild(tile);
+      });
+    }
+
+    // =========================================================
+    // Cart operations
+    // =========================================================
+    function addToCart(item, qty) {
+      qty = qty || 1;
+      const existing = state.cart.find(function (r) { return r.code === item.code; });
+      if (existing) {
+        existing.quantity += qty;
+      } else {
+        state.cart.push({
+          code: item.code,
+          name_en: item.name_en,
+          name_zh: item.name_zh,
+          price_cents: item.price_cents,
+          quantity: qty,
+        });
+      }
+      renderCart();
+      renderTotals();
+    }
+    function changeQty(code, delta) {
+      const row = state.cart.find(function (r) { return r.code === code; });
+      if (!row) return;
+      row.quantity += delta;
+      if (row.quantity <= 0) {
+        state.cart = state.cart.filter(function (r) { return r.code !== code; });
+      }
+      renderCart();
+      renderTotals();
+    }
+    function removeFromCart(code) {
+      state.cart = state.cart.filter(function (r) { return r.code !== code; });
+      renderCart();
+      renderTotals();
+    }
+    function renderCart() {
+      const list = $('#cart-list');
+      clear(list);
+      if (state.cart.length === 0) {
+        list.appendChild(el('div', { class: 'cart-empty' }, t('pos.cartEmpty')));
+        $('#btn-print').disabled = state.submitting || true;
+        return;
+      }
+      $('#btn-print').disabled = state.submitting;
+      state.cart.forEach(function (r) {
+        const row = el('div', { class: 'cart-row' });
+        row.appendChild(el('div', { class: 'c-code' }, r.code));
+        const name = el('div', { class: 'c-name' });
+        name.appendChild(el('span', { class: 'zh' }, r.name_zh));
+        name.appendChild(document.createTextNode(' · ' + r.name_en));
+        row.appendChild(name);
+        const qty = el('div', { class: 'c-qty' });
+        const minus = el('button', { type: 'button', 'aria-label': 'Decrease' }, '−');
+        const plus = el('button', { type: 'button', 'aria-label': 'Increase' }, '+');
+        const n = el('span', { class: 'n' }, String(r.quantity));
+        minus.addEventListener('click', function () { changeQty(r.code, -1); });
+        plus.addEventListener('click', function () { changeQty(r.code, +1); });
+        qty.appendChild(minus);
+        qty.appendChild(n);
+        qty.appendChild(plus);
+        row.appendChild(qty);
+        row.appendChild(el('div', { class: 'c-line' }, money(r.price_cents * r.quantity)));
+        list.appendChild(row);
+      });
+    }
+
+    // =========================================================
+    // Totals math (mirrors lib/orders.js computeTotals)
+    // =========================================================
+    function computeSubtotalCents() {
+      return state.cart.reduce(function (acc, r) { return acc + r.price_cents * r.quantity; }, 0);
+    }
+    // Convert the raw discount input into cents (clamped 0..subtotal),
+    // returning also the pct so the totals row can show "(20%)".
+    function computeDiscountCents(subtotal) {
+      const raw = state.discountVal.trim();
+      if (raw === '') return { cents: 0, pct: null };
+      const n = Number(raw);
+      if (!isFinite(n) || n < 0) return { cents: 0, pct: null };
+      if (state.discountMode === 'pct') {
+        const pct = Math.min(100, Math.max(0, Math.round(n)));
+        return { cents: Math.max(0, Math.min(subtotal, Math.round(subtotal * pct / 100))), pct };
+      }
+      // Dollar mode: raw is in dollars, may have cents
+      const cents = Math.max(0, Math.min(subtotal, Math.round(n * 100)));
+      return { cents, pct: null };
+    }
+    function renderTotals() {
+      const subtotal = computeSubtotalCents();
+      const { cents: discount, pct } = computeDiscountCents(subtotal);
+      const taxable = subtotal - discount;
+      const tax = 0; // NYC rate 0; kept for parity with server math
+      const total = taxable + tax;
+      $('#t-subtotal').textContent = money(subtotal);
+      if (discount > 0) {
+        $('#t-discount-row').hidden = false;
+        $('#t-discount').textContent = '−' + money(discount);
+        $('#t-discount-tag').textContent = pct != null ? '(' + pct + '%)' : '';
+      } else {
+        $('#t-discount-row').hidden = true;
+      }
+      if (tax > 0) {
+        $('#t-tax-row').hidden = false;
+        $('#t-tax').textContent = money(tax);
+      } else {
+        $('#t-tax-row').hidden = true;
+      }
+      $('#t-total').textContent = money(total);
+      renderChange(total);
+      // Re-evaluate Print button
+      $('#btn-print').disabled = state.submitting || state.cart.length === 0;
+    }
+    function renderChange(totalCents) {
+      const raw = state.cashText.trim();
+      const disp = $('#change-display');
+      if (raw === '') {
+        disp.textContent = '—';
+        disp.classList.remove('is-short');
+        return;
+      }
+      const n = Number(raw);
+      if (!isFinite(n) || n < 0) {
+        disp.textContent = '—';
+        disp.classList.remove('is-short');
+        return;
+      }
+      const cash = Math.round(n * 100);
+      const change = cash - totalCents;
+      if (change < 0) {
+        disp.textContent = '−' + money(-change);
+        disp.classList.add('is-short');
+      } else {
+        disp.textContent = money(change);
+        disp.classList.remove('is-short');
+      }
+    }
+
+    // =========================================================
+    // Discount input wiring (presets + mode toggle + input)
+    // =========================================================
+    function applyPreset(pct) {
+      state.discountMode = 'pct';
+      state.discountVal = String(pct);
+      syncDiscountUI();
+      renderTotals();
+    }
+    function setDiscountMode(mode) {
+      state.discountMode = mode;
+      syncDiscountUI();
+      renderTotals();
+    }
+    function syncDiscountUI() {
+      $('#mode-pct').classList.toggle('is-active', state.discountMode === 'pct');
+      $('#mode-dollar').classList.toggle('is-active', state.discountMode === 'dollar');
+      $('#discount-input').value = state.discountVal;
+      // Highlight the matching preset button
+      const activePct = (state.discountMode === 'pct') ? Number(state.discountVal) : NaN;
+      document.querySelectorAll('.preset-row button').forEach(function (btn) {
+        const p = Number(btn.getAttribute('data-preset'));
+        btn.classList.toggle('is-active', p === activePct);
+      });
+    }
+
+    // =========================================================
+    // Clear cart (two-click arm, mirrors admin patterns)
+    // =========================================================
+    function armClearButton() {
+      const btn = $('#btn-clear');
+      btn.classList.add('is-armed');
+      btn.textContent = t('pos.clearAgain');
+      state.clearArmed = true;
+      clearTimeout(__clearArmTimer);
+      __clearArmTimer = setTimeout(resetClearArm, 5000);
+    }
+    function resetClearArm() {
+      const btn = $('#btn-clear');
+      btn.classList.remove('is-armed');
+      btn.textContent = t('pos.clearCart');
+      state.clearArmed = false;
+      clearTimeout(__clearArmTimer);
+    }
+    function actuallyClearCart() {
+      state.cart = [];
+      state.discountVal = '';
+      state.cashText = '';
+      $('#cash-tendered').value = '';
+      $('#discount-reason').value = '';
+      syncDiscountUI();
+      renderCart();
+      renderTotals();
+      resetClearArm();
+    }
+
+    // =========================================================
+    // POS Print flow
+    // =========================================================
+    function buildPostBody() {
+      const body = {
+        items: state.cart.map(function (r) { return { code: r.code, quantity: r.quantity }; }),
+        dining_option: state.dining,
+      };
+      const nm = $('#cust-name').value.trim();
+      const ph = $('#cust-phone').value.trim();
+      const nt = $('#order-notes').value.trim();
+      if (nm) body.customer_name = nm;
+      if (ph) body.customer_phone = ph;
+      if (nt) body.notes = nt;
+      const raw = state.discountVal.trim();
+      if (raw !== '') {
+        const n = Number(raw);
+        if (isFinite(n) && n > 0) {
+          if (state.discountMode === 'pct') {
+            body.discount_pct = Math.min(100, Math.max(0, Math.round(n)));
+          } else {
+            body.discount_cents = Math.max(0, Math.round(n * 100));
+          }
+        }
+      }
+      const dr = $('#discount-reason').value.trim();
+      if (dr) body.discount_reason = dr;
+      const cashRaw = state.cashText.trim();
+      if (cashRaw !== '') {
+        const nc = Number(cashRaw);
+        if (isFinite(nc) && nc >= 0) {
+          body.cash_tendered_cents = Math.round(nc * 100);
+        }
+      }
+      return body;
+    }
+    async function doPost(body) {
+      const res = await fetch('/api/admin/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(function () { return {}; });
+      return { ok: res.ok, status: res.status, data };
+    }
+    async function handlePrint() {
+      if (state.submitting) return;
+      if (state.cart.length === 0) { toast(t('pos.errEmpty'), 'bad'); return; }
+      // Cash-tendered short-check is a warning, not a block — cashier may
+      // be paid partly in card and just noting cash on the side.
+      state.submitting = true;
+      $('#btn-print').disabled = true;
+      const originalLabel = $('#btn-print').textContent;
+      $('#btn-print').textContent = t('pos.printing');
+      try {
+        const body = buildPostBody();
+        let r = await doPost(body);
+        if (!r.ok && r.status === 409 && Array.isArray(r.data.unavailable_codes)) {
+          const codes = r.data.unavailable_codes.join(', ');
+          const ok = await askConfirm(
+            t('pos.ringAnywayTitle'),
+            t('pos.ringAnyway', { codes })
+          );
+          if (!ok) {
+            state.submitting = false;
+            $('#btn-print').textContent = originalLabel;
+            $('#btn-print').disabled = state.cart.length === 0;
+            return;
+          }
+          body.allow_unavailable = true;
+          r = await doPost(body);
+        }
+        if (!r.ok) {
+          toast((r.data && r.data.error) || t('pos.errUnknown'), 'bad');
+          state.submitting = false;
+          $('#btn-print').textContent = originalLabel;
+          $('#btn-print').disabled = state.cart.length === 0;
+          return;
+        }
+        // Print + clear cart + show void-last strip.
+        printOrder(r.data);
+        state.lastTicket = r.data;
+        state.lastVoided = false;
+        toast(t('pos.printed', { id: r.data.order_id }), 'good');
+        actuallyClearCart();
+        updateLastTicketStrip();
+      } catch (err) {
+        console.error('[pos] print error:', err);
+        toast(t('pos.errUnknown'), 'bad');
+      } finally {
+        state.submitting = false;
+        $('#btn-print').textContent = originalLabel;
+        $('#btn-print').disabled = state.cart.length === 0;
+      }
+    }
+    function printOrder(order) {
+      const portal = $('#print-portal');
+      if (!portal) return;
+      clear(portal);
+      if (typeof window.buildPrintSlip !== 'function') return;
+      portal.appendChild(window.buildPrintSlip(order, { t }));
+      setTimeout(function () {
+        try { window.print(); } catch (e) {}
+      }, 50);
+    }
+
+    // =========================================================
+    // Void-last strip (post-print reprint of a VOID slip)
+    // =========================================================
+    function updateLastTicketStrip() {
+      const strip = $('#void-last');
+      if (!state.lastTicket) {
+        strip.classList.remove('is-open');
+        return;
+      }
+      strip.classList.add('is-open');
+      const dining = state.lastTicket.dining_option === 'dine_in' ? t('pos.dineIn') : t('pos.takeout');
+      const info = state.lastVoided
+        ? t('pos.voidedInfo', { n: state.lastTicket.order_id })
+        : t('pos.lastTicketInfo', {
+            id: state.lastTicket.order_id,
+            dining,
+            total: money(state.lastTicket.total_cents),
+          });
+      $('#void-last-info').textContent = info;
+      $('#void-btn').hidden = state.lastVoided;
+    }
+    function armVoidButton() {
+      const btn = $('#void-btn');
+      btn.classList.add('is-armed');
+      btn.textContent = t('pos.voidAgain');
+      state.voidArmed = true;
+      clearTimeout(__voidArmTimer);
+      __voidArmTimer = setTimeout(resetVoidArm, 5000);
+    }
+    function resetVoidArm() {
+      const btn = $('#void-btn');
+      btn.classList.remove('is-armed');
+      btn.textContent = t('pos.voidLast');
+      state.voidArmed = false;
+      clearTimeout(__voidArmTimer);
+    }
+    async function actuallyVoidLast() {
+      if (!state.lastTicket) return;
+      const id = state.lastTicket.order_id;
+      try {
+        const res = await fetch('/api/admin/orders', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ id, status: 'cancelled' }),
+        });
+        if (!res.ok) throw new Error('PATCH failed');
+        // Reprint a VOIDED slip so the kitchen knows to cancel
+        printOrder(Object.assign({}, state.lastTicket, { _voided: true }));
+        state.lastVoided = true;
+        toast(t('pos.voided', { id }), 'good');
+        updateLastTicketStrip();
+      } catch (err) {
+        console.error('[pos] void error:', err);
+        toast(t('pos.errUnknown'), 'bad');
+      } finally {
+        resetVoidArm();
+      }
+    }
+
+    // =========================================================
+    // Quick-entry keyboard input
+    // =========================================================
+    // Global keystroke capture (except when typing into a real text field).
+    // Parses A4, 3*A4, 3 A4, -A4 and adds to cart.
+    function isTypingInField(el) {
+      if (!el) return false;
+      const tag = (el.tagName || '').toLowerCase();
+      return tag === 'input' || tag === 'textarea';
+    }
+    function handleGlobalKey(e) {
+      // Function-key shortcuts even when a field is focused
+      if (e.key === 'F1') {
+        e.preventDefault();
+        state.dining = (state.dining === 'dine_in') ? 'takeout' : 'dine_in';
+        $('#opt-dine').classList.toggle('is-active', state.dining === 'dine_in');
+        $('#opt-takeout').classList.toggle('is-active', state.dining === 'takeout');
+        return;
+      }
+      if (e.key === 'F2') {
+        e.preventDefault();
+        $('#discount-input').focus();
+        return;
+      }
+      // Everything below routes through the quick-entry buffer; skip when
+      // the cashier is typing into a real form field.
+      if (isTypingInField(document.activeElement) && document.activeElement.id !== 'quick-entry') return;
+      if (e.key === 'Enter') {
+        // If quick-entry has content, parse it; otherwise trigger Print
+        const buf = $('#quick-entry').value;
+        if (buf && buf.trim()) {
+          e.preventDefault();
+          handleQuickEntry(buf);
+          $('#quick-entry').value = '';
+          return;
+        }
+        if (state.cart.length > 0) {
+          e.preventDefault();
+          handlePrint();
+        }
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (state.cart.length === 0) return;
+        if (!state.clearArmed) armClearButton();
+        else actuallyClearCart();
+        return;
+      }
+      // Route printable chars into quick-entry
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        $('#quick-entry').value += e.key;
+      } else if (e.key === 'Backspace') {
+        $('#quick-entry').value = $('#quick-entry').value.slice(0, -1);
+      }
+    }
+    function handleQuickEntry(bufRaw) {
+      const buf = bufRaw.trim().toUpperCase();
+      // Patterns: A4, 3*A4, 3 A4, 3xA4, -A4
+      let qty = 1, code = buf;
+      let m;
+      if (/^-([A-Z][0-9]+)$/.test(buf)) {
+        code = buf.slice(1);
+        qty = -1;
+      } else if ((m = buf.match(/^(\d+)[\s*Xx]+([A-Z][0-9]+)$/))) {
+        qty = parseInt(m[1], 10) || 1;
+        code = m[2];
+      } else if (!/^[A-Z][0-9]+$/.test(buf)) {
+        toast(buf + ' ?', 'bad');
+        return;
+      }
+      // Look up in menuIndex (includes specials)
+      const item = state.menuIndex[code];
+      if (!item) { toast(code + ' ?', 'bad'); return; }
+      if (qty === -1) changeQty(code, -1);
+      else addToCart(item, qty);
+    }
+
+    // =========================================================
+    // Boot
+    // =========================================================
+    async function boot() {
+      // Restore language preference
+      try {
+        const lang = localStorage.getItem('asg-lang');
+        if (lang) applyLang(lang === 'zh' ? 'zh' : 'en');
+      } catch (e) {}
+      // Session probe — if not admin, bounce to /admin/
+      try {
+        const probe = await fetch('/api/admin/ingredients', { credentials: 'same-origin' });
+        if (probe.status === 401 || probe.status === 403) {
+          window.location.replace('/admin/');
+          return;
+        }
+      } catch (e) {
+        // network blip — allow through; the ring-up POST will still gate on auth
+      }
+      // Load the menu
+      try {
+        const res = await fetch('/api/menu-today', { credentials: 'same-origin' });
+        if (!res.ok) throw new Error('menu load failed');
+        const data = await res.json();
+        state.menuItems   = Array.isArray(data.menu_items)      ? data.menu_items : [];
+        state.specials    = Array.isArray(data.todays_specials) ? data.todays_specials : [];
+        state.availableSet = new Set(Array.isArray(data.available_codes) ? data.available_codes : []);
+        // Flat map for quick-entry lookup (specials override menu items on
+        // key collision — but the admin API refuses that overlap anyway)
+        state.menuIndex = {};
+        state.menuItems.forEach(function (m) { state.menuIndex[m.code] = m; });
+        state.specials.forEach(function (s) {
+          state.menuIndex[s.code] = {
+            code: s.code, name_en: s.name_en, name_zh: s.name_zh,
+            price_cents: s.price_cents, category: 'special',
+          };
+        });
+      } catch (err) {
+        console.error('[pos] menu load error:', err);
+        toast(t('pos.errUnknown'), 'bad');
+        state.menuItems = [];
+        state.specials = [];
+        state.availableSet = new Set();
+        state.menuIndex = {};
+      }
+      // Read cashier name from a hint cookie set by /api/auth login. Not
+      // authoritative (the server pulls the real name off the session) — just
+      // a UI nicety to show who's logged in.
+      try {
+        const raw = sessionStorage.getItem('asg-admin-user');
+        if (raw) $('#cashier-tag').textContent = raw;
+      } catch (e) {}
+      renderCategoryTabs();
+      renderMenuGrid();
+      renderCart();
+      renderTotals();
+      wireHandlers();
+    }
+    function wireHandlers() {
+      $('#opt-dine').addEventListener('click', function () {
+        state.dining = 'dine_in';
+        $('#opt-dine').classList.add('is-active');
+        $('#opt-takeout').classList.remove('is-active');
+      });
+      $('#opt-takeout').addEventListener('click', function () {
+        state.dining = 'takeout';
+        $('#opt-takeout').classList.add('is-active');
+        $('#opt-dine').classList.remove('is-active');
+      });
+      // Preset discount buttons
+      document.querySelectorAll('.preset-row button').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          applyPreset(Number(btn.getAttribute('data-preset')));
+        });
+      });
+      $('#mode-pct').addEventListener('click', function () { setDiscountMode('pct'); });
+      $('#mode-dollar').addEventListener('click', function () { setDiscountMode('dollar'); });
+      $('#discount-input').addEventListener('input', function (e) {
+        state.discountVal = e.target.value;
+        syncDiscountUI();
+        renderTotals();
+      });
+      $('#discount-clear').addEventListener('click', function () {
+        state.discountVal = '';
+        $('#discount-input').value = '';
+        syncDiscountUI();
+        renderTotals();
+      });
+      $('#cash-tendered').addEventListener('input', function (e) {
+        state.cashText = e.target.value;
+        renderTotals();
+      });
+      $('#btn-clear').addEventListener('click', function () {
+        if (state.cart.length === 0) return;
+        if (!state.clearArmed) armClearButton();
+        else actuallyClearCart();
+      });
+      $('#btn-print').addEventListener('click', function () { handlePrint(); });
+      // Void strip
+      $('#void-dismiss').addEventListener('click', function () {
+        state.lastTicket = null;
+        state.lastVoided = false;
+        updateLastTicketStrip();
+      });
+      $('#void-btn').addEventListener('click', function () {
+        if (!state.voidArmed) armVoidButton();
+        else actuallyVoidLast();
+      });
+      // Language
+      $('#lang-toggle').addEventListener('click', function () {
+        applyLang(currentLang() === 'en' ? 'zh' : 'en');
+      });
+      // Global keystrokes for quick-entry + F-keys
+      document.addEventListener('keydown', handleGlobalKey);
+      // Modal Escape closes without confirming
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && $('#modal').classList.contains('is-open')) {
+          $('#modal-cancel').click();
+        }
+      });
+    }
+
+    // Load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', boot);
+    } else {
+      boot();
+    }
+  </script>
+
+  <!-- Print portal: populated by printOrder() immediately before window.print(). -->
+  <div id="print-portal" aria-hidden="true"></div>
+</body>
+</html>

@@ -278,6 +278,70 @@ scope. Built as 9 incremental steps:
   Avenue O" subline — was redundant with the Visit section and the
   closed-now notice (`8311a5b`).
 
+## In-store POS system
+
+- **New page at `/admin/pos.html`** for the register cashier. Runs in
+  a separate browser tab; the existing `/admin/` inbox stays open in
+  another tab to detect + auto-print online orders. Shares the same
+  httpOnly admin session — no re-login. Locked to a 1200×720+
+  landscape viewport (a splash appears below that; a half-broken POS
+  at the register is worse than a locked-out one).
+- **Layout:** menu on left 2/3, cart on right 1/3. Category tabs
+  (Steamed / Soup / Snacks / Specials). Tapping a menu tile adds it
+  to the cart at qty=1; taps stack. Right column carries a
+  dine-in/take-out toggle, optional name + phone, cart list with
+  qty controls, notes, discount block, totals, cash tendered + live
+  change, and Clear / Print buttons. Below that, a "Last ticket"
+  strip appears after each successful Print with a one-tap void that
+  reprints a red VOIDED slip.
+- **Discounts:** custom `%` or custom `$`, plus four preset buttons
+  (10 · 20 · 50 · Comp). Optional reason field (audit trail: "why
+  was $47 comped last Tuesday"). Discount applies pre-tax; clamped
+  server-side to `0..subtotal` so no oddities on Comp 100%.
+- **Cash tendered + change:** the POS doesn't touch payment
+  gateways — cashiers just type what the customer handed over and
+  the change math + a printed cash/change line come free.
+- **Quick-entry keyboard:** typing `A4 <Enter>` adds A4; `3*A4` adds
+  three; `-A4` decrements. F1 flips dine-in / takeout, F2 focuses
+  discount, Enter prints (when the buffer is empty), Esc arms Clear.
+- **Bilingual EN + zh-Hant** parallel with the rest of the admin;
+  keys prefixed `pos.*` and `chan.*`.
+- **Schema:** one additive migration on `orders` — `order_channel`
+  (`online`|`pos`), `dining_option` (`dine_in`|`takeout`),
+  `discount_cents`, `discount_pct`, `discount_reason`,
+  `cash_tendered_cents`, `cashier_name`. Every column is nullable
+  or defaulted, so existing rows and the online path stay unchanged.
+  New index `idx_orders_channel_created` supports the inbox's
+  channel filter.
+- **API:** `/api/admin/orders` learned a **POST** verb for POS
+  ring-up. Reuses `lib/orders.js` (`resolveCartItems` with the new
+  `allowUnavailable` flag, `computeTotals` with `discount_cents`,
+  `insertOrder` with the new columns). Public `/api/orders` POST
+  unchanged. GET response expanded with the new columns so the
+  inbox can render badges + cashier meta. **Function count stayed at
+  11/12** — no new endpoint files.
+- **Print pipeline shared** between the register and the inbox via
+  a new static `admin/print-slip.js`. `buildPrintSlip()` is now
+  channel-aware:
+  - Online: unchanged (big pickup code, wait estimate, "Pay at
+    pickup").
+  - POS + takeout: big pickup code + wait estimate, cashier name in
+    header, no "Pay at pickup" (already handled at register),
+    discount + cash/change lines when present.
+  - POS + dine-in: pickup code demotes to a small "Ticket #NNNN"
+    in the header meta, `DINE-IN` label and cashier name replace
+    the wait block, no wait estimate.
+  - Voided variant: red VOIDED watermark, items shown with
+    strikethrough, total renders as `— VOID —`.
+- **Inbox integration:** `/admin/` gained (a) a POS-link button in
+  the header (opens `/admin/pos.html` in a new tab), (b) channel
+  filter tabs (All / Online / POS) above the status pills, persisted
+  in `localStorage`, (c) a "POS · Dine-in" or "POS · Take-out"
+  badge on each POS card + cashier name in the meta row, (d) the
+  auto-print detector now filters `order_channel === 'online'` so
+  POS orders don't double-print, and (e) manual Reprint on a POS
+  card prompts a confirm.
+
 ## Bug fixes worth remembering
 
 - **Empty closed-notice box** appearing under the Call CTA even when

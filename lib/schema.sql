@@ -297,6 +297,30 @@ CREATE TABLE IF NOT EXISTS order_items (
 CREATE INDEX IF NOT EXISTS idx_orders_status_created
   ON orders(status, created_at DESC);
 
+-- ----- POS-system columns -----
+-- Added when the register-side POS was introduced. All additive: existing
+-- online orders keep working (order_channel defaults to 'online'; every
+-- other new column is nullable). Run this block on prod BEFORE the new
+-- POS code deploys so the admin GET /orders SELECT doesn't 500 on the
+-- missing columns.
+ALTER TABLE orders
+  ADD COLUMN IF NOT EXISTS order_channel       TEXT    NOT NULL DEFAULT 'online'
+    CHECK (order_channel IN ('online','pos')),
+  ADD COLUMN IF NOT EXISTS dining_option       TEXT
+    CHECK (dining_option IS NULL OR dining_option IN ('dine_in','takeout')),
+  ADD COLUMN IF NOT EXISTS discount_cents      INTEGER NOT NULL DEFAULT 0
+    CHECK (discount_cents >= 0),
+  ADD COLUMN IF NOT EXISTS discount_pct        INTEGER
+    CHECK (discount_pct IS NULL OR (discount_pct BETWEEN 0 AND 100)),
+  ADD COLUMN IF NOT EXISTS discount_reason     TEXT,
+  ADD COLUMN IF NOT EXISTS cash_tendered_cents INTEGER
+    CHECK (cash_tendered_cents IS NULL OR cash_tendered_cents >= 0),
+  ADD COLUMN IF NOT EXISTS cashier_name        TEXT;
+
+-- Hot path for the admin inbox's channel filter (All / Online / POS).
+CREATE INDEX IF NOT EXISTS idx_orders_channel_created
+  ON orders(order_channel, created_at DESC);
+
 -- ============================================================
 -- SETTINGS (generic key-value feature flags)
 -- ============================================================

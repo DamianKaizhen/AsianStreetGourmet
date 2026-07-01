@@ -302,6 +302,10 @@
       <div class="flex items-center gap-2">
         <span class="mono text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)]" data-i18n="nav.admin">Admin</span>
         <span id="current-user" hidden class="mono text-xs uppercase tracking-[0.15em] text-[color:var(--destructive)] px-2 border-l border-[color:var(--border)] pl-3"></span>
+        <!-- POS button — opens the register in a new tab so the family can
+             keep this admin dashboard open for online orders + auto-print.
+             Hidden until authenticated (JS shows it alongside logout). -->
+        <a id="pos-link" hidden href="/admin/pos.html" target="_blank" rel="noopener" class="mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)]" data-i18n="nav.pos">POS →</a>
         <button id="lang-toggle" type="button" aria-label="Switch language" class="lang-pill" data-lang-toggle>
           <span class="l-en">EN</span>
           <span class="l-sep" aria-hidden="true">·</span>
@@ -381,6 +385,11 @@
           <span data-i18n="orders.autoPrintLabel">Auto-print new orders</span>
           <span class="mono text-[0.6rem] uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]" data-i18n="orders.autoPrintHint">(tab must stay open)</span>
         </label>
+
+        <!-- Channel filter tabs (All / Online / POS). POS-rung orders were
+             already printed at the register, so the inbox's auto-print is
+             skipped for them — see the guard in handleFreshOrders(). -->
+        <div id="orders-channel-tabs" class="mt-4 flex gap-0 seg" role="tablist" aria-label="Order source"></div>
 
         <div id="orders-filter-pills" class="mt-4 flex flex-wrap gap-2"></div>
 
@@ -507,6 +516,10 @@
     </section>
   </main>
 
+  <!-- Shared print-slip renderer (channel-aware: online / POS takeout /
+       POS dine-in / voided). Also used by /admin/pos.html. -->
+  <script src="/admin/print-slip.js"></script>
+
   <script>
     // =========================================================
     // Module-scope state — hoisted to the top of the script so that
@@ -532,6 +545,16 @@
         'nav.back': '← Back to site',
         'nav.admin': 'Admin',
         'nav.logout': 'Log out',
+        'nav.pos':   'POS →',
+
+        // POS-integration keys (channel filter, badges, reprint confirm).
+        'chan.all':       'All',
+        'chan.online':    'Online',
+        'chan.pos':       'POS',
+        'pos.dineIn':     'Dine-in',
+        'pos.takeout':    'Take-out',
+        'orders.cashier': '👤 {name}',
+        'card.confirmReprintPos': 'Reprint POS ticket #{id}?',
 
         'login.title': 'Sign in',
         'login.subtitle': 'Admin access only.',
@@ -669,8 +692,17 @@
         'print.colItem': 'Item',
         'print.colPrice': 'Price',
         'print.customerNotes': 'Customer notes',
+        'print.subtotal': 'Subtotal',
+        'print.discount': 'Discount',
+        'print.tax':      'Tax',
         'print.total': 'Total',
         'print.orderNum': 'Order #{id}',
+        'print.ticketNumber': 'Ticket #{code}',
+        'print.cashier':      'Cashier: {name}',
+        'print.cashTendered': 'Cash tendered',
+        'print.change':       'Change',
+        'print.voided':       'VOIDED',
+        'print.voidTotal':    '— VOID —',
         'print.footer': 'Thank you · 多謝晒 · Show this code at the counter',
 
         'password.heading': 'Change password',
@@ -699,6 +731,16 @@
         'nav.back': '← 返回網站',
         'nav.admin': '管理',
         'nav.logout': '登出',
+        'nav.pos':   'POS →',
+
+        // POS-integration keys
+        'chan.all':       '全部',
+        'chan.online':    '網上',
+        'chan.pos':       '收銀',
+        'pos.dineIn':     '堂食',
+        'pos.takeout':    '外賣',
+        'orders.cashier': '👤 {name}',
+        'card.confirmReprintPos': '重印收銀單 #{id}？',
 
         'login.title': '登入',
         'login.subtitle': '只限管理員。',
@@ -836,8 +878,17 @@
         'print.colItem': '項目',
         'print.colPrice': '價錢',
         'print.customerNotes': '顧客備註',
+        'print.subtotal': '小計',
+        'print.discount': '折扣',
+        'print.tax':      '稅',
         'print.total': '總計',
         'print.orderNum': '單號 #{id}',
+        'print.ticketNumber': '第 {code} 號',
+        'print.cashier':      '收銀：{name}',
+        'print.cashTendered': '收現金',
+        'print.change':       '找續',
+        'print.voided':       '已取消',
+        'print.voidTotal':    '— 取消 —',
         'print.footer': '多謝晒 · Thank you · 出示編號取餐',
 
         'password.heading': '更改密碼',
@@ -898,6 +949,7 @@
         $('#cart-state-pill').classList.contains('badge-on') ? t('cart.stateOn') : t('cart.stateOff');
       if (typeof allOrders !== 'undefined' && !$('#admin-view').hidden) {
         renderFilterPills();
+        renderChannelTabs();
         renderOrdersList();
         renderNotifPrompt();
         if (window.__hoursCache) renderHours(window.__hoursCache);
@@ -976,6 +1028,7 @@
       $('#login-view').hidden = false;
       $('#admin-view').hidden = true;
       $('#logout-btn').hidden = true;
+      const posLink = $('#pos-link'); if (posLink) posLink.hidden = true;
       const u = $('#current-user');
       if (u) { u.textContent = ''; u.hidden = true; }
     }
@@ -983,6 +1036,7 @@
       $('#login-view').hidden = true;
       $('#admin-view').hidden = false;
       $('#logout-btn').hidden = false;
+      const posLink = $('#pos-link'); if (posLink) posLink.hidden = false;
       const u = $('#current-user');
       if (u) {
         if (typeof username === 'string' && username.length > 0) {
@@ -1267,6 +1321,18 @@
       { id: 'all',       labelKey: 'filter.all',       statuses: ['received', 'preparing', 'ready', 'picked_up', 'cancelled'] },
     ];
 
+    // Channel filter (All / Online / POS). Persisted in localStorage so
+    // the family can leave the inbox on "Online" all day for the auto-print
+    // stream and pop over to POS view only when reconciling the register.
+    const CHANNEL_FILTERS = [
+      { id: 'all',    labelKey: 'chan.all',    match: () => true },
+      { id: 'online', labelKey: 'chan.online', match: (o) => (o.order_channel || 'online') === 'online' },
+      { id: 'pos',    labelKey: 'chan.pos',    match: (o) => o.order_channel === 'pos' },
+    ];
+    const CHANNEL_KEY = 'asg-admin-order-channel';
+    let currentChannel = 'all';
+    try { const c = localStorage.getItem(CHANNEL_KEY); if (c) currentChannel = c; } catch {}
+
     // (Order-inbox module state — allOrders / currentFilter / pollInterval /
     //  audioCtx / hiddenUnseenCount — is hoisted to the top of the script.
     //  Page title comes from pageTitle(), which is lang-aware.)
@@ -1300,12 +1366,36 @@
       });
     }
 
+    function renderChannelTabs() {
+      const c = $('#orders-channel-tabs');
+      if (!c) return;
+      clear(c);
+      CHANNEL_FILTERS.forEach((f) => {
+        const count = allOrders.filter(f.match).length;
+        const btn = el('button', {
+          type: 'button',
+          class: (currentChannel === f.id ? 'is-active ' : ''),
+          'data-channel': f.id,
+        }, t(f.labelKey) + ' (' + count + ')');
+        btn.addEventListener('click', () => {
+          currentChannel = f.id;
+          try { localStorage.setItem(CHANNEL_KEY, currentChannel); } catch {}
+          renderChannelTabs();
+          renderOrdersList();
+        });
+        c.appendChild(btn);
+      });
+    }
+
     function renderOrdersList() {
       const list = $('#orders-list');
       const empty = $('#orders-empty');
       clear(list);
       const filter = ORDER_FILTERS.find((f) => f.id === currentFilter) || ORDER_FILTERS[0];
-      const visible = allOrders.filter((o) => filter.statuses.includes(o.status));
+      const channel = CHANNEL_FILTERS.find((f) => f.id === currentChannel) || CHANNEL_FILTERS[0];
+      const visible = allOrders
+        .filter((o) => filter.statuses.includes(o.status))
+        .filter(channel.match);
       empty.hidden = visible.length > 0;
       visible.forEach((o) => list.appendChild(orderCard(o)));
     }
@@ -1317,6 +1407,18 @@
       const left = el('div', { class: 'flex items-baseline gap-3' });
       left.appendChild(el('span', { class: 'display text-3xl text-[color:var(--destructive)] font-medium', style: 'letter-spacing: 0.06em;' }, o.pickup_code));
       left.appendChild(el('span', { class: 'badge ' + (o.status === 'cancelled' ? 'badge-off' : 'badge-on') }, orderStatusLabel(o.status)));
+      // POS badge — only rendered for register-rung orders. Shows the
+      // dining option too so the family can see "POS · Dine-in" at a
+      // glance without opening the card.
+      if (o.order_channel === 'pos') {
+        const diningLabel = o.dining_option === 'dine_in'
+          ? t('pos.dineIn')
+          : o.dining_option === 'takeout' ? t('pos.takeout') : '';
+        left.appendChild(el('span', {
+          class: 'badge',
+          style: 'background: color-mix(in oklab, var(--destructive) 20%, var(--background)); color: var(--destructive);',
+        }, 'POS' + (diningLabel ? ' · ' + diningLabel : '')));
+      }
       head.appendChild(left);
       // Right side: relative time on top, absolute NY date+time underneath
       const timeWrap = el('div', { class: 'text-right' });
@@ -1336,6 +1438,11 @@
       if (o.customer_email) {
         cust.appendChild(document.createTextNode(' · '));
         cust.appendChild(el('span', { class: 'text-[color:var(--muted-foreground)]' }, o.customer_email));
+      }
+      if (o.cashier_name) {
+        cust.appendChild(document.createTextNode(' · '));
+        cust.appendChild(el('span', { class: 'mono text-xs uppercase tracking-[0.12em] text-[color:var(--muted-foreground)]' },
+          t('orders.cashier', { name: o.cashier_name })));
       }
       card.appendChild(cust);
 
@@ -1375,12 +1482,19 @@
         actions.appendChild(btn);
       }
       // Print button — opens the OS print dialog for this single order.
+      // POS orders were already printed at the register, so a manual reprint
+      // requires a small confirm to avoid accidental double-tickets.
       const printBtn = el('button', {
         type: 'button',
         class: 'mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border',
         style: 'border-radius: 2px; border-color: var(--border); color: var(--foreground);',
       }, t('card.print'));
-      printBtn.addEventListener('click', () => printOrder(o));
+      printBtn.addEventListener('click', () => {
+        if (o.order_channel === 'pos') {
+          if (!window.confirm(t('card.confirmReprintPos', { id: o.id }))) return;
+        }
+        printOrder(o);
+      });
       actions.appendChild(printBtn);
       if (o.status !== 'cancelled' && o.status !== 'picked_up') {
         // Two-click cancel: first click arms the button (label changes to
@@ -1483,8 +1597,13 @@
           // arrivals don't collide in the same print() call. Each one fires
           // window.print() — silenced in Chrome kiosk-printing mode, otherwise
           // pops the print preview (which the family can confirm with Enter).
+          //
+          // POS-rung orders are FILTERED OUT here — the register already
+          // printed a ticket at ring-up time, so auto-print would spit out
+          // a duplicate. Manual reprint from the order card still works.
           if (isAutoPrintOn()) {
             newOrders
+              .filter((o) => (o.order_channel || 'online') === 'online')
               .slice()
               .sort((a, b) => a.id - b.id)  // print oldest first
               .forEach((newOrder, i) => setTimeout(() => printOrder(newOrder), i * 1200));
@@ -1494,6 +1613,7 @@
 
         allOrders = orders;
         renderFilterPills();
+        renderChannelTabs();
         renderOrdersList();
       } catch (e) {
         // Silent — polling will retry. Show a subtle indicator next time.
@@ -1620,99 +1740,21 @@
     // =========================================================
     // Print template + printer wiring
     // =========================================================
-    // Builds an HTML string for the letter-sized order slip. Inserted into
-    // #print-portal right before window.print() is called.
-    function buildPrintSlip(o) {
-      const slip = document.createElement('div');
-      slip.className = 'print-slip';
-
-      const header = document.createElement('div');
-      header.className = 'print-header';
-      header.innerHTML =
-        '<div>' +
-          '<div class="restaurant">Asian Street Gourmet · 亞洲街頭美食</div>' +
-          '<div style="font-size:0.75rem;">84 Avenue O · Brooklyn 11204 · 917-723-6262</div>' +
-        '</div>' +
-        '<div class="meta">' +
-          '<div>' + escapeHtml(nyDateTime(o.created_at)) + '</div>' +
-          '<div>' + escapeHtml(t('print.orderNum', { id: o.id })) + '</div>' +
-        '</div>';
-      slip.appendChild(header);
-
-      const pickup = document.createElement('div');
-      pickup.className = 'pickup-block';
-      pickup.innerHTML =
-        '<div>' +
-          '<div class="pickup-label">' + escapeHtml(t('print.pickupCode')) + '</div>' +
-          '<div class="pickup-code">' + escapeHtml(o.pickup_code) + '</div>' +
-        '</div>' +
-        '<div class="pickup-wait">' +
-          '<div>' + escapeHtml(t('print.readyIn', { n: o.estimated_wait_min })) + '</div>' +
-          '<div style="font-size:0.7rem;margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.15em;">' + escapeHtml(t('print.payAtPickup')) + '</div>' +
-        '</div>';
-      slip.appendChild(pickup);
-
-      const cust = document.createElement('div');
-      cust.className = 'customer-row';
-      let custHtml = '<span class="name">' + escapeHtml(o.customer_name) + '</span>';
-      if (o.customer_phone) custHtml += ' · <span class="phone">' + escapeHtml(o.customer_phone) + '</span>';
-      if (o.customer_email) custHtml += ' · ' + escapeHtml(o.customer_email);
-      cust.innerHTML = custHtml;
-      slip.appendChild(cust);
-
-      const table = document.createElement('table');
-      table.className = 'items';
-      let rows = '<thead><tr><th>' + escapeHtml(t('print.colCode')) + '</th><th>' + escapeHtml(t('print.colQty')) + '</th><th>' + escapeHtml(t('print.colItem')) + '</th><th style="text-align:right;">' + escapeHtml(t('print.colPrice')) + '</th></tr></thead><tbody>';
-      (o.items || []).forEach((it) => {
-        rows +=
-          '<tr>' +
-            '<td class="code">' + escapeHtml(it.menu_code) + '</td>' +
-            '<td class="qty">×' + it.quantity + '</td>' +
-            '<td><span class="zh" style="font-family:\'Noto Serif TC\',serif;">' + escapeHtml(it.name_zh) + '</span> · ' + escapeHtml(it.name_en) + '</td>' +
-            '<td class="price">$' + (it.line_total_cents / 100).toFixed(2) + '</td>' +
-          '</tr>';
-      });
-      rows += '</tbody>';
-      table.innerHTML = rows;
-      slip.appendChild(table);
-
-      if (o.notes && o.notes.trim()) {
-        const n = document.createElement('div');
-        n.className = 'notes-block';
-        n.innerHTML = '<div class="label">' + escapeHtml(t('print.customerNotes')) + '</div>' + escapeHtml(o.notes);
-        slip.appendChild(n);
-      }
-
-      const total = document.createElement('div');
-      total.className = 'total-row';
-      total.innerHTML =
-        '<span class="label">' + escapeHtml(t('print.total')) + '</span>' +
-        '<span class="amount">$' + (o.total_cents / 100).toFixed(2) + '</span>';
-      slip.appendChild(total);
-
-      const footer = document.createElement('div');
-      footer.className = 'footer';
-      footer.innerHTML = escapeHtml(t('print.footer'));
-      slip.appendChild(footer);
-
-      return slip;
-    }
-
-    function escapeHtml(s) {
-      if (s == null) return '';
-      return String(s).replace(/[&<>"']/g, (c) => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-      }[c]));
-    }
-
-    // Renders one order into #print-portal and triggers the OS print dialog.
-    // In Chrome kiosk-printing mode (`chrome --kiosk-printing`), the dialog
-    // is skipped and the page prints directly to the default printer.
+    // Print — delegates the slip building to /admin/print-slip.js (loaded
+    // via a <script src> above). That file is shared with /admin/pos.html
+    // so both dashboards render identical, channel-aware tickets. The
+    // renderer expects a `t` function so both admin dashboards can pass
+    // their own translations without dragging LANG_STRINGS into the file.
+    // =========================================================
     function printOrder(o) {
       const portal = $('#print-portal');
       if (!portal) return;
       clear(portal);
-      portal.appendChild(buildPrintSlip(o));
+      if (typeof window.buildPrintSlip !== 'function') {
+        console.error('[admin] print-slip.js failed to load');
+        return;
+      }
+      portal.appendChild(window.buildPrintSlip(o, { t }));
       // Defer slightly so the new DOM is committed before print() snapshots it.
       setTimeout(() => {
         try { window.print(); } catch (e) {}

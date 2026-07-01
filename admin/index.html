@@ -304,8 +304,10 @@
         <span id="current-user" hidden class="mono text-xs uppercase tracking-[0.15em] text-[color:var(--destructive)] px-2 border-l border-[color:var(--border)] pl-3"></span>
         <!-- POS button — opens the register in a new tab so the family can
              keep this admin dashboard open for online orders + auto-print.
-             Hidden until authenticated (JS shows it alongside logout). -->
-        <a id="pos-link" hidden href="/admin/pos.html" target="_blank" rel="noopener" class="mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 border border-[color:var(--border)] hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)]" data-i18n="nav.pos">POS →</a>
+             Terracotta fill so it stands out against the muted nav pills
+             (the cashier's primary destination on this page). Hidden
+             until authenticated (JS shows it alongside logout). -->
+        <a id="pos-link" hidden href="/admin/pos.html" target="_blank" rel="noopener" class="mono text-xs uppercase tracking-[0.18em] px-3 py-1.5 bg-[color:var(--destructive)] text-white border border-[color:var(--destructive)] hover:brightness-110" data-i18n="nav.pos">POS →</a>
         <button id="lang-toggle" type="button" aria-label="Switch language" class="lang-pill" data-lang-toggle>
           <span class="l-en">EN</span>
           <span class="l-sep" aria-hidden="true">·</span>
